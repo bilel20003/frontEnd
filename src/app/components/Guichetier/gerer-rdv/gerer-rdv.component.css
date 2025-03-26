@@ -1,0 +1,139 @@
+/* Conteneur principal */
+.container {
+    max-width: 1700px;
+    margin: auto;
+    padding: 20px;
+    position: relative; /* Ajouté pour le positionnement du bouton "Créer un RDV" */
+}
+
+/* Bouton Créer un RDV */
+.create-rdv-btn {
+    position: absolute;
+    top: 50px;
+    left: 250px;
+    z-index: 10; /* Assure que le bouton soit toujours au-dessus des autres éléments */
+    padding: 20px 30px; /* Augmenter la taille du bouton en élargissant les côtés */
+    font-size: 24px; /* Augmenter la taille de la police pour un texte plus grand */
+    border-radius: 10px; /* Augmenter légèrement l'arrondi des coins */
+    background-color: #078b28; /* Couleur de fond ajustée */
+    color: white; /* Couleur du texte */
+    border: none; /* Supprimer les bordures par défaut */
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.create-rdv-btn:hover {
+    background-color: #48ff10; /* Couleur au survol */
+}
+
+
+
+/* Barre de recherche */
+.search-bar-container {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 15px;
+}
+
+.search-bar {
+    display: flex;
+    align-items: center;
+    background-color: #fff;
+    border-radius: 25px;
+    padding: 8px 15px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+    width: 350px;
+}
+
+.search-bar input {
+    flex: 1;
+    border: none;
+    outline: none;
+    padding: 8px 12px;
+    font-size: 14px;
+}
+
+.search-bar button {
+    background-color: #ffcc00;
+    border: none;
+    border-radius: 50%;
+    padding: 8px;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.search-bar button:hover {
+    background-color: #ff9900;
+}
+
+/* Tableau amélioré */
+.table-responsive {
+    margin-top: 20px;
+    margin-left: 200px;
+    border-radius: 15px;
+    overflow: hidden;
+}
+
+.table {
+    width: 100%;
+    background-color: #ffffff;
+    border-radius: 10px;
+    overflow: hidden;
+    border-collapse: separate;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.table th,
+.table td {
+    padding: 12px 15px;
+    text-align: left;
+}
+
+.table-header th {
+    background: linear-gradient(135deg, #1e3c72, #2a5298);
+    color: white;
+    cursor: pointer;
+}
+
+.table-hover tbody tr:hover {
+    background-color: #f9f9f9;
+}
+
+/* Badges */
+.badge {
+    padding: 5px 10px;
+    border-radius: 5px;
+    font-size: 13px;
+    font-weight: bold;
+}
+
+.badge-primary { background-color: #007bff; color: white; }
+.badge-warning { background-color: #ffc107; color: white; }
+.badge-success { background-color: #28a745; color: white; }
+.badge-danger { background-color: #dc3545; color: white; }
+.badge-secondary { background-color: #6c757d; color: white; }
+
+/* Boutons */
+td:last-child {
+    white-space: nowrap;
+}
+
+td:last-child .btn {
+    margin-bottom: 5px;
+}
+
+.btn {
+    padding: 6px 12px;
+    border-radius: 5px;
+    font-size: 14px;
+    margin-right: 5px;
+}
+
+.btn-info { background-color: #17a2b8; color: white; }
+.btn-danger { background-color: #dc3545; color: white; }
+
+.btn i {
+    margin-right: 5px;
+}
+
+

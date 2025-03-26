@@ -1,0 +1,42 @@
+<app-tech-nav></app-tech-nav>
+
+<div class="container mt-4">
+  <h2>Renseigner l'état d'avancement</h2>
+
+  <!-- Formulaire pour renseigner les informations de la demande -->
+  <form (ngSubmit)="submitAvancement()">
+    
+    <!-- ID de la demande -->
+    <div class="mb-3">
+      <label for="idDemande" class="form-label">ID de la demande</label>
+      <input type="text" id="idDemande" class="form-control" [(ngModel)]="idDemande" name="idDemande" required>
+    </div>
+
+    <!-- Date de la demande -->
+    <div class="mb-3">
+      <label for="dateDemande" class="form-label">Date de la demande</label>
+      <input type="date" id="dateDemande" class="form-control" [(ngModel)]="dateDemande" name="dateDemande" required>
+    </div>
+
+    <!-- Sélection de l'état d'avancement -->
+    <div class="mb-3">
+      <label for="etat" class="form-label">Etat d'avancement</label>
+      <select id="etat" class="form-control" [(ngModel)]="etatAvancement" name="etat" required>
+        <option value="En cours">En cours</option>
+        <option value="Terminé">Terminé</option>
+        <option value="En attente">En attente</option>
+      </select>
+    </div>
+
+    
+
+    <!-- Zone de texte pour ajouter une note -->
+    <div class="mb-3">
+      <label for="note" class="form-label">Note</label>
+      <textarea id="note" class="form-control" [(ngModel)]="note" name="note" rows="4" placeholder="Ajouter une note..."></textarea>
+    </div>
+
+    <!-- Bouton pour soumettre le formulaire -->
+    <button type="submit" class="btn btn-primary">Chercher</button>
+  </form>
+</div>

@@ -1,0 +1,17 @@
+<client-navbar></client-navbar>
+<div class="container">
+    <h2>Demande de Travaux</h2>
+    <form (ngSubmit)="onSubmit()">
+      
+      <div class="mb-3">
+        <label for="description" class="form-label">Description des Travaux</label>
+        <textarea class="form-control" id="description" [(ngModel)]="description" name="description" rows="3" placeholder="Décrivez le travail à effectuer" required></textarea>
+      </div>
+      <div class="mb-3">
+        <label for="date" class="form-label">Date souhaitée pour le début des travaux</label>
+        <input type="date" class="form-control" id="date" [(ngModel)]="date" name="date" required>
+      </div>
+      <button type="submit" class="btn btn-primary">Envoyer la demande</button>
+    </form>
+  </div>
+  

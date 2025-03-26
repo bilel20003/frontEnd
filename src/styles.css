@@ -1,0 +1,27 @@
+/* 🌍 Global Styles */
+html, body { height: 100%; }
+body { 
+    margin: 0; 
+    font-family: Roboto, "Helvetica Neue", sans-serif;
+}
+
+/* 🎨 Styles de Home appliqués globalement */
+.container {
+    max-width: 1700px;
+    margin: auto;
+    padding: 20px;
+    padding-top: 80px; /* Ajuste l'espace sous la top-bar */
+}
+
+/* ✅ Ajoute ici tous les styles de home.component.css */
+.search-bar-container {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 15px;
+    
+    top: 60px; /* Fixe la barre de recherche sous la top-bar */
+    background-color: white; 
+    padding: 10px 0;
+}
+
+/* 🔥 Copie tout le reste de `home.component.css` ici */

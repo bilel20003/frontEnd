@@ -1,0 +1,65 @@
+<!-- Navbar -->
+<app-gui-nav></app-gui-nav>
+
+
+
+<div class="container mt-4">
+  <!-- Bouton Créer un RDV -->
+  <div class="mb-4">
+    <button class="btn btn-success create-rdv-btn" (click)="creerRdv()">
+      <i class="fas fa-plus"></i> Créer un RDV
+    </button>
+  </div>
+
+  <!-- Barre de recherche -->
+  <div class="search-bar-container">
+    <div class="search-bar">
+      <input type="text" [(ngModel)]="searchText" placeholder="Rechercher un RDV..." />
+      <button>
+        <i class="fas fa-search"></i>
+      </button>
+    </div>
+  </div>
+
+  <!-- Tableau des RDV -->
+  <div class="table-responsive">
+    <table class="table table-hover">
+      <thead class="table-header">
+        <tr>
+          <th (click)="trier('id')">ID</th>
+          <th (click)="trier('date')">Date</th>
+          <th (click)="trier('client.nom')">Nom</th>
+          <th (click)="trier('client.prenom')">Prénom</th>
+          <th (click)="trier('heure')">Heure</th>
+          <th (click)="trier('status')">Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let rdv of filtrerRendezVous()">
+          <td>{{ rdv.id }}</td>
+          <td>{{ rdv.date }}</td>
+          <td>{{ rdv.client.nom }}</td>
+          <td>{{ rdv.client.prenom }}</td>
+          <td>{{ rdv.heure }}</td>
+          <td>
+            <span [ngClass]="{
+                'badge': true,
+                'badge-success': rdv.status === 'Confirmé',
+                'badge-warning': rdv.status === 'En attente',
+                'badge-danger': rdv.status === 'Annulé'
+              }">{{ rdv.status }}</span>
+          </td>
+          <td>
+            <button class="btn btn-info btn-sm me-2" (click)="modifierRdv(rdv)">
+              <i class="fas fa-edit"></i> Modifier
+            </button>
+            <button class="btn btn-danger btn-sm" (click)="annulerRdv(rdv.id)">
+              <i class="fas fa-trash"></i> Annuler
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>

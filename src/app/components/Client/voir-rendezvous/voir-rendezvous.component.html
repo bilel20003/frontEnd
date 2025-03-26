@@ -1,0 +1,20 @@
+<client-navbar></client-navbar>
+<div class="container">
+    <h2>Voir les Rendez-vous</h2>
+  
+    <!-- Liste des rendez-vous -->
+    <div *ngIf="rendezvousList.length > 0; else noAppointments">
+      <ul class="list-group">
+        <li *ngFor="let rendezvous of rendezvousList" class="list-group-item">
+          <h5>Date: {{ rendezvous.date }} - Heure: {{ rendezvous.time }}</h5>
+          <p>{{ rendezvous.description }}</p>
+        </li>
+      </ul>
+    </div>
+  
+    <!-- Message affiché s'il n'y a pas de rendez-vous -->
+    <ng-template #noAppointments>
+      <p>Aucun rendez-vous à afficher.</p>
+    </ng-template>
+  </div>
+  

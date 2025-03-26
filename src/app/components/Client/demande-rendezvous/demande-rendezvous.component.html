@@ -1,0 +1,20 @@
+<client-navbar></client-navbar>
+<div class="container">
+    <h2>Demande de Rendez-vous</h2>
+    <form (ngSubmit)="submitForm()" #rendezvousForm="ngForm">
+      <div class="mb-3">
+        <label for="date" class="form-label">Date du Rendez-vous</label>
+        <input type="date" id="date" class="form-control" [(ngModel)]="rendezvous.date" name="date" required>
+      </div>
+      <div class="mb-3">
+        <label for="time" class="form-label">Heure du Rendez-vous</label>
+        <input type="time" id="time" class="form-control" [(ngModel)]="rendezvous.time" name="time" required>
+      </div>
+      <div class="mb-3">
+        <label for="description" class="form-label">Description du Rendez-vous</label>
+        <textarea id="description" class="form-control" [(ngModel)]="rendezvous.description" name="description" rows="4" required></textarea>
+      </div>
+      <button type="submit" class="btn btn-primary" [disabled]="!rendezvousForm.form.valid">Envoyer la Demande</button>
+    </form>
+  </div>
+  

@@ -1,0 +1,56 @@
+<!-- Navbar -->
+<app-gui-nav></app-gui-nav>
+
+
+
+<!-- Contenu principal -->
+<div class="container">
+  <!-- Barre de recherche -->
+  <div class="search-bar-container">
+    <div class="search-bar">
+      <input type="text" placeholder="Rechercher..." [(ngModel)]="searchTerm" (input)="filterReclamations()">
+      <button><i class="fas fa-search"></i></button>
+    </div>
+  </div> 
+
+  <!-- Tableau des réclamations -->
+  <div class="table-responsive">
+    <table class="table table-hover shadow-sm rounded">
+      <thead class="table-header">
+        <tr>
+          <th (click)="sort('id')" class="sortable">ID</th>
+          <th (click)="sort('type')" class="sortable">Type</th>
+          <th (click)="sort('emetteur')" class="sortable">Émetteur</th>
+          <th (click)="sort('ministere')" class="sortable">Ministère</th>
+          <th (click)="sort('service')" class="sortable">Service</th>
+          <th (click)="sort('objet')" class="sortable">Objet</th>
+          <th (click)="sort('etat')" class="sortable">État</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let reclamation of filteredReclamations">
+          <td>{{ reclamation.id }}</td>
+          <td>{{ reclamation.type }}</td>
+          <td>{{ reclamation.emetteur }}</td>
+          <td>{{ reclamation.ministere }}</td>
+          <td>{{ reclamation.service }}</td>
+          <td>{{ reclamation.objet }}</td>
+          <td>
+            <span class="badge" [ngClass]="getBadgeClass(reclamation.etat)">
+              {{ reclamation.etat }}
+            </span>
+          </td>
+          <td>
+            <button class="btn btn-info btn-sm me-2" [routerLink]="['/request-details', reclamation.id]">
+              <i class="fas fa-eye"></i> Consulter
+            </button>
+            <button class="btn btn-danger btn-sm" (click)="refuserReclamation(reclamation.id)">
+              <i class="fas fa-times"></i> Refuser
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>

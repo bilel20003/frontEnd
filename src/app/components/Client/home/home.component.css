@@ -1,0 +1,36 @@
+.container {
+  max-width: 90%;
+}
+
+h2 {
+  font-weight: bold;
+  color: #333;
+}
+
+.table {
+  background: #fff;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.table th {
+  text-align: center;
+}
+
+.table td {
+  vertical-align: middle;
+}
+
+.btn {
+  transition: 0.3s;
+}
+
+.btn-info:hover {
+  background-color: #17a2b8;
+  color: white;
+}
+
+.btn-danger:hover {
+  background-color: #dc3545;
+  color: white;
+}

@@ -1,0 +1,35 @@
+import { Component,  HostListener } from '@angular/core';
+
+@Component({
+  selector: 'app-gui-nav',
+  templateUrl: './gui-nav.component.html',
+  styleUrls: ['./gui-nav.component.css']
+})
+export class GuiNavComponent {
+  dropdownVisible: boolean = false;
+
+  toggleDropdown(event: Event) {
+    event.stopPropagation();
+    this.dropdownVisible = !this.dropdownVisible;
+    console.log("Dropdown toggled:", this.dropdownVisible);
+    const dropdownMenu = document.querySelector('.dropdown-menu');
+    if (dropdownMenu) {
+      this.dropdownVisible ? dropdownMenu.classList.add('show') : dropdownMenu.classList.remove('show');
+    }
+  }
+
+  @HostListener('document:click', ['$event'])
+  closeDropdown(event: Event) {
+    const dropdownMenu = document.querySelector('.dropdown-menu');
+    const button = document.querySelector('.icon-btn');
+
+    if (dropdownMenu && !dropdownMenu.contains(event.target as Node) && button !== event.target) {
+      this.dropdownVisible = false;
+      dropdownMenu.classList.remove('show');
+    }
+  }
+
+  logout() {
+    console.log('Déconnexion');
+  }
+}

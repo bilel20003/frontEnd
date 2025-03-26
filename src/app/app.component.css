@@ -1,0 +1,70 @@
+/* Style de la navbar */
+.navbar {
+    background: linear-gradient(135deg, #1e3c72, #2a5298); /* Dégradé bleu */
+    padding: 12px 15px;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2); /* Effet d'ombre */
+  }
+  
+  /* Logo */
+  .navbar-brand img {
+    height: 45px;
+    transition: transform 0.3s ease-in-out;
+  }
+  
+  .navbar-brand img:hover {
+    transform: scale(1.1); /* Effet zoom au survol */
+  }
+  
+  /* Style des liens */
+  .navbar-nav .nav-link {
+    font-size: 16px;
+    font-weight: 500;
+    color: #ffffff;
+    transition: all 0.3s ease-in-out;
+    padding: 10px 15px;
+  }
+  
+  /* Effet hover doré */
+  .navbar-nav .nav-link:hover,
+  .navbar-nav .nav-link.active {
+    color: #ffd700; /* Jaune doré */
+    text-decoration: underline;
+  }
+  
+  /* Recherche */
+  .form-control {
+    border-radius: 20px;
+    padding: 8px 15px;
+    border: none;
+    width: 200px;
+  }
+  
+  .btn-outline-success {
+    color: #fff;
+    border-color: #ffd700;
+    background-color: transparent;
+    transition: 0.3s;
+  }
+  
+  .btn-outline-success:hover {
+    background-color: #ffd700;
+    color: #000;
+  }
+  
+  /* Style du bouton burger */
+  .navbar-toggler {
+    border: none;
+  }
+  
+  .navbar-toggler-icon {
+    background-color: #fff;
+    border-radius: 5px;
+  }
+  
+  /* Responsive : centrer les liens */
+  @media (max-width: 992px) {
+    .navbar-nav {
+      text-align: center;
+    }
+  }
+  

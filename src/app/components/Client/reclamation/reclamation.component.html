@@ -1,0 +1,18 @@
+<client-navbar></client-navbar>
+<div class="container mt-4">
+  <h2>Créer une Réclamation</h2>
+
+  <form (ngSubmit)="submitReclamation()">
+    <div class="mb-3">
+      <label for="titre" class="form-label">Titre</label>
+      <input type="text" id="titre" class="form-control" [(ngModel)]="reclamation.titre" name="titre" required>
+    </div>
+
+    <div class="mb-3">
+      <label for="description" class="form-label">Description</label>
+      <textarea id="description" class="form-control" rows="4" [(ngModel)]="reclamation.description" name="description" required></textarea>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Envoyer</button>
+  </form>
+</div>
