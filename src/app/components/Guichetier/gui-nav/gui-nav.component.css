@@ -3,10 +3,10 @@
   position: fixed; /* Fixe la navbar */
   top: 50px; /* Décale la navbar sous la bande en haut */
   left: 0;
-  width: 290px; /* Largeur ajustée pour laisser plus d'espace */
+  width: 240px; /* Réduit la largeur de la sidebar */
   height: calc(100vh - 50px); /* Hauteur ajustée pour prendre toute la fenêtre en dessous de la bande en haut */
   background: linear-gradient(135deg, #1e3c72, #2a5298); /* Dégradé bleu foncé et bleu clair */
-  padding: 20px; /* Réduit un peu le padding */
+  padding: 10px 20px; /* Réduit le padding pour un look plus compact */
   box-shadow: 4px 0 15px rgba(0, 0, 0, 0.2);
   display: flex;
   flex-direction: column;
@@ -23,21 +23,22 @@
   margin-bottom: 20px; /* Ajoute un espacement sous le logo */
 }
 
+/* Logo ajusté */
 .logo-container {
   display: flex;
   justify-content: center;
   align-items: center;
-  width: 190px; /* Taille du cadre */
-  height: 190px;
+  width: 150px; /* Réduit la largeur du logo */
+  height: 150px; /* Ajuste la hauteur */
   background: rgba(255, 255, 255, 0.7); /* Fond semi-transparent */
   border-radius: 15px; /* Coins arrondis */
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); /* Ombre */
-  margin: 5px auto 0; /* Augmente la marge en haut pour descendre */
+  margin: 10px auto 20px; /* Espace ajusté sous le logo */
   padding: 10px;
 }
 
 .logo-container img {
-  width: 260px; /* Augmente la taille de l'image */
+  width: 100%; /* Ajuste l'image à la largeur du conteneur */
   height: auto;
   transition: transform 0.3s ease-in-out;
 }
@@ -46,37 +47,29 @@
   transform: scale(1.1);
 }
 
-/* Espacer les éléments du navbar */
+/* Espacement des éléments de la navbar */
 .nav-links {
-  list-style-type: none; /* Supprime les points devant chaque élément de la liste */
-  padding-left: 0; /* Supprime le padding gauche par défaut */
-  margin-top: 20px; /* Ajoute un espacement en haut de la liste de liens */
+  list-style-type: none; /* Supprime les puces */
+  padding-left: 0;
+  margin-top: 10px; /* Ajuste l'espacement des liens */
 }
 
 .nav-links li {
-  padding: 10px 0; /* Augmente l'espacement entre les éléments du navbar */
+  padding: 8px 0; /* Ajuste l'espacement entre les éléments */
 }
 
-/* Les liens de la navbar */
-.nav-links li {
-  width: 100%;
-  text-align: left;
-}
-
+/* Liens de la navbar */
 .nav-links a {
   display: block;
-  padding: 12px 20px; /* Réduit un peu le padding */
-  margin: 8px 0;
-  font-size: 14px; /* Réduit la taille de la police */
+  padding: 10px 15px; /* Réduit le padding */
+  margin: 6px 0;
+  font-size: 14px;
   font-weight: 500;
   color: #ffffff;
   text-decoration: none;
   border-radius: 8px;
   transition: 0.3s;
   background: transparent;
-  white-space: nowrap; /* Empêche le texte de se couper en plusieurs lignes */
-  overflow: hidden; /* Cache le texte qui dépasse */
-  text-overflow: ellipsis; /* Ajoute des points de suspension si le texte dépasse */
 }
 
 /* Lien actif et hover */
@@ -90,9 +83,11 @@
 
 /* Ajustement du contenu principal */
 body {
-  margin-left: 290px; /* Ajustement à la largeur de la sidebar */
-  margin-top: 50px; /* Ajuste le contenu principal sous la top-bar */
+  margin-left: 240px; /* Ajuste le contenu à la nouvelle largeur de la sidebar */
+  margin-top: 50px; /* Ajuste sous la bande en haut */
+  font-family: Arial, sans-serif;
 }
+
 
 .sidebar .nav-links i {
   font-size: 20px; /* Taille des icônes */
@@ -128,7 +123,6 @@ body {
   border: 1px solid #ccc;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
 }
-
 /* Bouton de l'icône */
 .icon-btn {
   background-color: #fff;

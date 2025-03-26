@@ -1,6 +1,5 @@
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
-import { HttpClient } from '@angular/common/http';
 
 @Component({
   selector: 'app-login',
@@ -8,15 +7,22 @@ import { HttpClient } from '@angular/common/http';
   styleUrls: ['./login.component.css']
 })
 export class LoginComponent {
-  public form={
-    username: null,
-  password:null
-  }
-  
+  public form = {
+    username: '',
+    password: ''
+  };
 
-  constructor(private router: Router, private http: HttpClient) {}
+  constructor(private router: Router) {}
 
   onLogin() {
-   console.log(this.form);
+    if (this.form.username === 'client' && this.form.password === '123') {
+      this.router.navigate(['/client-home']); // Redirige vers l'interface client
+    } else {
+      if (this.form.username === 'guichetier' && this.form.password === '123') {
+        this.router.navigate(['/gui-home']); // Redirige vers l'interface client
+      }else{
+      alert('Nom d’utilisateur ou mot de passe incorrect');
+    }
+  }
   }
 }

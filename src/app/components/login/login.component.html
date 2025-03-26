@@ -13,7 +13,7 @@
         <div class="login-card">
           <h2 class="login-title">Login</h2>
 
-          <form #loginForm="ngForm" (ngSubmit)="onLogin()">
+          <form (ngSubmit)="onLogin()">
             <div class="input-group">
               <label for="username">Username:</label>
               <input type="text" id="username" [(ngModel)]="form.username" name="username" required />

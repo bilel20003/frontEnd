@@ -51,7 +51,7 @@
 /* Tableau amélioré */
 .table-responsive {
     margin-top: 20px;
-    margin-left: 200px;
+    margin-left: 250px;
     border-radius: 15px;
     overflow: hidden;
     background-color: white;
@@ -204,4 +204,3 @@ body {
 .sidebar .nav-links i {
     font-size: 20px;
 }
-
