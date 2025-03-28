@@ -1,11 +1,36 @@
-import { Component } from '@angular/core';
+
+import { Component,  HostListener } from '@angular/core';
 
 @Component({
-  selector: 'client-navbar',
+  selector: 'app-navbar',
   templateUrl: './navbar.component.html',
   styleUrls: ['./navbar.component.css']
 })
 export class NavbarComponent {
-  isCollapsed = true;
- }
-  
+  dropdownVisible: boolean = false;
+
+  toggleDropdown(event: Event) {
+    event.stopPropagation();
+    this.dropdownVisible = !this.dropdownVisible;
+    console.log("Dropdown toggled:", this.dropdownVisible);
+    const dropdownMenu = document.querySelector('.dropdown-menu');
+    if (dropdownMenu) {
+      this.dropdownVisible ? dropdownMenu.classList.add('show') : dropdownMenu.classList.remove('show');
+    }
+  }
+
+  @HostListener('document:click', ['$event'])
+  closeDropdown(event: Event) {
+    const dropdownMenu = document.querySelector('.dropdown-menu');
+    const button = document.querySelector('.icon-btn');
+
+    if (dropdownMenu && !dropdownMenu.contains(event.target as Node) && button !== event.target) {
+      this.dropdownVisible = false;
+      dropdownMenu.classList.remove('show');
+    }
+  }
+
+  logout() {
+    console.log('Déconnexion');
+  }
+}

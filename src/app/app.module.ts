@@ -1,19 +1,14 @@
 import { NgModule } from '@angular/core';
 import { HttpClientModule } from '@angular/common/http';
-
+import { ReactiveFormsModule } from '@angular/forms';
 
 import { BrowserModule } from '@angular/platform-browser';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { LoginComponent } from './components/login/login.component';
-import { HomeComponent } from './components/Client/home/home.component';
+
 import { FormsModule } from '@angular/forms';
-import { DemandeRendezvousComponent } from './components/Client/demande-rendezvous/demande-rendezvous.component';
-import { VoirRendezvousComponent } from './components/Client/voir-rendezvous/voir-rendezvous.component';
-import { DemandeTravauxComponent } from './components/Client/demande-travaux/demande-travaux.component';
-import { NavbarComponent } from './components/Client/navbar/navbar.component';
-import { ReclamationComponent } from './components/Client/reclamation/reclamation.component';
 
 import { RenseignerAvancementComponent } from './components/Technicien/renseigner-avancement/renseigner-avancement.component';
 import { TechNavComponent } from './components/Technicien/tech-nav/tech-nav.component';
@@ -29,6 +24,17 @@ import { NgxPaginationModule } from 'ngx-pagination';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { GuiRequestDetailsComponent } from './components/Guichetier/gui-request-details/gui-request-details.component';
 import { SignupComponent } from './components/signup/signup.component';
+//client
+
+import { DetailDemandeComponent } from './components/Client/detail-demande/detail-demande.component';
+import { DocumentsComponent } from './components/Client/document/document.component';
+import { HomeComponent } from './components/Client/home/home.component';
+import { PageRechercheComponent } from './components/Client/recherche/recherche.component';
+import { PageRechercheAvanceeComponent } from './components/Client/recherche-avancee/recherche-avancee.component';
+import { ReclamationComponent } from './components/Client/reclamation/reclamation.component';
+import { RendezVousComponent } from './components/Client/rendez-vous/rendez-vous.component';
+import { RendezVousDetailComponent } from './components/Client/rendez-vous/rendezvous-detail/rendezvous-detail.component';
+import { NavbarComponent } from './components/Client/navbar/navbar.component';
 
 
 
@@ -39,12 +45,7 @@ import { SignupComponent } from './components/signup/signup.component';
     
     AppComponent,
     LoginComponent,
-    HomeComponent,
-    DemandeRendezvousComponent,
-    VoirRendezvousComponent,
-    DemandeTravauxComponent,
-    NavbarComponent,
-    ReclamationComponent,
+  
     
     RenseignerAvancementComponent,
     TechNavComponent,
@@ -58,12 +59,23 @@ import { SignupComponent } from './components/signup/signup.component';
     GuiHomeComponent,
     GuiRequestDetailsComponent,
     SignupComponent,
+
+    DetailDemandeComponent,
+    DocumentsComponent,
+    HomeComponent,
+    PageRechercheComponent,
+    PageRechercheAvanceeComponent,
+    ReclamationComponent,
+    RendezVousComponent,
+    RendezVousDetailComponent,
+    NavbarComponent,
    
     
   ],
   imports: [
     BrowserModule,
     AppRoutingModule,
+    ReactiveFormsModule,
     FormsModule,
     NgxPaginationModule,
     BrowserAnimationsModule,

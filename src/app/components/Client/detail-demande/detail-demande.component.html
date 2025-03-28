@@ -1,0 +1,21 @@
+<app-navbar></app-navbar>
+<div class="container">
+  <header>
+    <h1>Détails de la Requête</h1>
+    <p><strong>Référence :</strong> {{ reference }}</p>
+  </header>
+
+  <!-- Vérifie si une requête existe -->
+  <div *ngIf="requetes.length > 0">
+    <p><strong>Objet :</strong> {{ requetes[0].objet }}</p>
+    <p><strong>Description :</strong> {{ requetes[0].description }}</p>
+    <p><strong>Type de Requête :</strong> {{ requetes[0].typeRequete }}</p>
+    <p><strong>État :</strong> {{ requetes[0].etat }}</p>
+    <!-- Si la requête contient une pièce jointe, affiche le lien pour télécharger -->
+    <p *ngIf="requetes[0].pieceJointe"><strong>Pièce Jointe :</strong> 
+      <a [href]="'/assets/documents/' + requetes[0].pieceJointe" download>{{ requetes[0].pieceJointe }}</a>
+    </p>
+  </div>
+
+  <button routerLink="/home">Retour</button>
+</div>

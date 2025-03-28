@@ -1,36 +1,117 @@
+/* Conteneur principal */
 .container {
-  max-width: 90%;
+    max-width: 1700px;
+    margin: auto;
+    padding: 20px;
+    padding-top: 80px; /* Ajuste l'espace sous la top-bar */
 }
 
-h2 {
-  font-weight: bold;
-  color: #333;
+/* Barre de recherche */
+.search-bar-container {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 15px;
+    background-color: white; 
+    padding: 10px 0;
+}
+
+.search-bar {
+    display: flex;
+    align-items: center;
+    background-color: #fff;
+    border-radius: 25px;
+    padding: 8px 15px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+    width: 350px;
+}
+
+.search-bar input {
+    flex: 1;
+    border: none;
+    outline: none;
+    padding: 8px 12px;
+    font-size: 14px;
+}
+
+.search-bar button {
+    background-color: #ffcc00;
+    border: none;
+    border-radius: 50%;
+    padding: 8px;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.search-bar button:hover {
+    background-color: #ff9900;
+}
+
+/* Tableau amélioré */
+.table-responsive {
+    margin-top: 20px;
+    margin-left: 250px;
+    border-radius: 15px;
+    overflow: hidden;
+    background-color: white;
 }
 
 .table {
-  background: #fff;
-  border-radius: 10px;
-  overflow: hidden;
+    width: 100%;
+    border-radius: 10px;
+    border-collapse: separate;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
 }
 
-.table th {
-  text-align: center;
-}
-
+.table th,
 .table td {
-  vertical-align: middle;
+    padding: 12px 15px;
+    text-align: left;
+}
+
+.table-header th {
+    background: linear-gradient(135deg, #1e3c72, #2a5298);
+    color: white;
+    cursor: pointer;
+}
+
+.table-hover tbody tr:hover {
+    background-color: #f9f9f9;
+}
+
+/* Badges */
+.badge {
+    padding: 5px 10px;
+    border-radius: 5px;
+    font-size: 13px;
+    font-weight: bold;
+}
+
+.badge-primary { background-color: #007bff; color: white; }
+.badge-warning { background-color: #ffc107; color: white; }
+.badge-success { background-color: #28a745; color: white; }
+.badge-danger { background-color: #dc3545; color: white; }
+.badge-secondary { background-color: #6c757d; color: white; }
+
+/* Boutons */
+td:last-child {
+    white-space: nowrap;
 }
 
 .btn {
-  transition: 0.3s;
+    padding: 6px 12px;
+    border-radius: 5px;
+    font-size: 14px;
+    margin-right: 5px;
 }
 
-.btn-info:hover {
-  background-color: #17a2b8;
-  color: white;
+.btn-info { background-color: #17a2b8; color: white; }
+
+.btn i {
+    margin-right: 5px;
 }
 
-.btn-danger:hover {
-  background-color: #dc3545;
-  color: white;
+/* Ajustement du contenu principal */
+body {
+    margin-left: 290px;
+    margin-top: 50px;
 }

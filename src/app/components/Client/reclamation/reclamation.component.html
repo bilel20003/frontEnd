@@ -1,18 +1,41 @@
-<client-navbar></client-navbar>
-<div class="container mt-4">
-  <h2>Créer une Réclamation</h2>
-
-  <form (ngSubmit)="submitReclamation()">
-    <div class="mb-3">
-      <label for="titre" class="form-label">Titre</label>
-      <input type="text" id="titre" class="form-control" [(ngModel)]="reclamation.titre" name="titre" required>
-    </div>
-
-    <div class="mb-3">
-      <label for="description" class="form-label">Description</label>
-      <textarea id="description" class="form-control" rows="4" [(ngModel)]="reclamation.description" name="description" required></textarea>
-    </div>
-
-    <button type="submit" class="btn btn-primary">Envoyer</button>
-  </form>
+<app-navbar></app-navbar>
+<div class="container mx-auto mt-10">
+    <h2 class="text-2xl font-bold text-blue-600 mb-4">Création d'une nouvelle Requête</h2>
+    <form [formGroup]="reclamationForm" (ngSubmit)="onSubmit()">
+      
+      <!-- Type de la Requête -->
+      <div class="mb-4">
+        <label class="block text-gray-700">Type de la Requête</label>
+        <select formControlName="type_de_requete" class="form-control" required>
+          <option value="réclamation">Réclamation</option>
+          <option value="demande de travaux">Demande de travaux</option>
+        </select>
+      </div>
+      
+      <!-- Objet -->
+      <div class="mb-4">
+        <label class="block text-gray-700">Objet</label>
+        <input type="text" formControlName="objet" class="form-control" required>
+      </div>
+      
+      <!-- Description -->
+      <div class="mb-4">
+        <label class="block text-gray-700">Description</label>
+        <textarea formControlName="description" class="form-control" required></textarea>
+      </div>
+      
+      <!-- Joindre un fichier -->
+      <div class="mb-4">
+        <label class="block text-gray-700">Joindre un fichier</label>
+        <input type="file" (change)="onFileSelected($event)" class="form-control">
+      </div>
+      
+     
+      <!-- Conteneur pour les boutons -->
+      <div class="button-container flex justify-between mt-4">
+        <button type="submit" class="btn btn-primary" [disabled]="!reclamationForm.valid">Envoyer</button>
+        <button type="button" class="btn btn-secondary" (click)="onSave()">Enregistrer</button>
+        <button type="button" class="btn btn-danger" (click)="onCancel()">Annuler</button>
+      </div>
+    </form>
 </div>

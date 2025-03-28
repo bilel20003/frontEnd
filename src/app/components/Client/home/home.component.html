@@ -1,1 +1,54 @@
-<div class="h1">client</div>
+<!-- Navbar -->
+<app-navbar></app-navbar>
+
+<!-- Contenu principal -->
+<div class="container">
+  <!-- Barre de recherche -->
+  <div class="search-bar-container">
+    <div class="search-bar">
+      <input type="text" placeholder="Rechercher..." [(ngModel)]="searchTerm" (input)="filterReclamations()">
+      <button><i class="fas fa-search"></i></button>
+    </div>
+  </div> 
+
+  <!-- Titre "Liste de Requêtes" -->
+  <header>
+    <h2 class="text-center" style="color: #007bff; font-weight: 600; font-size: 2rem; margin-bottom: 40px;">
+      Liste de Requêtes
+    </h2>
+  </header>
+
+  <!-- Tableau des requêtes -->
+  <div class="table-responsive">
+    <table class="table table-hover shadow-sm rounded">
+      <thead class="table-header">
+        <tr>
+          <th (click)="sort('ref')" class="sortable">Réf</th>
+          <th (click)="sort('objet')" class="sortable">Objet</th>
+          <th (click)="sort('typeRequete')" class="sortable">Type de requête</th>
+          <th>Description</th>
+          <th (click)="sort('etat')" class="sortable">État</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let requete of filteredRequetes">
+          <td>{{ requete.ref }}</td>
+          <td>{{ requete.objet }}</td>
+          <td>{{ requete.typeRequete }}</td>
+          <td>{{ requete.description }}</td>
+          <td>
+            <span class="badge" [ngClass]="getBadgeClass(requete.etat)">
+              {{ requete.etat }}
+            </span>
+          </td>
+          <td>
+            <button class="btn btn-info btn-sm me-2" [routerLink]="['/detail-demande', requete.ref]">
+              <i class="fas fa-eye"></i> Voir
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>

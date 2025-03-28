@@ -1,5 +1,12 @@
 import { Component } from '@angular/core';
-import { Reclamation } from './reclamation.model';  // Import du modèle
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { HttpClient } from '@angular/common/http';
+import { ReactiveFormsModule } from '@angular/forms'; 
+
+
+
+
+// Assurez-vous que le chemin est correct
 
 @Component({
   selector: 'app-reclamation',
@@ -7,35 +14,57 @@ import { Reclamation } from './reclamation.model';  // Import du modèle
   styleUrls: ['./reclamation.component.css']
 })
 export class ReclamationComponent {
-  reclamation: Reclamation = {
-    id: 0,  // Id initialisé à 0, il sera généré ou attribué par le backend.
-    titre: '',
-    description: '',
-    statut: 'En attente',  // Statut initial
-    dateCreation: new Date(),  // Date de création actuelle
-    utilisateurId: 1,  // Exemple d'ID utilisateur, tu peux le lier à l'utilisateur authentifié
-  };
+  reclamationForm: FormGroup;
+  selectedFile: File | null = null;
 
-  // Méthode pour soumettre la réclamation
-  submitReclamation() {
-    if (this.reclamation.titre && this.reclamation.description) {
-      // Ici, tu peux appeler un service pour envoyer la réclamation au serveur
-      console.log('Réclamation soumise:', this.reclamation);
+  constructor(private fb: FormBuilder, private http: HttpClient) {
+    // Création du formulaire avec validation
+    this.reclamationForm = this.fb.group({
+      type_de_requete: ['', Validators.required],
+      objet: ['', Validators.required],
+      description: ['', Validators.required],
+      fichier: [null]
+    });
+  }
 
-      // Par exemple, appel à un service API pour envoyer la réclamation
-      // this.reclamationService.createReclamation(this.reclamation).subscribe(response => {
-      //   console.log('Réclamation enregistrée:', response);
-      // });
+  // Fonction pour sélectionner un fichier
+  onFileSelected(event: any): void {
+    this.selectedFile = event.target.files[0];
+  }
 
-      // Réinitialisation du formulaire après soumission
-      this.reclamation = { 
-        id: 0, 
-        titre: '', 
-        description: '', 
-        statut: 'En attente', 
-        dateCreation: new Date(), 
-        utilisateurId: 1 
-      };
+ 
+
+  // Fonction pour soumettre le formulaire (envoi à l'API backend Laravel)
+  onSubmit(): void {
+    if (this.reclamationForm.valid) {
+      const formData = new FormData();
+      formData.append('type_de_requete', this.reclamationForm.value.type_de_requete);
+      formData.append('objet', this.reclamationForm.value.objet);
+      formData.append('description', this.reclamationForm.value.description);
+
+      if (this.selectedFile) {
+        formData.append('fichier', this.selectedFile, this.selectedFile.name);
+      }
+
+      // Envoi de la réclamation au backend Laravel via HTTP
+      this.http.post('http://localhost/api/reclamations', formData).subscribe(
+        (response) => {
+          console.log('Réclamation envoyée avec succès', response);
+        },
+        (error) => {
+          console.error('Erreur lors de l\'envoi de la réclamation', error);
+        }
+      );
     }
+  }
+
+  // Fonction pour enregistrer la requête sans l'envoyer (si nécessaire)
+  onSave(): void {
+    console.log('Requête enregistrée localement', this.reclamationForm.value);
+  }
+
+  // Fonction pour annuler l'action et réinitialiser le formulaire
+  onCancel(): void {
+    this.reclamationForm.reset();
   }
 }

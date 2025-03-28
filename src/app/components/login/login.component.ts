@@ -16,7 +16,7 @@ export class LoginComponent {
 
   onLogin() {
     if (this.form.username === 'client' && this.form.password === '123') {
-      this.router.navigate(['/client-home']); // Redirige vers l'interface client
+      this.router.navigate(['/home']); // Redirige vers l'interface client
     } else {
       if (this.form.username === 'guichetier' && this.form.password === '123') {
         this.router.navigate(['/gui-home']); // Redirige vers l'interface client

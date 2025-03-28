@@ -1,0 +1,27 @@
+<app-navbar></app-navbar>
+<p>rendez-vous works!</p>
+<div class="container">
+    <button class="btn-new" (click)="navigateToDetail()">New</button>
+    <h2 class="title">Liste des Rendez-vous</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Date d'Envoi</th>
+          <th>Type de Problème</th>
+          <th>Description</th>
+          <th>État</th> <!-- Nouvelle colonne pour l'état -->
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let rendezVous of rendezVousList">
+          <td>{{ rendezVous.date }}</td>
+          <td>{{ rendezVous.typeProbleme }}</td>
+          <td>{{ rendezVous.description }}</td>
+          <td>{{ rendezVous.etat }}</td> <!-- Affichage de l'état -->
+        </tr>
+      </tbody>
+    </table>
+  
+    <!-- Router outlet pour afficher le composant enfant -->
+    <router-outlet></router-outlet>
+  </div>
