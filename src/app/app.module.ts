@@ -23,7 +23,7 @@ import { GuiHomeComponent } from './components/Guichetier/gui-home/gui-home.comp
 import { NgxPaginationModule } from 'ngx-pagination';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { GuiRequestDetailsComponent } from './components/Guichetier/gui-request-details/gui-request-details.component';
-import { SignupComponent } from './components/signup/signup.component';
+
 //client
 
 import { DetailDemandeComponent } from './components/Client/detail-demande/detail-demande.component';
@@ -58,7 +58,7 @@ import { NavbarComponent } from './components/Client/navbar/navbar.component';
     TechDetailsComponent,
     GuiHomeComponent,
     GuiRequestDetailsComponent,
-    SignupComponent,
+  
 
     DetailDemandeComponent,
     DocumentsComponent,

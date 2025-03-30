@@ -19,12 +19,12 @@ import { TechHomeComponent } from './components/Technicien/tech-home/tech-home.c
 import { TechDetailsComponent } from './components/Technicien/tech-details/tech-details.component';
 import { GuiHomeComponent } from './components/Guichetier/gui-home/gui-home.component';
 import { GuiRequestDetailsComponent } from './components/Guichetier/gui-request-details/gui-request-details.component';
-import { SignupComponent } from './components/signup/signup.component';
+
 
 const routes: Routes = [
   { path: '', redirectTo: '/login', pathMatch: 'full' }, 
   { path: 'login', component: LoginComponent },
-  { path: 'signup', component: SignupComponent },
+  
   
   // Client
   { path: 'home', component: HomeComponent },

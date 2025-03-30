@@ -1,49 +1,62 @@
 <!-- Navbar -->
 <app-gui-nav></app-gui-nav>
 
-<div class="container">
-    <div class="card shadow-sm">
-        <div class="card-header">
-            <h4 class="mb-0">📌 Détails de la réclamation</h4>
-        </div>
-        <div class="card-body">
-            <div class="row">
-                <div class="col-md-6">
-                    <p><strong>📄 Type:</strong> {{ reclamation.type }}</p>
-                    <p><strong>👤 Émetteur:</strong> {{ reclamation.emetteur }}</p>
-                    <p><strong>🏛️ Ministère:</strong> {{ reclamation.ministere }}</p>
-                    <p><strong>📌 Service:</strong> {{ reclamation.service }}</p>
-                </div>
-                <div class="col-md-6">
-                    <p><strong>📜 Objet:</strong> {{ reclamation.objet }}</p>
-                    <p><strong>⚡ État:</strong>
-                        <span class="badge" [ngClass]="getBadgeClass(reclamation.etat)">
-                            {{ reclamation.etat }}
-                        </span>
-                    </p>
-                </div>
-            </div>
-            <div class="text-center mt-4">
-                <button class="btn btn-warning btn-lg me-2" (click)="showTechnicianDropdown()">
-                    <i class="fas fa-user-cog"></i> Router à un technicien
-                </button>
-                <button class="btn btn-success btn-lg" (click)="showResponseArea()">
-                    <i class="fas fa-reply"></i> Répondre à la requête
-                </button>
-            </div>
-            <div *ngIf="technicianDropdownVisible" class="mt-3">
-                <label for="technicianSelect">👨‍🔧 Choisir un technicien:</label>
-                <select id="technicianSelect" [(ngModel)]="selectedTechnician" class="form-select">
-                    <option *ngFor="let technician of technicians" [value]="technician.id">
-                        {{ technician.name }}
-                    </option>
-                </select>
-            </div>
-            <div *ngIf="responseAreaVisible" class="mt-3">
-                <label for="responseText">✍ Votre réponse:</label>
-                <textarea id="responseText" [(ngModel)]="responseText" rows="4" class="form-control"></textarea>
-                <button class="btn btn-primary mt-2" (click)="sendResponse()">📨 Envoyer</button>
-            </div>
-        </div>
+<!-- Conteneur principal -->
+<div class="content-wrapper">
+  <div class="card">
+    <div class="card-header">
+      <h3 class="title">📌 Détails de la réclamation</h3>
     </div>
+    <div class="card-body">
+      <div class="info-grid">
+        <div class="info-item">
+          <span class="label">📄 Type:</span>
+          <span class="value">{{ reclamation?.type || 'Non spécifié' }}</span>
+        </div>
+        <div class="info-item">
+          <span class="label">👤 Émetteur:</span>
+          <span class="value">{{ reclamation?.client?.nom || 'Nom non disponible' }} {{ reclamation?.client?.prenom || 'Prénom non disponible' }}</span>
+        </div>
+        <div class="info-item">
+          <span class="label">📌 Objet:</span>
+          <span class="value">{{ reclamation?.objet || 'Non spécifié' }}</span>
+        </div>
+        <div class="info-item">
+          <span class="label">⚡ État:</span>
+          <span class="badge" [ngClass]="getBadgeClass(reclamation?.etat || '')">
+            {{ reclamation?.etat || 'Non spécifié' }}
+          </span>
+        </div>
+        <div class="info-item full-width">
+          <span class="label">📝 Description:</span>
+          <p class="value description">{{ reclamation?.description || 'Aucune description' }}</p>
+        </div>
+      </div>
+
+      <div class="action-buttons">
+        <button class="btn btn-warning" (click)="showTechnicianDropdown()">
+          <i class="fas fa-user-cog"></i> Router à un technicien
+        </button>
+        <button class="btn btn-success" (click)="showResponseArea()">
+          <i class="fas fa-reply"></i> Répondre à la requête
+        </button>
+      </div>
+
+      <div *ngIf="technicianDropdownVisible" class="dropdown-section">
+        <label for="technicianSelect">👨‍🔧 Choisir un technicien:</label>
+        <select id="technicianSelect" [(ngModel)]="selectedTechnician" class="form-select">
+          <option *ngFor="let technician of technicians" [value]="technician.id">
+            {{ technician.nom }} {{ technician.prenom }}
+          </option>
+        </select>
+        <button class="btn btn-primary" (click)="assignTechnician()">Assigner</button>
+      </div>
+
+      <div *ngIf="responseAreaVisible" class="response-section">
+        <label for="responseText">✍ Votre réponse:</label>
+        <textarea id="responseText" [(ngModel)]="responseText" rows="3" class="form-control"></textarea>
+        <button class="btn btn-success" (click)="sendResponse()">Envoyer la réponse</button>
+      </div>
+    </div>
+  </div>
 </div>
