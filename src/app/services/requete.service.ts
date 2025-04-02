@@ -13,4 +13,7 @@ export class RequeteService {
   getAllRequetes(): Observable<any[]> {
     return this.http.get<any[]>(this.apiUrl); // Envoie une requête GET
   }
+  ajouterRequete(requete: any): Observable<any> {
+    return this.http.post<any>(this.apiUrl, requete);
+  }
 }

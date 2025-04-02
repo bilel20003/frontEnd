@@ -9,13 +9,20 @@
       <input type="text" placeholder="Rechercher..." [(ngModel)]="searchTerm" (input)="filterReclamations()">
       <button><i class="fas fa-search"></i></button>
     </div>
-  </div> 
+  </div>
 
-  <!-- Titre "Liste de Requêtes" -->
-  <header>
-    <h2 class="text-center" style="color: #007bff; font-weight: 600; font-size: 2rem; margin-bottom: 40px;">
+  <!-- Titre "Liste de Requêtes" avec le bouton "Nouvelle Requête" et l'icône de mode jour/nuit -->
+  <header class="d-flex justify-content-between align-items-center">
+    <h2 class="text-center" style="color: #070708; font-weight: 600; font-size: 2rem; margin-bottom: 40px; margin-left: 250px;">
       Liste de Requêtes
     </h2>
+    <div class="header-actions">
+      
+      <button class="mode-toggle" (click)="toggleMode()">
+        <i class="fas" [ngClass]="isNightMode ? 'fa-sun' : 'fa-moon'"></i>
+      </button>
+      <button class="btn btn-primary" (click)="goToReclamationPage()">+ Nouvelle Requête</button>
+    </div>
   </header>
 
   <!-- Tableau des requêtes -->
@@ -32,7 +39,7 @@
         </tr>
       </thead>
       <tbody>
-        <tr *ngFor="let requete of filteredRequetes">
+        <tr *ngFor="let requete of paginatedRequetes">
           <td>{{ requete.ref }}</td>
           <td>{{ requete.objet }}</td>
           <td>{{ requete.typeRequete }}</td>
@@ -50,5 +57,24 @@
         </tr>
       </tbody>
     </table>
+  
+
+      <!-- Pagination et Choix des lignes par page -->
+      <div class="pagination-container d-flex justify-content-between">
+        <div class="page-options">
+          <select [(ngModel)]="itemsPerPage" (change)="onItemsPerPageChange($event)">
+
+            <option *ngFor="let option of [5, 10, 20]" [value]="option">{{ option }} lignes par page</option>
+          </select>
+        </div>
+ 
+      <div class="pagination">
+        <button (click)="goToPreviousPage()" [disabled]="currentPage === 1">Précédent</button>
+        <span>Page {{ currentPage }} sur {{ totalPages }}</span>
+        <button (click)="goToNextPage()" [disabled]="currentPage === totalPages">Suivant</button>
+      </div>
+    </div>
   </div>
+
 </div>
+

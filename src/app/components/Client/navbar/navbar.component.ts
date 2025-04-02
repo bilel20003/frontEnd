@@ -8,6 +8,7 @@ import { Component,  HostListener } from '@angular/core';
 })
 export class NavbarComponent {
   dropdownVisible: boolean = false;
+  
 
   toggleDropdown(event: Event) {
     event.stopPropagation();

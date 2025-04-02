@@ -37,6 +37,15 @@ export class DetailDemandeComponent implements OnInit {
     // Si la requête est trouvée, assigne-la à requetes. Sinon, assigne un tableau vide
     this.requetes = requeteTrouvee ? [requeteTrouvee] : [];
   }
+  getBadgeClass(etat: string): string {
+    switch (etat) {
+      case 'NOUVEAU': return 'badge-primary';
+      case 'EN_COURS_DE_TRAITEMENT': return 'badge-warning';
+      case 'TRAITEE': return 'badge-success';
+      case 'REFUSEE': return 'badge-danger';
+      default: return 'badge-secondary';
+    }
+  }
 
   retour() {
     window.history.back();
