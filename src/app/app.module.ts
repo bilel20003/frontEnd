@@ -1,6 +1,7 @@
 import { NgModule } from '@angular/core';
 import { HttpClientModule } from '@angular/common/http';
 import { ReactiveFormsModule } from '@angular/forms';
+import { NgxChartsModule } from '@swimlane/ngx-charts';
 
 import { BrowserModule } from '@angular/platform-browser';
 
@@ -80,6 +81,7 @@ import { NavbarComponent } from './components/Client/navbar/navbar.component';
     NgxPaginationModule,
     BrowserAnimationsModule,
     HttpClientModule,
+    NgxChartsModule,
   ],
   providers: [],
   bootstrap: [AppComponent]

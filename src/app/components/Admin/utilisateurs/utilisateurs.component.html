@@ -1,0 +1,71 @@
+<app-navbar-admin></app-navbar-admin>
+
+<div class="container">
+  <!-- Barre de recherche -->
+  <div class="search-bar-container">
+    <div class="search-bar">
+      <input type="text" placeholder="Rechercher un utilisateur..." [(ngModel)]="searchTerm" (input)="filterUtilisateurs()">
+      <button><i class="fas fa-search"></i></button>
+    </div>
+  </div>
+
+  <!-- Titre + actions -->
+  <header class="d-flex justify-content-between align-items-center">
+    <h2 style="margin-left: 250px;">Gestion des Utilisateurs</h2>
+    <div class="header-actions">
+      <button class="mode-toggle" (click)="toggleMode()">
+        <i class="fas" [ngClass]="isNightMode ? 'fa-sun' : 'fa-moon'"></i>
+      </button>
+      <button class="btn btn-primary" (click)="ajouterUtilisateur()">+ Ajouter Utilisateur</button>
+    </div>
+  </header>
+
+  <!-- Tableau -->
+  <div class="table-responsive">
+    <table class="table table-hover shadow-sm rounded">
+      <thead class="table-header">
+        <tr>
+          <th>Nom</th>
+          <th>Email</th>
+          <th>Rôle</th>
+          <th>Ministère</th>
+          <th>Service</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let user of paginatedUtilisateurs">
+          <td>{{ user.nom }}</td>
+          <td>{{ user.email }}</td>
+          <td>
+            <span class="badge badge-secondary">{{ user.role }}</span>
+          </td>
+          <td>{{ user.ministere }}</td>
+          <td>{{ user.service }}</td>
+          <td>
+            <button class="btn btn-info btn-sm me-2" (click)="modifierUtilisateur(user)">
+              <i class="fas fa-edit"></i> Modifier
+            </button>
+            <button class="btn btn-danger btn-sm" (click)="supprimerUtilisateur(user)">
+              <i class="fas fa-trash"></i> Supprimer
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- Pagination -->
+    <div class="pagination-container">
+      <div class="page-options">
+        <select [(ngModel)]="itemsPerPage" (change)="onItemsPerPageChange($event)">
+          <option *ngFor="let option of [5, 10, 20]" [value]="option">{{ option }} lignes par page</option>
+        </select>
+      </div>
+      <div class="pagination">
+        <button (click)="goToPreviousPage()" [disabled]="currentPage === 1">Précédent</button>
+        <span>Page {{ currentPage }} sur {{ totalPages }}</span>
+        <button (click)="goToNextPage()" [disabled]="currentPage === totalPages">Suivant</button>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,74 @@
+<app-navbar-admin></app-navbar-admin>
+
+<div class="container">
+  <!-- Section Résumé des Statistiques -->
+  <div class="stat-summary">
+    <div class="stat-card">
+      <h3>Total des Réclamations</h3>
+      <p>{{ totalClaims }}</p>
+    </div>
+    <div class="stat-card">
+      <h3>Réclamations Résolues</h3>
+      <p>{{ resolvedClaims }}</p>
+    </div>
+    <div class="stat-card">
+      <h3>Réclamations en Cours</h3>
+      <p>{{ ongoingClaims }}</p>
+    </div>
+    <div class="stat-card">
+      <h3>Réclamations Refusées</h3>
+      <p>{{ rejectedClaims }}</p>
+    </div>
+  </div>
+
+  <!-- Graphiques -->
+  <div class="charts-container">
+    <div class="chart">
+      <h4>Répartition par Statut</h4>
+      <!-- Intégration du graphique à secteurs (pie chart) -->
+      <ngx-charts-pie-chart
+        [results]="statusData"
+        [legend]="true"
+        [doughnut]="true">
+      </ngx-charts-pie-chart>
+    </div>
+    <div class="chart">
+      <h4>Réclamations par Ministère</h4>
+      <!-- Intégration du graphique à barres -->
+      <ngx-charts-bar-vertical
+        [results]="ministryData"
+        [xAxis]="true"
+        [yAxis]="true"
+        [legend]="true"
+        [showDataLabel]="true">
+      </ngx-charts-bar-vertical>
+    </div>
+  </div>
+
+  <!-- Tableaux des réclamations -->
+  <div class="table-container">
+    <h4>Détails des Réclamations</h4>
+    <table class="table table-bordered">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Date</th>
+          <th>Ministère</th>
+          <th>Statut</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let claim of claims">
+          <td>{{ claim.id }}</td>
+          <td>{{ claim.date }}</td>
+          <td>{{ claim.ministry }}</td>
+          <td>{{ claim.status }}</td>
+          <td>
+            <button class="btn btn-info">Voir Détails</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>

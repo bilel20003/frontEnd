@@ -1,0 +1,115 @@
+/* Conteneur du Dashboard */
+.dashboard-container {
+    display: flex;
+    height: 100vh;
+  }
+  
+  /* Sidebar */
+  .sidebar {
+    position: fixed;
+    top: 50px;
+    left: 0;
+    width: 240px;
+    height: calc(100vh - 50px);
+    background: linear-gradient(135deg, #1e3c72, #2a5298);
+    padding: 20px;
+    box-shadow: 4px 0 15px rgba(0, 0, 0, 0.2);
+  }
+  
+  .sidebar .logo {
+    text-align: center;
+  }
+  
+  .sidebar .logo-container img {
+    width: 100px;
+    height: auto;
+  }
+  
+  .nav-links {
+    list-style: none;
+    padding: 0;
+    margin-top: 20px;
+  }
+  
+  .nav-links li {
+    padding: 10px 0;
+  }
+  
+  .nav-links a {
+    color: white;
+    text-decoration: none;
+    font-size: 16px;
+    padding: 10px;
+    display: flex;
+    align-items: center;
+    transition: 0.3s;
+  }
+  
+  .nav-links a i {
+    margin-right: 10px;
+  }
+  
+  .nav-links a:hover,
+  .nav-links a.active {
+    background: #ffcc00;
+    color: black;
+  }
+  
+  /* Contenu principal */
+  .main-content {
+    margin-left: 240px;
+    padding: 20px;
+  }
+  
+  .top-bar {
+    position: fixed;
+    top: 0;
+    right: 0;
+    padding: 10px;
+    background: linear-gradient(135deg, #1e3c72, #2a5298);
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    z-index: 1000;
+  }
+  
+  .icon-btn {
+    background-color: white;
+    border: none;
+    padding: 10px;
+    margin-left: 10px;
+    border-radius: 50%;
+    cursor: pointer;
+  }
+  
+  .icon-btn i {
+    color: #2a5298;
+    font-size: 18px;
+  }
+  
+  /* Contenu des cartes */
+  .cards-container {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 50px;
+  }
+  
+  .card {
+    background: #ffffff;
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    width: 30%;
+    text-align: center;
+  }
+  
+  .card h2 {
+    font-size: 22px;
+    margin-bottom: 10px;
+  }
+  
+  .card p {
+    font-size: 18px;
+    font-weight: bold;
+  }
+  
