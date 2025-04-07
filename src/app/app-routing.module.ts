@@ -2,6 +2,7 @@ import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { LoginComponent } from './components/login/login.component';
 
+
 import { RenseignerAvancementComponent } from './components/Technicien/renseigner-avancement/renseigner-avancement.component';
 //client
 import { NavbarComponent } from './components/Client/navbar/navbar.component';
@@ -19,13 +20,35 @@ import { TechHomeComponent } from './components/Technicien/tech-home/tech-home.c
 import { TechDetailsComponent } from './components/Technicien/tech-details/tech-details.component';
 import { GuiHomeComponent } from './components/Guichetier/gui-home/gui-home.component';
 import { GuiRequestDetailsComponent } from './components/Guichetier/gui-request-details/gui-request-details.component';
-
+//admin 
+import { UtilisateursComponent } from './components/Admin/utilisateurs/utilisateurs.component';
+import { NavbarAdminComponent } from './components/Admin/navbar-admin/navbar-admin.component';
+import { DashboardComponent } from './components/Admin/dashboard/dashboard.component';
+import { ProductsComponent } from './components/Admin/product/product.component';
+import { ProductListComponent } from './components/Admin/product-list/product-list.component'; // Import
+import { ObjetReclamationComponent } from './components/Admin/objet-reclamation/objet-reclamation.component';
+import { GererRoleComponent } from './components/Admin/role/role.component';
+import { MinistryManagementComponent } from './components/Admin/ministere/ministere.component';
+import { ClientManagementComponent } from './components/Admin/client/client.component';
+import { StatisticsComponent } from './components/Admin/statistic/statistic.component';
+import { HoraireComponent } from './components/Admin/horaire/horaire.component';
 
 const routes: Routes = [
   { path: '', redirectTo: '/login', pathMatch: 'full' }, 
   { path: 'login', component: LoginComponent },
   
-  
+  //admin
+  { path: 'utilisateurs', component:  UtilisateursComponent },
+  { path: 'navbar-admin', component:  NavbarAdminComponent },
+  { path: 'dashboard', component:  DashboardComponent },
+  { path: 'product', component: ProductsComponent },
+  { path: 'product-list', component: ProductListComponent},
+  { path: 'objet-reclamation', component: ObjetReclamationComponent},
+  { path: 'role', component:  GererRoleComponent },
+  { path: 'ministere', component:  MinistryManagementComponent },
+  { path: 'client', component:  ClientManagementComponent },
+  { path: 'statistic', component:  StatisticsComponent },
+  { path: 'horaire', component:  HoraireComponent },
   // Client
   { path: 'home', component: HomeComponent },
   { 

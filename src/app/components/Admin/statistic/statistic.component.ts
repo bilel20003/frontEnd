@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { Chart } from 'chart.js';
 
 @Component({
   selector: 'app-statistic',
@@ -6,30 +7,81 @@ import { Component, OnInit } from '@angular/core';
   styleUrls: ['./statistic.component.css']
 })
 export class StatisticsComponent implements OnInit {
-  totalClaims = 120;
-  resolvedClaims = 80;
-  ongoingClaims = 30;
-  rejectedClaims = 10;
+  chart: any;
+
+  // Données pour le graphique
+  totalClaims: number = 250;
+  resolvedClaims: number = 150;
+  ongoingClaims: number = 80;
+  rejectedClaims: number = 20;
   
-  statusData = [
-    { name: 'Résolu', value: 80 },
-    { name: 'En Cours', value: 30 },
-    { name: 'Refusé', value: 10 }
-  ];
+  // Données pour le graphique à secteurs
+  statusData: number[] = [80, 30, 10]; // Exemple de répartition par statut
+  statusLabels: string[] = ['Résolu', 'En Cours', 'Refusé'];
 
+  // Données pour le graphique à barres
   ministryData = [
-    { name: 'Ministère 1', value: 50 },
-    { name: 'Ministère 2', value: 30 },
-    { name: 'Ministère 3', value: 40 },
+    { name: 'Ministère A', value: 100 },
+    { name: 'Ministère B', value: 80 },
+    { name: 'Ministère C', value: 70 }
   ];
 
-  claims = [
-    { id: 1, date: '2025-04-01', ministry: 'Ministère 1', status: 'Résolu' },
-    { id: 2, date: '2025-04-02', ministry: 'Ministère 2', status: 'En Cours' },
-    { id: 3, date: '2025-04-03', ministry: 'Ministère 3', status: 'Refusé' }
-  ];
+  ngOnInit(): void {
+    this.createPieChart();
+    this.createBarChart();
+  }
 
-  constructor() {}
+  // Création du graphique à secteurs
+  createPieChart(): void {
+    this.chart = new Chart('pieChart', {
+      type: 'pie',  // Type de graphique
+      data: {
+        labels: this.statusLabels,
+        datasets: [{
+          data: this.statusData,
+          backgroundColor: ['#FF5733', '#FFBD33', '#33FF57'],
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: {
+            position: 'top',
+          },
+          tooltip: {
+            callbacks: {
+              label: (context) => {
+                return `${context.label}: ${context.raw}%`;
+              }
+            }
+          }
+        }
+      }
+    });
+  }
 
-  ngOnInit(): void {}
+  // Création du graphique à barres
+  createBarChart(): void {
+    const barChart = new Chart('barChart', {
+      type: 'bar',  // Type de graphique
+      data: {
+        labels: this.ministryData.map(ministry => ministry.name),
+        datasets: [{
+          label: 'Réclamations par Ministère',
+          data: this.ministryData.map(ministry => ministry.value),
+          backgroundColor: '#FFBD33',
+          borderColor: '#FF5733',
+          borderWidth: 1
+        }]
+      },
+      options: {
+        responsive: true,
+        scales: {
+          y: {
+            beginAtZero: true
+          }
+        }
+      }
+    });
+  }
 }

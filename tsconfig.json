@@ -1,6 +1,4 @@
-/* To learn more about this file see: https://angular.io/config/tsconfig. */
 {
-  "compileOnSave": false,
   "compilerOptions": {
     "baseUrl": "./",
     "outDir": "./dist/out-tsc",
@@ -29,5 +27,9 @@
     "strictInjectionParameters": true,
     "strictInputAccessModifiers": true,
     "strictTemplates": true
-  }
+  },
+  "include": [
+    "src/**/*.ts",  // Ajoutez ceci pour inclure tous les fichiers TypeScript dans le dossier src
+    "src/d3-types.d.ts"  // Si vous avez un fichier d3-types.d.ts personnalisé
+  ]
 }

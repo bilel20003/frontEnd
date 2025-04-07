@@ -1,7 +1,7 @@
 import { NgModule } from '@angular/core';
 import { HttpClientModule } from '@angular/common/http';
 import { ReactiveFormsModule } from '@angular/forms';
-import { NgxChartsModule } from '@swimlane/ngx-charts';
+
 
 import { BrowserModule } from '@angular/platform-browser';
 
@@ -37,6 +37,20 @@ import { RendezVousComponent } from './components/Client/rendez-vous/rendez-vous
 import { RendezVousDetailComponent } from './components/Client/rendez-vous/rendezvous-detail/rendezvous-detail.component';
 import { NavbarComponent } from './components/Client/navbar/navbar.component';
 
+ //admin
+
+ import { UtilisateursComponent } from './components/Admin/utilisateurs/utilisateurs.component';
+import { NavbarAdminComponent } from './components/Admin/navbar-admin/navbar-admin.component';
+import { DashboardComponent } from './components/Admin/dashboard/dashboard.component';
+import { ProductsComponent } from './components/Admin/product/product.component';
+import { ProductListComponent } from './components/Admin/product-list/product-list.component';
+import { ObjetReclamationComponent } from './components/Admin/objet-reclamation/objet-reclamation.component';
+import { GererRoleComponent } from './components/Admin/role/role.component';
+import { MinistryManagementComponent } from './components/Admin/ministere/ministere.component';
+import { ClientManagementComponent } from './components/Admin/client/client.component';
+import { StatisticsComponent } from './components/Admin/statistic/statistic.component';
+import { HoraireComponent } from './components/Admin/horaire/horaire.component';
+
 
 
 
@@ -46,6 +60,7 @@ import { NavbarComponent } from './components/Client/navbar/navbar.component';
     
     AppComponent,
     LoginComponent,
+    
   
     
     RenseignerAvancementComponent,
@@ -70,6 +85,18 @@ import { NavbarComponent } from './components/Client/navbar/navbar.component';
     RendezVousComponent,
     RendezVousDetailComponent,
     NavbarComponent,
+    //admin
+    UtilisateursComponent,
+    NavbarAdminComponent,
+    DashboardComponent,
+    ProductsComponent,
+    ProductListComponent,
+    ObjetReclamationComponent,
+    GererRoleComponent,
+    MinistryManagementComponent,
+    ClientManagementComponent,
+    StatisticsComponent,
+    HoraireComponent,
    
     
   ],
@@ -81,7 +108,7 @@ import { NavbarComponent } from './components/Client/navbar/navbar.component';
     NgxPaginationModule,
     BrowserAnimationsModule,
     HttpClientModule,
-    NgxChartsModule,
+   
   ],
   providers: [],
   bootstrap: [AppComponent]

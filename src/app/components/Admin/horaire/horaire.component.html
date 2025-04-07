@@ -1,0 +1,58 @@
+<div class="app-container">
+    <!-- Navbar admin (ne pas modifier) -->
+    <app-navbar-admin></app-navbar-admin>
+  
+    <!-- Contenu principal -->
+    <div class="page-content">
+      <div class="card">
+        <h2 class="page-title">Gestion des horaires de travail</h2>
+  
+        <!-- Formulaire -->
+        <form class="form-grid" (ngSubmit)="ajouterHoraire()">
+          <div class="form-group">
+            <label for="jour">Jour</label>
+            <select id="jour" [(ngModel)]="horaire.jour" name="jour" required>
+              <option *ngFor="let jour of jours" [value]="jour">{{ jour }}</option>
+            </select>
+          </div>
+  
+          <div class="form-group">
+            <label for="heureDebut">Heure d'ouverture</label>
+            <input type="time" id="heureDebut" [(ngModel)]="horaire.heureDebut" name="heureDebut" required />
+          </div>
+  
+          <div class="form-group">
+            <label for="heureFin">Heure de fermeture</label>
+            <input type="time" id="heureFin" [(ngModel)]="horaire.heureFin" name="heureFin" required />
+          </div>
+  
+          <div class="form-actions">
+            <button type="submit" class="btn-primary">Ajouter</button>
+          </div>
+        </form>
+  
+        <!-- Tableau -->
+        <table class="styled-table">
+          <thead>
+            <tr>
+              <th>Jour</th>
+              <th>Heure d'ouverture</th>
+              <th>Heure de fermeture</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let h of horaires">
+              <td>{{ h.jour }}</td>
+              <td>{{ h.heureDebut }}</td>
+              <td>{{ h.heureFin }}</td>
+              <td>
+                <button class="btn-danger" (click)="supprimerHoraire(h)">Supprimer</button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  

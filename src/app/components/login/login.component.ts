@@ -17,12 +17,13 @@ export class LoginComponent {
   onLogin() {
     if (this.form.username === 'client' && this.form.password === '123') {
       this.router.navigate(['/home']); // Redirige vers l'interface client
+    } else if (this.form.username === 'guichetier' && this.form.password === '123') {
+      this.router.navigate(['/gui-home']); // Redirige vers l'interface guichetier
+    } else if (this.form.username === 'admin' && this.form.password === '123') {
+      this.router.navigate(['/utilisateurs']); // Redirige vers l'interface admin
     } else {
-      if (this.form.username === 'guichetier' && this.form.password === '123') {
-        this.router.navigate(['/gui-home']); // Redirige vers l'interface client
-      }else{
       alert('Nom d’utilisateur ou mot de passe incorrect');
     }
   }
-  }
+  
 }
