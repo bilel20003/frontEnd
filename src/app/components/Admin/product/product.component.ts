@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { ProductService } from 'C:/Users/pc_asus/Documents/frontEnd/src/app/services/product.service';
+import { ProductService } from 'src/app/services/product.service';
 
 interface Product {
   id: number;
@@ -7,6 +7,7 @@ interface Product {
   description: string;
   price: number;
   stock: number;
+  topologie: string; // ✅ Nouveau champ ajouté
 }
 
 @Component({
@@ -16,15 +17,17 @@ interface Product {
 })
 export class ProductsComponent implements OnInit {
 
-  products: Product[] = [];  // Liste des produits
-  newProduct: Product = { id: 0, name: '', description: '', price: 0, stock: 0 };  // Produit à ajouter
-  editingProduct: Product | null = null;  // Produit en cours d'édition
-  searchTerm: string = '';  // Variable de recherche pour filtrer les produits
-  itemsPerPage: number = 5;  // Nombre de produits par page
-  currentPage: number = 1;  // Page actuelle de la pagination
-  totalPages: number = 1;  // Total de pages pour la pagination
-  paginatedProducts: Product[] = [];  // Produits de la page actuelle
-  isNightMode: boolean = false;  // Mode nuit activé ou non
+  products: Product[] = [];
+  newProduct: Product = { id: 0, name: '', description: '', price: 0, stock: 0, topologie: '' };
+  editingProduct: Product | null = null;
+  searchTerm: string = '';
+  itemsPerPage: number = 5;
+  currentPage: number = 1;
+  totalPages: number = 1;
+  paginatedProducts: Product[] = [];
+  isNightMode: boolean = false;
+  isModalOpen: boolean = false; // Contrôle l'ouverture de la modale
+  productForm: Product = { id: 0, name: '', description: '', price: 0, stock: 0, topologie: '' }; // Contient les données du produit
 
   constructor(private productService: ProductService) {}
 
@@ -33,7 +36,7 @@ export class ProductsComponent implements OnInit {
   }
 
   getProducts() {
-    this.products = this.productService.getProducts();  // Obtient la liste des produits
+    this.products = this.productService.getProducts();
     this.paginateProducts();
   }
 
@@ -44,25 +47,39 @@ export class ProductsComponent implements OnInit {
     this.totalPages = Math.ceil(this.products.length / this.itemsPerPage);
   }
 
+  // Ouvre la modale avec un produit à modifier ou un formulaire vide pour un nouveau produit
+  openModal(product: Product | null = null): void {
+    this.isModalOpen = true;
+    if (product) {
+      this.editingProduct = { ...product };
+      this.productForm = { ...product }; // Pré-remplir le formulaire avec les données du produit
+    } else {
+      this.editingProduct = null;
+      this.productForm = { id: 0, name: '', description: '', price: 0, stock: 0, topologie: '' }; // Formulaire vide
+    }
+  }
+
+  // Ferme la modale
+  closeModal(): void {
+    this.isModalOpen = false;
+    this.productForm = { id: 0, name: '', description: '', price: 0, stock: 0, topologie: '' };
+  }
+
   addProduct() {
-    if (this.newProduct.name && this.newProduct.description && this.newProduct.price && this.newProduct.stock) {
-      this.productService.addProduct(this.newProduct);
+    if (this.productForm.name && this.productForm.description && this.productForm.price && this.productForm.stock && this.productForm.topologie) {
+      this.productService.addProduct(this.productForm);
       this.getProducts();
-      this.newProduct = { id: 0, name: '', description: '', price: 0, stock: 0 };  // Réinitialise le formulaire
+      this.closeModal();
     } else {
       alert('Veuillez remplir tous les champs');
     }
   }
 
-  editProduct(product: Product) {
-    this.editingProduct = { ...product };  // Clone pour éviter la référence directe
-  }
-
   updateProduct() {
-    if (this.editingProduct && this.editingProduct.name && this.editingProduct.description && this.editingProduct.price && this.editingProduct.stock) {
-      this.productService.updateProduct(this.editingProduct.id, this.editingProduct);
+    if (this.productForm && this.productForm.name && this.productForm.description && this.productForm.price && this.productForm.stock && this.productForm.topologie) {
+      this.productService.updateProduct(this.productForm.id, this.productForm);
       this.getProducts();
-      this.editingProduct = null;  // Réinitialise le formulaire
+      this.closeModal();
     } else {
       alert('Veuillez remplir tous les champs');
     }
@@ -76,16 +93,17 @@ export class ProductsComponent implements OnInit {
   }
 
   filterProducts() {
-    // Filtre les produits en fonction du terme de recherche
     if (this.searchTerm) {
-      this.products = this.productService.getProducts().filter(product => 
-        product.name.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
-        product.description.toLowerCase().includes(this.searchTerm.toLowerCase())
+      const term = this.searchTerm.toLowerCase();
+      this.products = this.productService.getProducts().filter(product =>
+        product.name.toLowerCase().includes(term) ||
+        product.description.toLowerCase().includes(term) ||
+        product.topologie.toLowerCase().includes(term)
       );
     } else {
-      this.getProducts();  // Restaure tous les produits si la recherche est vide
+      this.getProducts();
     }
-    this.paginateProducts();  // Recalcule la pagination après le filtrage
+    this.paginateProducts();
   }
 
   goToPreviousPage() {
@@ -104,31 +122,32 @@ export class ProductsComponent implements OnInit {
 
   onItemsPerPageChange(event: Event) {
     const selectElement = event.target as HTMLSelectElement;
-    this.itemsPerPage = Number(selectElement.value); // Mettre à jour le nombre d'éléments par page
-    this.currentPage = 1;  // Réinitialise à la première page lorsque l'on change le nombre d'éléments par page
-    this.paginateProducts();  // Recalcule la pagination
+    this.itemsPerPage = Number(selectElement.value);
+    this.currentPage = 1;
+    this.paginateProducts();
   }
 
-  // Fonction pour basculer le mode nuit
   toggleMode() {
     this.isNightMode = !this.isNightMode;
     document.body.classList.toggle('night-mode', this.isNightMode);
   }
 
-  // Fonction d'ajout de produit
+  // Actions de gestion des produits
   ajouterProduit() {
-    this.newProduct = { id: 0, name: '', description: '', price: 0, stock: 0 }; // Initialisation du formulaire d'ajout
+    this.openModal(); // Ouvre une modale vide pour ajouter un produit
   }
 
-  // Fonction pour modifier un produit
   modifierProduit(product: Product) {
-    this.editingProduct = { ...product };
+    this.openModal(product); // Ouvre la modale avec les informations du produit à modifier
   }
 
-  // Fonction pour supprimer un produit
   supprimerProduit(product: Product) {
     if (confirm('Voulez-vous vraiment supprimer ce produit ?')) {
       this.deleteProduct(product.id);
     }
+  }
+
+  cancelEdit() {
+    this.closeModal();
   }
 }

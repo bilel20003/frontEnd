@@ -137,4 +137,10 @@ export class ObjetReclamationComponent implements OnInit {
     this.isNightMode = !this.isNightMode;  // Inverse la valeur de isNightMode
   }
   
+  affecterProduit(objet: any) {
+    // Par exemple : ouvrir une modale ou rediriger vers une page
+    console.log('Affecter produit à :', objet);
+  }
+  
+
 }

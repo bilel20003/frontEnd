@@ -6,20 +6,44 @@ import { Component } from '@angular/core';
   styleUrls: ['./horaire.component.css']
 })
 export class HoraireComponent {
-  jours: string[] = ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi'];
-  
+  jours: string[] = ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi', 'Dimanche'];
+
   horaire = {
     jour: '',
-    heureDebut: '',
-    heureFin: ''
+    ouvertureMatin: '',
+    fermetureMatin: '',
+    ouvertureSoir: '',
+    fermetureSoir: ''
   };
 
   horaires: any[] = [];
 
   ajouterHoraire() {
-    if (this.horaire.jour && this.horaire.heureDebut && this.horaire.heureFin) {
+    const {
+      jour,
+      ouvertureMatin,
+      fermetureMatin,
+      ouvertureSoir,
+      fermetureSoir
+    } = this.horaire;
+
+    if (
+      jour &&
+      ouvertureMatin &&
+      fermetureMatin &&
+      ouvertureSoir &&
+      fermetureSoir
+    ) {
       this.horaires.push({ ...this.horaire });
-      this.horaire = { jour: '', heureDebut: '', heureFin: '' };
+
+      // Réinitialiser le formulaire
+      this.horaire = {
+        jour: '',
+        ouvertureMatin: '',
+        fermetureMatin: '',
+        ouvertureSoir: '',
+        fermetureSoir: ''
+      };
     }
   }
 

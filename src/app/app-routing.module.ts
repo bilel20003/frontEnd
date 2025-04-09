@@ -30,7 +30,7 @@ import { ObjetReclamationComponent } from './components/Admin/objet-reclamation/
 import { GererRoleComponent } from './components/Admin/role/role.component';
 import { MinistryManagementComponent } from './components/Admin/ministere/ministere.component';
 import { ClientManagementComponent } from './components/Admin/client/client.component';
-import { StatisticsComponent } from './components/Admin/statistic/statistic.component';
+
 import { HoraireComponent } from './components/Admin/horaire/horaire.component';
 
 const routes: Routes = [
@@ -47,7 +47,7 @@ const routes: Routes = [
   { path: 'role', component:  GererRoleComponent },
   { path: 'ministere', component:  MinistryManagementComponent },
   { path: 'client', component:  ClientManagementComponent },
-  { path: 'statistic', component:  StatisticsComponent },
+
   { path: 'horaire', component:  HoraireComponent },
   // Client
   { path: 'home', component: HomeComponent },

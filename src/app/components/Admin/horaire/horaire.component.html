@@ -1,58 +1,73 @@
 <div class="app-container">
-    <!-- Navbar admin (ne pas modifier) -->
-    <app-navbar-admin></app-navbar-admin>
-  
-    <!-- Contenu principal -->
-    <div class="page-content">
-      <div class="card">
-        <h2 class="page-title">Gestion des horaires de travail</h2>
-  
-        <!-- Formulaire -->
-        <form class="form-grid" (ngSubmit)="ajouterHoraire()">
+  <app-navbar-admin></app-navbar-admin>
+
+  <div class="page-content">
+    <div class="card">
+      <h2 class="page-title">Gestion des horaires de travail</h2>
+
+      <!-- Formulaire -->
+      <form class="form-grid" (ngSubmit)="ajouterHoraire()">
+        <div class="form-group">
+          <label for="jour">Jour</label>
+          <select id="jour" [(ngModel)]="horaire.jour" name="jour" required>
+            <option *ngFor="let jour of jours" [value]="jour">{{ jour }}</option>
+          </select>
+        </div>
+
+        <!-- Section Matin -->
+        <div class="form-section">
+          <h3>Matin</h3>
           <div class="form-group">
-            <label for="jour">Jour</label>
-            <select id="jour" [(ngModel)]="horaire.jour" name="jour" required>
-              <option *ngFor="let jour of jours" [value]="jour">{{ jour }}</option>
-            </select>
+            <label for="ouvertureMatin">Heure d'ouverture</label>
+            <input type="time" id="ouvertureMatin" [(ngModel)]="horaire.ouvertureMatin" name="ouvertureMatin" required />
           </div>
-  
+
           <div class="form-group">
-            <label for="heureDebut">Heure d'ouverture</label>
-            <input type="time" id="heureDebut" [(ngModel)]="horaire.heureDebut" name="heureDebut" required />
+            <label for="fermetureMatin">Heure de fermeture</label>
+            <input type="time" id="fermetureMatin" [(ngModel)]="horaire.fermetureMatin" name="fermetureMatin" required />
           </div>
-  
+        </div>
+
+        <!-- Section Après-midi -->
+        <div class="form-section">
+          <h3>Après-midi</h3>
           <div class="form-group">
-            <label for="heureFin">Heure de fermeture</label>
-            <input type="time" id="heureFin" [(ngModel)]="horaire.heureFin" name="heureFin" required />
+            <label for="ouvertureSoir">Heure d'ouverture</label>
+            <input type="time" id="ouvertureSoir" [(ngModel)]="horaire.ouvertureSoir" name="ouvertureSoir" required />
           </div>
-  
-          <div class="form-actions">
-            <button type="submit" class="btn-primary">Ajouter</button>
+
+          <div class="form-group">
+            <label for="fermetureSoir">Heure de fermeture</label>
+            <input type="time" id="fermetureSoir" [(ngModel)]="horaire.fermetureSoir" name="fermetureSoir" required />
           </div>
-        </form>
-  
-        <!-- Tableau -->
-        <table class="styled-table">
-          <thead>
-            <tr>
-              <th>Jour</th>
-              <th>Heure d'ouverture</th>
-              <th>Heure de fermeture</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr *ngFor="let h of horaires">
-              <td>{{ h.jour }}</td>
-              <td>{{ h.heureDebut }}</td>
-              <td>{{ h.heureFin }}</td>
-              <td>
-                <button class="btn-danger" (click)="supprimerHoraire(h)">Supprimer</button>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+        </div>
+
+        <div class="form-actions">
+          <button type="submit" class="btn-primary">Ajouter</button>
+        </div>
+      </form>
+
+      <!-- Tableau -->
+      <table class="styled-table">
+        <thead>
+          <tr>
+            <th>Jour</th>
+            <th>Matin (Ouverture - Fermeture)</th>
+            <th>Après-midi (Ouverture - Fermeture)</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let h of horaires">
+            <td>{{ h.jour }}</td>
+            <td>{{ h.ouvertureMatin }} - {{ h.fermetureMatin }}</td>
+            <td>{{ h.ouvertureSoir }} - {{ h.fermetureSoir }}</td>
+            <td>
+              <button class="btn-danger" (click)="supprimerHoraire(h)">Supprimer</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
     </div>
   </div>
-  
+</div>

@@ -1,211 +1,268 @@
 /* Conteneur principal */
 .container {
-    max-width: 1700px;
-    margin: auto;
-    padding: 20px;
-    padding-top: 80px;
-  }
-  
-  /* Barre de recherche */
-  .search-bar-container {
-    display: flex;
-    justify-content: flex-end;
-    margin-bottom: 15px;
-    background-color: white;
-    padding: 10px 0;
-  }
-  
-  .search-bar {
-    display: flex;
-    align-items: center;
-    background-color: #fff;
-    border-radius: 25px;
-    padding: 8px 15px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
-    width: 350px;
-  }
-  
-  .search-bar input {
-    flex: 1;
-    border: none;
-    outline: none;
-    padding: 8px 12px;
-    font-size: 14px;
-  }
-  
-  .search-bar button {
-    background-color: #ffcc00;
-    border: none;
-    border-radius: 50%;
-    padding: 8px;
-    cursor: pointer;
-    transition: 0.3s;
-  }
-  
-  .search-bar button:hover {
-    background-color: #ff9900;
-  }
-  
-  /* Tableau */
-  .table-responsive {
-    margin-top: 20px;
-    margin-left: 250px;
-    border-radius: 15px;
-    overflow: hidden;
-    background-color: white;
-  }
-  
-  .table {
-    width: 100%;
-    border-radius: 10px;
-    border-collapse: separate;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-  }
-  
-  .table th,
-  .table td {
-    padding: 12px 15px;
-    text-align: left;
-  }
-  
-  .table-header th {
-    background: linear-gradient(135deg, #1e3c72, #2a5298);
-    color: white;
-    cursor: pointer;
-  }
-  
-  .table-hover tbody tr:hover {
-    background-color: #f9f9f9;
-  }
-  
-  /* Badges */
-  .badge {
-    padding: 5px 10px;
-    border-radius: 5px;
-    font-size: 13px;
-    font-weight: bold;
-  }
-  
-  .badge-primary { background-color: #007bff; color: white; }
-  .badge-warning { background-color: #ffc107; color: white; }
-  .badge-success { background-color: #28a745; color: white; }
-  .badge-danger { background-color: #dc3545; color: white; }
-  .badge-secondary { background-color: #6c757d; color: white; }
-  
-  /* Boutons */
-  td:last-child {
-    white-space: nowrap;
-  }
-  
-  .btn {
-    padding: 6px 12px;
-    border-radius: 5px;
-    font-size: 14px;
-    margin-right: 5px;
-  }
-  
-  .btn-info { background-color: #17a2b8; color: white; }
-  .btn-danger { background-color: #dc3545; color: white; }
-  .btn-primary { background-color: #007bff; color: white; }
-  
-  .btn i {
-    margin-right: 5px;
-  }
-  
-  /* Navbar */
-  .header-actions {
-    display: flex;
-    align-items: center;
-  }
-  
-  .header-actions button {
-    margin-right: 20px;
-  }
-  
-  .header-actions i {
-    cursor: pointer;
-    font-size: 1.5rem;
-    color: #007bff;
-    transition: 0.3s;
-  }
-  
-  .header-actions i:hover {
-    color: #0056b3;
-  }
-  
-  /* Pagination */
-  .pagination-container {
-    margin-top: 20px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-  
-  .pagination button {
-    padding: 8px 12px;
-    font-size: 14px;
-    margin: 5px;
-    border-radius: 5px;
-    background-color: #007bff;
-    color: white;
-    cursor: pointer;
-    transition: 0.3s;
-  }
-  
-  .pagination button:disabled {
-    background-color: #6c757d;
-    cursor: not-allowed;
-  }
-  
-  .pagination span {
-    font-size: 14px;
-  }
-  
-  /* Choix du nombre de lignes par page */
-  .page-options select {
-    padding: 5px;
-    font-size: 14px;
-    border-radius: 5px;
-    border: 1px solid #aa2727;
-  }
-  
-  /* Mode nuit */
-  body.night-mode {
-    background-color: #121212;
-    color: white;
-  }
-  
-  .night-mode .navbar {
-    background-color: #333;
-  }
-  
-  .mode-toggle {
-    background: none;
-    border: none;
-    color: #007bff;
-    font-size: 1.5rem;
-    cursor: pointer;
-    transition: color 0.3s;
-  }
-  
-  .mode-toggle:hover {
-    color: #0056b3;
-  }
-  /* Mode nuit */
+  max-width: 1700px;
+  margin: auto;
+  padding: 20px;
+  padding-top: 80px;
+}
+
+/* Barre de recherche */
+.search-bar-container {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 15px;
+  background-color: white;
+  padding: 10px 0;
+}
+
+.search-bar {
+  display: flex;
+  align-items: center;
+  background-color: #fff;
+  border-radius: 25px;
+  padding: 8px 15px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+  width: 350px;
+}
+
+.search-bar input {
+  flex: 1;
+  border: none;
+  outline: none;
+  padding: 8px 12px;
+  font-size: 14px;
+}
+
+.search-bar button {
+  background-color: #ffcc00;
+  border: none;
+  border-radius: 50%;
+  padding: 8px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.search-bar button:hover {
+  background-color: #ff9900;
+}
+
+/* Tableau */
+.table-responsive {
+  margin-top: 20px;
+  margin-left: 250px;
+  border-radius: 15px;
+  overflow: hidden;
+  background-color: white;
+}
+
+.table {
+  width: 100%;
+  border-radius: 10px;
+  border-collapse: separate;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.table th,
+.table td {
+  padding: 12px 15px;
+  text-align: left;
+}
+
+.table-header th {
+  background: linear-gradient(135deg, #1e3c72, #2a5298);
+  color: white;
+  cursor: pointer;
+}
+
+.table-hover tbody tr:hover {
+  background-color: #f9f9f9;
+}
+
+/* Boutons */
+td:last-child {
+  white-space: nowrap;
+}
+
+.btn {
+  padding: 6px 12px;
+  border-radius: 5px;
+  font-size: 14px;
+  margin-right: 5px;
+}
+
+.btn-info { background-color: #17a2b8; color: white; }
+.btn-danger { background-color: #dc3545; color: white; }
+.btn-primary { background-color: #007bff; color: white; }
+
+.btn i {
+  margin-right: 5px;
+}
+
+/* Navbar */
+.header-actions {
+  display: flex;
+  align-items: center;
+}
+
+.header-actions button {
+  margin-right: 20px;
+}
+
+.header-actions i {
+  cursor: pointer;
+  font-size: 1.5rem;
+  color: #007bff;
+  transition: 0.3s;
+}
+
+.header-actions i:hover {
+  color: #0056b3;
+}
+
+/* Pagination */
+.pagination-container {
+  margin-top: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.pagination button {
+  padding: 8px 12px;
+  font-size: 14px;
+  margin: 5px;
+  border-radius: 5px;
+  background-color: #007bff;
+  color: white;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.pagination button:disabled {
+  background-color: #6c757d;
+  cursor: not-allowed;
+}
+
+.pagination span {
+  font-size: 14px;
+}
+
+/* Choix du nombre de lignes par page */
+.page-options select {
+  padding: 5px;
+  font-size: 14px;
+  border-radius: 5px;
+  border: 1px solid #aa2727;
+}
+
+/* Mode nuit */
 body.night-mode {
-    background-color: #121212;
-    color: white;
-  }
-  
-  .night-mode .navbar {
-    background-color: #333;
-  }
-  
-  .night-mode .table {
-    background-color: #1f1f1f;
-  }
-  
-  .night-mode .table th, .night-mode .table td {
-    color: white;
-  }
-  
+  background-color: #121212;
+  color: white;
+}
+
+.night-mode .navbar {
+  background-color: #333;
+}
+
+.night-mode .table {
+  background-color: #1f1f1f;
+}
+
+.night-mode .table th, .night-mode .table td {
+  color: white;
+}
+
+.mode-toggle {
+  background: none;
+  border: none;
+  color: #007bff;
+  font-size: 1.5rem;
+  cursor: pointer;
+  transition: color 0.3s;
+}
+
+.mode-toggle:hover {
+  color: #0056b3;
+}
+
+
+
+/* Modale */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background-color: #fff;
+  padding: 30px;
+  border-radius: 8px;
+  max-width: 600px;
+  width: 100%;
+}
+
+.modal-content h3 {
+  margin-bottom: 20px;
+  font-size: 20px;
+}
+
+.form-group {
+  margin-bottom: 15px;
+}
+
+.form-group label {
+  font-size: 14px;
+  margin-bottom: 5px;
+  display: block;
+}
+
+.form-group input, .form-group textarea {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+.form-group textarea {
+  resize: vertical;
+  min-height: 80px;
+}
+
+.form-actions {
+  display: flex;
+  justify-content: space-between;
+}
+
+.form-actions .btn {
+  font-size: 14px;
+  padding: 8px 15px;
+  border-radius: 4px;
+}
+
+.form-actions .btn-success {
+  background-color: #28a745;
+  color: white;
+}
+
+.form-actions .btn-secondary {
+  background-color: #6c757d;
+  color: white;
+}
+
+.form-actions .btn-success:hover {
+  background-color: #218838;
+}
+
+.form-actions .btn-secondary:hover {
+  background-color: #5a6268;
+}

@@ -1,5 +1,4 @@
 <app-navbar-admin></app-navbar-admin>
-
 <div class="container">
   <!-- Barre de recherche -->
   <div class="search-bar-container">
@@ -16,7 +15,7 @@
       <button class="mode-toggle" (click)="toggleMode()">
         <i class="fas" [ngClass]="isNightMode ? 'fa-sun' : 'fa-moon'"></i>
       </button>
-      <button class="btn btn-primary" (click)="ajouterProduit()">+ Ajouter Produit</button>
+      <button class="btn btn-primary" (click)="openModal()">+ Ajouter Produit</button>
     </div>
   </header>
 
@@ -28,6 +27,7 @@
           <th>Nom</th>
           <th>Description</th>
           <th>Prix</th>
+          <th>Topologie</th>
           <th>Actions</th>
         </tr>
       </thead>
@@ -36,11 +36,12 @@
           <td>{{ product.name }}</td>
           <td>{{ product.description }}</td>
           <td>{{ product.price | currency }}</td>
+          <td>{{ product.topologie }}</td>
           <td>
-            <button class="btn btn-info btn-sm me-2" (click)="modifierProduit(product)">
+            <button class="btn btn-info btn-sm me-2" (click)="openModal(product)">
               <i class="fas fa-edit"></i> Modifier
             </button>
-            <button class="btn btn-danger btn-sm" (click)="supprimerProduit(product)">
+            <button class="btn btn-danger btn-sm" (click)="deleteProduct(product.id)">
               <i class="fas fa-trash"></i> Supprimer
             </button>
           </td>
@@ -60,6 +61,39 @@
         <span>Page {{ currentPage }} sur {{ totalPages }}</span>
         <button (click)="goToNextPage()" [disabled]="currentPage === totalPages">Suivant</button>
       </div>
+    </div>
+  </div>
+
+  <!-- Modale pour formulaire Ajouter / Modifier Produit -->
+  <div *ngIf="isModalOpen" class="modal-overlay">
+    <div class="modal-content">
+      <h3>{{ editingProduct ? 'Modifier Produit' : 'Ajouter Produit' }}</h3>
+      <form (ngSubmit)="editingProduct ? updateProduct() : addProduct()">
+        <div class="form-group">
+          <label for="name">Nom</label>
+          <input type="text" [(ngModel)]="productForm.name" name="name" required>
+        </div>
+        <div class="form-group">
+          <label for="description">Description</label>
+          <textarea [(ngModel)]="productForm.description" name="description" required></textarea>
+        </div>
+        <div class="form-group">
+          <label for="price">Prix</label>
+          <input type="number" [(ngModel)]="productForm.price" name="price" required>
+        </div>
+        <div class="form-group">
+          <label for="stock">Stock</label>
+          <input type="number" [(ngModel)]="productForm.stock" name="stock" required>
+        </div>
+        <div class="form-group">
+          <label for="topologie">Topologie</label>
+          <textarea [(ngModel)]="productForm.topologie" name="topologie" required></textarea>
+        </div>
+        <div class="form-actions">
+          <button type="submit" class="btn btn-success">{{ editingProduct ? 'Mettre à jour' : 'Ajouter' }}</button>
+          <button type="button" class="btn btn-secondary" (click)="closeModal()">Annuler</button>
+        </div>
+      </form>
     </div>
   </div>
 </div>

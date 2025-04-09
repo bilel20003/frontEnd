@@ -48,7 +48,7 @@ import { ObjetReclamationComponent } from './components/Admin/objet-reclamation/
 import { GererRoleComponent } from './components/Admin/role/role.component';
 import { MinistryManagementComponent } from './components/Admin/ministere/ministere.component';
 import { ClientManagementComponent } from './components/Admin/client/client.component';
-import { StatisticsComponent } from './components/Admin/statistic/statistic.component';
+
 import { HoraireComponent } from './components/Admin/horaire/horaire.component';
 
 
@@ -95,7 +95,7 @@ import { HoraireComponent } from './components/Admin/horaire/horaire.component';
     GererRoleComponent,
     MinistryManagementComponent,
     ClientManagementComponent,
-    StatisticsComponent,
+  
     HoraireComponent,
    
     
