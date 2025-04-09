@@ -25,7 +25,7 @@ import { UtilisateursComponent } from './components/Admin/utilisateurs/utilisate
 import { NavbarAdminComponent } from './components/Admin/navbar-admin/navbar-admin.component';
 import { DashboardComponent } from './components/Admin/dashboard/dashboard.component';
 import { ProductsComponent } from './components/Admin/product/product.component';
-import { ProductListComponent } from './components/Admin/product-list/product-list.component'; // Import
+
 import { ObjetReclamationComponent } from './components/Admin/objet-reclamation/objet-reclamation.component';
 import { GererRoleComponent } from './components/Admin/role/role.component';
 import { MinistryManagementComponent } from './components/Admin/ministere/ministere.component';
@@ -42,7 +42,7 @@ const routes: Routes = [
   { path: 'navbar-admin', component:  NavbarAdminComponent },
   { path: 'dashboard', component:  DashboardComponent },
   { path: 'product', component: ProductsComponent },
-  { path: 'product-list', component: ProductListComponent},
+ 
   { path: 'objet-reclamation', component: ObjetReclamationComponent},
   { path: 'role', component:  GererRoleComponent },
   { path: 'ministere', component:  MinistryManagementComponent },

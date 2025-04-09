@@ -43,7 +43,7 @@ import { NavbarComponent } from './components/Client/navbar/navbar.component';
 import { NavbarAdminComponent } from './components/Admin/navbar-admin/navbar-admin.component';
 import { DashboardComponent } from './components/Admin/dashboard/dashboard.component';
 import { ProductsComponent } from './components/Admin/product/product.component';
-import { ProductListComponent } from './components/Admin/product-list/product-list.component';
+
 import { ObjetReclamationComponent } from './components/Admin/objet-reclamation/objet-reclamation.component';
 import { GererRoleComponent } from './components/Admin/role/role.component';
 import { MinistryManagementComponent } from './components/Admin/ministere/ministere.component';
@@ -90,7 +90,7 @@ import { HoraireComponent } from './components/Admin/horaire/horaire.component';
     NavbarAdminComponent,
     DashboardComponent,
     ProductsComponent,
-    ProductListComponent,
+  
     ObjetReclamationComponent,
     GererRoleComponent,
     MinistryManagementComponent,
