@@ -1,16 +1,8 @@
-import { Component, OnInit } from '@angular/core';
-import { MinistryService } from 'src/app/services/ministry.service';  // Assure-toi d'avoir un service pour récupérer les ministères
-import { Observable } from 'rxjs';
-
-// Définition des interfaces
-interface Service {
-  name: string;
-}
+import { Component } from '@angular/core';
 
 interface Ministry {
-  id: number;
+  id_ministere: number;
   name: string;
-  services: Service[];
 }
 
 @Component({
@@ -18,97 +10,116 @@ interface Ministry {
   templateUrl: './ministere.component.html',
   styleUrls: ['./ministere.component.css']
 })
-export class MinistryManagementComponent implements OnInit {
+export class MinistryManagementComponent {
 
-  ministries: Ministry[] = [];  // Liste de tous les ministères avec les services
-  paginatedMinistries: Ministry[] = [];  // Ministères paginés
-  searchTerm = '';  // Terme de recherche pour filtrer les ministères
-  currentPage = 1;  // Page courante pour la pagination
-  totalPages = 1;  // Nombre total de pages pour la pagination
-  itemsPerPage = 5;  // Nombre de ministères par page
-  isNightMode = false;  // Variable pour gérer le mode nuit
+  ministries: Ministry[] = [
+    { id_ministere: 1, name: 'Ministère de l\'Informatique' },
+    { id_ministere: 2, name: 'Ministère des Ressources Humaines' },
+    { id_ministere: 3, name: 'Ministère de la Logistique' },
+    { id_ministere: 4, name: 'Ministère des Affaires Juridiques' },
+    { id_ministere: 5, name: 'Ministère de la Communication' },
+    { id_ministere: 6, name: 'Ministère de la Santé' },
+  ];
 
-  constructor(private ministryService: MinistryService) { }
+  searchTerm = '';
+  filteredMinistries: Ministry[] = [...this.ministries];
+  paginatedMinistries: Ministry[] = [];
 
-  ngOnInit(): void {
-    this.loadMinistries();
+  currentPage = 1;
+  itemsPerPage = 5;
+  isNightMode = false;
+
+  // Modal state
+  showModal = false;
+  modalTitle = '';
+  modalButtonText = '';
+  ministryName = '';
+  currentMinistry: Ministry | null = null;
+
+  constructor() {
+    this.updatePaginatedMinistries();
   }
 
-  // Fonction pour charger les ministères depuis le service
-  loadMinistries(): void {
-    this.ministryService.getAllMinistries().subscribe(data => {
-      this.ministries = data;
-      this.totalPages = Math.ceil(this.ministries.length / this.itemsPerPage);
-      this.paginateMinistries();
-    });
+  // Recherche
+  filterMinistries() {
+    const term = this.searchTerm.toLowerCase();
+    this.filteredMinistries = this.ministries.filter(ministry =>
+      ministry.name.toLowerCase().includes(term)
+    );
+    this.currentPage = 1;
+    this.updatePaginatedMinistries();
   }
 
-  // Fonction de filtrage des ministères
-  filterMinistries(): void {
-    const filtered = this.ministries.filter(ministry => 
-      ministry.name.toLowerCase().includes(this.searchTerm.toLowerCase()));
-    this.totalPages = Math.ceil(filtered.length / this.itemsPerPage);
-    this.paginateMinistries(filtered);
+  get totalPages(): number {
+    return Math.ceil(this.filteredMinistries.length / this.itemsPerPage);
   }
 
-  // Fonction de pagination des ministères
-  paginateMinistries(filteredMinistries: Ministry[] = this.ministries): void {
+  updatePaginatedMinistries() {
     const start = (this.currentPage - 1) * this.itemsPerPage;
     const end = start + this.itemsPerPage;
-    this.paginatedMinistries = filteredMinistries.slice(start, end);
+    this.paginatedMinistries = this.filteredMinistries.slice(start, end);
   }
 
-  // Ajouter un ministère
-  addMinistry(): void {
-    // Logique pour ajouter un ministère (peut-être ouvrir un formulaire modal)
-    console.log('Ajouter un ministère');
-  }
-
-  // Modifier un ministère
-  editMinistry(ministry: Ministry): void {
-    // Logique pour modifier un ministère (peut-être ouvrir un formulaire modal)
-    console.log('Modifier le ministère', ministry);
-  }
-
-  // Supprimer un ministère
-  deleteMinistry(ministryId: number): void {
-    // Logique pour supprimer un ministère
-    this.ministryService.deleteMinistry(ministryId).subscribe(() => {
-      this.loadMinistries();  // Recharge les ministères après suppression
-    });
-  }
-
-  // Ajouter un service à un ministère
-  addService(ministryId: number): void {
-    // Logique pour ajouter un service à un ministère
-    console.log('Ajouter un service au ministère avec id:', ministryId);
-  }
-
-  // Aller à la page suivante
-  goToNextPage(): void {
-    if (this.currentPage < this.totalPages) {
-      this.currentPage++;
-      this.paginateMinistries();
-    }
-  }
-
-  // Aller à la page précédente
-  goToPreviousPage(): void {
+  goToPreviousPage() {
     if (this.currentPage > 1) {
       this.currentPage--;
-      this.paginateMinistries();
+      this.updatePaginatedMinistries();
     }
   }
 
-  // Changer le nombre de ministères par page
-  onItemsPerPageChange(): void {
-    this.totalPages = Math.ceil(this.ministries.length / this.itemsPerPage);
-    this.paginateMinistries();
+  goToNextPage() {
+    if (this.currentPage < this.totalPages) {
+      this.currentPage++;
+      this.updatePaginatedMinistries();
+    }
   }
 
-  // Changer le mode nuit
-  toggleMode(): void {
+  onItemsPerPageChange() {
+    this.currentPage = 1;
+    this.updatePaginatedMinistries();
+  }
+
+  toggleMode() {
     this.isNightMode = !this.isNightMode;
     document.body.classList.toggle('night-mode', this.isNightMode);
+  }
+
+  // Modal Logic
+  openModal(action: string, ministry?: Ministry) {
+    this.showModal = true;
+    if (action === 'add') {
+      this.modalTitle = 'Ajouter un Ministère';
+      this.modalButtonText = 'Ajouter';
+      this.ministryName = '';
+      this.currentMinistry = null;
+    } else if (action === 'edit' && ministry) {
+      this.modalTitle = `Modifier le ministère : ${ministry.name}`;
+      this.modalButtonText = 'Modifier';
+      this.ministryName = ministry.name;
+      this.currentMinistry = ministry;
+    }
+  }
+
+  closeModal() {
+    this.showModal = false;
+  }
+
+  saveMinistry() {
+    if (this.currentMinistry) {
+      this.currentMinistry.name = this.ministryName;
+    } else {
+      const newId = this.ministries.length + 1;
+      this.ministries.push({ id_ministere: newId, name: this.ministryName });
+    }
+
+    this.closeModal();
+    this.filterMinistries(); // Update list after save
+  }
+
+  deleteMinistry(id_ministere: number) {
+    if (confirm('Voulez-vous vraiment supprimer ce ministère ?')) {
+      this.ministries = this.ministries.filter(m => m.id_ministere !== id_ministere);
+      this.filterMinistries(); // Mise à jour après suppression
+    }
   }
 }

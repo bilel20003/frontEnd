@@ -7,8 +7,10 @@ import { Component } from '@angular/core';
 })
 export class HoraireComponent {
   jours: string[] = ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi', 'Dimanche'];
+  moisList: string[] = ['Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin', 'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre'];
 
   horaire = {
+    mois: '',
     jour: '',
     ouvertureMatin: '',
     fermetureMatin: '',
@@ -20,6 +22,7 @@ export class HoraireComponent {
 
   ajouterHoraire() {
     const {
+      mois,
       jour,
       ouvertureMatin,
       fermetureMatin,
@@ -27,17 +30,12 @@ export class HoraireComponent {
       fermetureSoir
     } = this.horaire;
 
-    if (
-      jour &&
-      ouvertureMatin &&
-      fermetureMatin &&
-      ouvertureSoir &&
-      fermetureSoir
-    ) {
+    if (mois && jour && ouvertureMatin && fermetureMatin && ouvertureSoir && fermetureSoir) {
       this.horaires.push({ ...this.horaire });
 
-      // Réinitialiser le formulaire
+      // Réinitialiser
       this.horaire = {
+        mois: '',
         jour: '',
         ouvertureMatin: '',
         fermetureMatin: '',

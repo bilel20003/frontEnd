@@ -1,4 +1,5 @@
-import { Component, OnInit, HostListener } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
+import { RendezvousService, Rendezvous } from 'src/app/services/rendez-vous.service';
 
 @Component({
   selector: 'app-gerer-rdv',
@@ -6,90 +7,116 @@ import { Component, OnInit, HostListener } from '@angular/core';
   styleUrls: ['./gerer-rdv.component.css']
 })
 export class GererRdvComponent implements OnInit {
-  searchText: string = '';  // Champ de recherche
+  rendezvous: Rendezvous[] = [];
+  rendezvousForm: Rendezvous = { id: 0, client: { nom: '', prenom: '' }, dateEnvoi: new Date(), typeProbleme: '', description: '', etat: 'En attente' };
+  searchTerm: string = '';
+  itemsPerPage: number = 5;
+  currentPage: number = 1;
+  totalPages: number = 1;
+  paginatedRendezvous: Rendezvous[] = [];
+  isModalOpen: boolean = false;
+  isEditMode: boolean = false;
 
-  rendezVous: any[] = [
-    { id: 1, date: '2025-03-15', client: { nom: 'Client', prenom: 'A' }, heure: '10:00', status: 'Confirmé' },
-    { id: 2, date: '2025-03-16', client: { nom: 'Client', prenom: 'B' }, heure: '11:00', status: 'En attente' },
-    { id: 3, date: '2025-03-16', client: { nom: 'Client', prenom: 'D' }, heure: '14:00', status: 'Confirmé' },
-    { id: 4, date: '2025-03-17', client: { nom: 'Client', prenom: 'C' }, heure: '12:00', status: 'Annulé' },
-    { id: 5, date: '2025-03-18', client: { nom: 'Client', prenom: 'E' }, heure: '09:30', status: 'Confirmé' },
-    { id: 6, date: '2025-03-18', client: { nom: 'Client', prenom: 'F' }, heure: '15:00', status: 'En attente' },
-    { id: 7, date: '2025-03-19', client: { nom: 'Client', prenom: 'G' }, heure: '10:30', status: 'Confirmé' },
-    { id: 8, date: '2025-03-20', client: { nom: 'Client', prenom: 'H' }, heure: '16:00', status: 'Annulé' },
-    { id: 9, date: '2025-03-21', client: { nom: 'Client', prenom: 'I' }, heure: '13:45', status: 'Confirmé' },
-    { id: 10, date: '2025-03-22', client: { nom: 'Client', prenom: 'J' }, heure: '08:00', status: 'En attente' },
-    
-  ];
+  constructor(private rendezvousService: RendezvousService) {}
 
-  sortColumn: string = '';  // Colonne actuellement triée
-  sortOrder: boolean = true;  // Ordre du tri (true = ascendant, false = descendant)
-
-  
-
-  constructor() {}
-
-  ngOnInit(): void {}
-
-  // Fonction pour créer un nouveau RDV
-  creerRdv(): void {
-    const nouveauRdv = {
-      id: this.rendezVous.length + 1,  // Assigner un nouvel ID
-      date: '2025-03-18',  // Par défaut, une nouvelle date (cela peut être modifié selon ton besoin)
-      client: { nom: 'Nouveau', prenom: 'Client' },  // Nom et prénom par défaut
-      heure: '14:00',  // Heure par défaut
-      status: 'En attente'  // Statut par défaut
-    };
-    this.rendezVous.push(nouveauRdv);  // Ajoute le nouveau RDV à la liste
-    console.log('Nouveau RDV créé:', nouveauRdv);
+  ngOnInit() {
+    this.getRendezvous();
   }
 
-  modifierRdv(rdv: any): void {
-    console.log('Modifier RDV:', rdv);
-    // Logique de modification ici
+  getRendezvous() {
+    this.rendezvous = this.rendezvousService.getRendezvous();
+    this.paginateRendezvous();
   }
 
-  annulerRdv(id: number): void {
-    this.rendezVous = this.rendezVous.filter(rdv => rdv.id !== id);
-    console.log('Rendez-vous annulé avec succès:', id);
+  paginateRendezvous() {
+    const startIndex = (this.currentPage - 1) * this.itemsPerPage;
+    const endIndex = startIndex + this.itemsPerPage;
+    this.paginatedRendezvous = this.rendezvous.slice(startIndex, endIndex);
+    this.totalPages = Math.ceil(this.rendezvous.length / this.itemsPerPage);
   }
 
-  filtrerRendezVous(): any[] {
-    const searchTextLower = this.searchText.toLowerCase();  // Conversion de la recherche en minuscule
-    return this.rendezVous
-      .filter(rdv => {
-        // Convertir id en chaîne pour la recherche, tout en vérifiant que ce n'est pas un nombre (pour éviter la confusion avec l'heure)
-        return (
-          rdv.id.toString().includes(searchTextLower) ||  // Recherche dans l'id (converti en chaîne)
-          rdv.date.includes(searchTextLower) ||
-          rdv.client.nom.toLowerCase().includes(searchTextLower) ||
-          rdv.client.prenom.toLowerCase().includes(searchTextLower) ||
-          rdv.heure.includes(searchTextLower)  // Recherche dans l'heure (chaine de caractère)
-        );
-      })
-      .sort((a, b) => {
-        const valueA = this.getPropertyValue(a, this.sortColumn);
-        const valueB = this.getPropertyValue(b, this.sortColumn);
-    
-        if (valueA < valueB) return this.sortOrder ? -1 : 1;
-        if (valueA > valueB) return this.sortOrder ? 1 : -1;
-        return 0;
-      });
+  openModal(): void {
+    this.isModalOpen = true;
+    this.isEditMode = false;
+    this.rendezvousForm = { id: 0, client: { nom: '', prenom: '' }, dateEnvoi: new Date(), typeProbleme: '', description: '', etat: 'En attente' };
   }
 
-  // Fonction pour accéder à la valeur d'une propriété dynamique (comme 'client.nom')
-  getPropertyValue(obj: any, path: string): any {
-    return path.split('.').reduce((acc, part) => acc ? acc[part] : undefined, obj);
+  closeModal(): void {
+    this.isModalOpen = false;
+    this.rendezvousForm = { id: 0, client: { nom: '', prenom: '' }, dateEnvoi: new Date(), typeProbleme: '', description: '', etat: 'En attente' };
   }
 
-  trier(colonne: string) {
-    if (this.sortColumn === colonne) {
-      this.sortOrder = !this.sortOrder; // Inverse l'ordre si on clique à nouveau sur la même colonne
+  addRendezvous() {
+    if (this.rendezvousForm.client.nom && this.rendezvousForm.client.prenom && this.rendezvousForm.typeProbleme && this.rendezvousForm.description) {
+      this.rendezvousService.addRendezvous(this.rendezvousForm);
+      this.getRendezvous();
+      this.closeModal();
     } else {
-      this.sortColumn = colonne;
-      this.sortOrder = true; // Par défaut, tri ascendant
+      alert('Veuillez remplir tous les champs');
     }
   }
 
-  
+  openEditModal(rendezvous: Rendezvous) {
+    this.isModalOpen = true;
+    this.isEditMode = true;
+    this.rendezvousForm = { ...rendezvous }; // Copie de l'objet pour l'édition
+  }
+
+  updateRendezvous() {
+    if (this.rendezvousForm.client.nom && this.rendezvousForm.client.prenom && this.rendezvousForm.typeProbleme && this.rendezvousForm.description) {
+      const index = this.rendezvous.findIndex(rdv => rdv.id === this.rendezvousForm.id);
+      if (index !== -1) {
+        this.rendezvousService.updateRendezvous(index, this.rendezvousForm);
+        this.getRendezvous();
+        this.closeModal();
+      }
+    } else {
+      alert('Veuillez remplir tous les champs');
+    }
+  }
+
+  deleteRendezvous(id: number) {
+    const index = this.rendezvous.findIndex(rdv => rdv.id === id);
+    if (index !== -1) {
+      this.rendezvousService.deleteRendezvous(index);
+      this.getRendezvous();
+    }
+  }
+
+  filterRendezvous() {
+    if (this.searchTerm) {
+      const term = this.searchTerm.toLowerCase();
+      this.rendezvous = this.rendezvousService.getRendezvous().filter(rdv =>
+        rdv.client.nom.toLowerCase().includes(term) ||
+        rdv.client.prenom.toLowerCase().includes(term) ||
+        rdv.typeProbleme.toLowerCase().includes(term) ||
+        rdv.description.toLowerCase().includes(term) ||
+        rdv.etat.toLowerCase().includes(term)
+      );
+    } else {
+      this.getRendezvous();
+    }
+    this.paginateRendezvous();
+  }
+
+  goToPreviousPage() {
+    if (this.currentPage > 1) {
+      this.currentPage--;
+      this.paginateRendezvous();
+    }
+  }
+
+  goToNextPage() {
+    if (this.currentPage < this.totalPages) {
+      this.currentPage++;
+      this.paginateRendezvous();
+    }
+  }
+
+  onItemsPerPageChange(event: Event) {
+    const selectElement = event.target as HTMLSelectElement;
+    this.itemsPerPage = Number(selectElement.value);
+    this.currentPage = 1;
+    this.paginateRendezvous();
+  }
 }

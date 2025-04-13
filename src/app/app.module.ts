@@ -19,7 +19,7 @@ import { GererRdvComponent } from './components/Guichetier/gerer-rdv/gerer-rdv.c
 
 
 import { TechHomeComponent } from './components/Technicien/tech-home/tech-home.component';
-import { TechDetailsComponent } from './components/Technicien/tech-details/tech-details.component';
+
 import { GuiHomeComponent } from './components/Guichetier/gui-home/gui-home.component';
 import { NgxPaginationModule } from 'ngx-pagination';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
@@ -34,7 +34,7 @@ import { PageRechercheComponent } from './components/Client/recherche/recherche.
 import { PageRechercheAvanceeComponent } from './components/Client/recherche-avancee/recherche-avancee.component';
 import { ReclamationComponent } from './components/Client/reclamation/reclamation.component';
 import { RendezVousComponent } from './components/Client/rendez-vous/rendez-vous.component';
-import { RendezVousDetailComponent } from './components/Client/rendez-vous/rendezvous-detail/rendezvous-detail.component';
+
 import { NavbarComponent } from './components/Client/navbar/navbar.component';
 
  //admin
@@ -50,6 +50,7 @@ import { MinistryManagementComponent } from './components/Admin/ministere/minist
 import { ClientManagementComponent } from './components/Admin/client/client.component';
 
 import { HoraireComponent } from './components/Admin/horaire/horaire.component';
+import { ServiceComponent } from './components/Admin/service/service.component';
 
 
 
@@ -71,7 +72,7 @@ import { HoraireComponent } from './components/Admin/horaire/horaire.component';
  
   
     TechHomeComponent,
-    TechDetailsComponent,
+ 
     GuiHomeComponent,
     GuiRequestDetailsComponent,
   
@@ -83,7 +84,7 @@ import { HoraireComponent } from './components/Admin/horaire/horaire.component';
     PageRechercheAvanceeComponent,
     ReclamationComponent,
     RendezVousComponent,
-    RendezVousDetailComponent,
+    
     NavbarComponent,
     //admin
     UtilisateursComponent,
@@ -97,6 +98,7 @@ import { HoraireComponent } from './components/Admin/horaire/horaire.component';
     ClientManagementComponent,
   
     HoraireComponent,
+        ServiceComponent,
    
     
   ],

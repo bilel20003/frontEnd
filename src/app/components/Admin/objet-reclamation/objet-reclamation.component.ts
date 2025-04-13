@@ -1,13 +1,6 @@
 import { Component, OnInit } from '@angular/core';
-import { ObjectService } from 'C:/Users/pc_asus/Documents/frontEnd/src/app/services/object.service';
-
-interface Object {
-  id: number;
-  name: string;
-  type: string;
-  description: string;
-  status: string;
-}
+import { ObjectService } from 'src/app/services/object.service';  // Assurez-vous que le service existe
+  // Utilisation de ng-bootstrap pour les modales si nécessaire
 
 @Component({
   selector: 'app-objet-reclamation',
@@ -15,132 +8,157 @@ interface Object {
   styleUrls: ['./objet-reclamation.component.css']
 })
 export class ObjetReclamationComponent implements OnInit {
+  objects: any[] = [];  // Tableau pour stocker les objets
+  itemsPerPage: number = 5;
+  paginatedObjects: any[] = [];  // Objets paginés à afficher
+  currentPage: number = 1;  // Page actuelle
+  pageSize: number = 5;  // Taille des pages pour la pagination
+  totalPages: number = 1;  // Nombre total de pages
+  searchTerm: string = '';  // Termes de recherche
+  showModal: boolean = false;  // Détermine si la modale est affichée ou non
+  editingObject: any = null;  // Objet en cours de modification
+  newObject: any = {  // Objet qui sera ajouté ou modifié
+    id: 0,
+    name: '',
+    type: '',
+    description: '',
+    status: ''
+  };
+  isNightMode: boolean = false;  // Mode nuit
 
-  objects: Object[] = [];  // Liste des objets associés aux réclamations
-  newObject: Object = { id: 0, name: '', type: '', description: '', status: '' };  // Objet à ajouter
-  editingObject: Object | null = null;  // Objet en cours d'édition
-  searchTerm: string = '';  // Terme de recherche pour filtrer les objets
-  itemsPerPage: number = 5;  // Nombre d'objets par page
-  currentPage: number = 1;  // Page actuelle de la pagination
-  totalPages: number = 1;  // Total des pages pour la pagination
-  paginatedObjects: Object[] = [];  // Objets de la page actuelle
-
-  isNightMode: boolean = false; 
   constructor(private objectService: ObjectService) {}
 
-  ngOnInit() {
+  ngOnInit(): void {
     this.getObjects();
   }
 
-  getObjects() {
-    // Souscription à l'Observable pour récupérer la liste des objets
-    this.objectService.getObjects().subscribe(
-      (data: Object[]) => {
-        this.objects = data;  // Met à jour la liste des objets
-        this.paginateObjects();  // Recalcule la pagination après avoir récupéré les objets
-      },
-      (error) => {
-        console.error('Erreur lors de la récupération des objets', error);  // Gestion des erreurs
-      }
-    );
+  // Récupérer tous les objets
+  getObjects(): void {
+    this.objectService.getAllObjects().subscribe(data => {
+      this.objects = data;
+      this.totalPages = Math.ceil(this.objects.length / this.pageSize);  // Calcul du nombre de pages
+      this.updatePaginatedObjects();
+    });
   }
 
-  paginateObjects() {
-    const startIndex = (this.currentPage - 1) * this.itemsPerPage;
-    const endIndex = startIndex + this.itemsPerPage;
+  // Mettre à jour la liste paginée des objets à afficher
+  updatePaginatedObjects(): void {
+    const startIndex = (this.currentPage - 1) * this.pageSize;
+    const endIndex = startIndex + this.pageSize;
     this.paginatedObjects = this.objects.slice(startIndex, endIndex);
-    this.totalPages = Math.ceil(this.objects.length / this.itemsPerPage);
   }
 
-  addObject() {
-    if (this.newObject.name && this.newObject.type && this.newObject.description && this.newObject.status) {
-      this.objectService.addObject(this.newObject).subscribe(
-        () => {
-          this.getObjects();  // Rafraîchir la liste des objets après l'ajout
-          this.newObject = { id: 0, name: '', type: '', description: '', status: '' };  // Réinitialiser le formulaire
-        },
-        (error) => {
-          console.error('Erreur lors de l\'ajout de l\'objet', error);  // Gestion des erreurs
-        }
-      );
-    } else {
-      alert('Veuillez remplir tous les champs');
-    }
-  }
-
-  editObject(object: Object) {
-    this.editingObject = { ...object };  // Cloner l'objet pour éviter la référence directe
-  }
-
-  updateObject() {
-    if (this.editingObject && this.editingObject.name && this.editingObject.type && this.editingObject.description && this.editingObject.status) {
-      this.objectService.updateObject(this.editingObject.id, this.editingObject).subscribe(
-        () => {
-          this.getObjects();  // Rafraîchir la liste des objets après la mise à jour
-          this.editingObject = null;  // Réinitialiser le formulaire
-        },
-        (error) => {
-          console.error('Erreur lors de la mise à jour de l\'objet', error);  // Gestion des erreurs
-        }
-      );
-    } else {
-      alert('Veuillez remplir tous les champs');
-    }
-  }
-
-  deleteObject(objectId: number) {
-    if (confirm('Voulez-vous vraiment supprimer cet objet ?')) {
-      this.objectService.deleteObject(objectId).subscribe(
-        () => {
-          this.getObjects();  // Rafraîchir la liste des objets après la suppression
-        },
-        (error) => {
-          console.error('Erreur lors de la suppression de l\'objet', error);  // Gestion des erreurs
-        }
-      );
-    }
-  }
-
-  filterObjects() {
-    // Filtre les objets en fonction du terme de recherche
-    if (this.searchTerm) {
-      this.objects = this.objects.filter(object => 
-        object.name.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
-        object.description.toLowerCase().includes(this.searchTerm.toLowerCase())
-      );
-    } else {
-      this.getObjects();
-    }
-    this.paginateObjects();  // Recalcule la pagination après le filtrage
-  }
-
-  goToPreviousPage() {
+  // Gérer le changement de page
+  previousPage(): void {
     if (this.currentPage > 1) {
       this.currentPage--;
-      this.paginateObjects();
+      this.updatePaginatedObjects();
     }
   }
 
-  goToNextPage() {
+  nextPage(): void {
     if (this.currentPage < this.totalPages) {
       this.currentPage++;
-      this.paginateObjects();
+      this.updatePaginatedObjects();
     }
   }
 
-  onItemsPerPageChange() {
-    this.currentPage = 1;  // Réinitialise à la première page
-    this.paginateObjects();  // Recalcule la pagination
+  // Ouvrir la modale pour ajouter un objet
+  addObject(): void {
+    this.editingObject = null;  // Pas d'objet en édition
+    this.newObject = { id: 0, name: '', type: '', description: '', status: '' };  // Réinitialiser l'objet
+    this.showModal = true;
   }
-  
-  toggleMode(): void {
-    this.isNightMode = !this.isNightMode;  // Inverse la valeur de isNightMode
-  }
-  
-  affecterProduit(objet: any) {
-    // Par exemple : ouvrir une modale ou rediriger vers une page
-    console.log('Affecter produit à :', objet);
-  }
-  
 
+  // Ouvrir la modale pour modifier un objet
+  editObject(object: any): void {
+    this.editingObject = { ...object };  // Dupliquer l'objet pour l'éditer
+    this.newObject = { ...object };  // Pré-remplir les champs du formulaire
+    this.showModal = true;
+  }
+
+  // Fermer la modale sans sauvegarder
+  closeModal(): void {
+    this.showModal = false;
+    this.newObject = { id: 0, name: '', type: '', description: '', status: '' };  // Réinitialiser l'objet
+    this.editingObject = null;
+  }
+
+  // Sauvegarder l'objet (ajout ou modification)
+  saveObject(): void {
+    if (!this.newObject.name || !this.newObject.type || !this.newObject.description || !this.newObject.status) {
+      alert('Veuillez remplir tous les champs');
+      return;
+    }
+
+    if (this.editingObject) {
+      // Si l'objet est en édition, le mettre à jour
+      this.objectService.updateObject(this.newObject.id, this.newObject).subscribe(() => {
+        this.getObjects();  // Recharger les objets
+        this.closeModal();  // Fermer la modale
+      });
+    } else {
+      // Sinon, ajouter un nouvel objet
+      this.objectService.addObject(this.newObject).subscribe(() => {
+        this.getObjects();  // Recharger les objets
+        this.closeModal();  // Fermer la modale
+      });
+    }
+  }
+
+  // Supprimer un objet
+  deleteObject(id: number): void {
+    if (confirm('Voulez-vous vraiment supprimer cet objet ?')) {
+      this.objectService.deleteObject(id).subscribe(() => {
+        this.getObjects();  // Recharger les objets après suppression
+      });
+    }
+  }
+
+  // Filtrer les objets en fonction du terme de recherche
+  filterObjects(): void {
+    if (this.searchTerm) {
+      this.objects = this.objects.filter(obj =>
+        obj.name.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
+        obj.type.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
+        obj.description.toLowerCase().includes(this.searchTerm.toLowerCase())
+      );
+    } else {
+      this.getObjects();  // Recharger les objets si aucun terme de recherche n'est donné
+    }
+    this.totalPages = Math.ceil(this.objects.length / this.pageSize);  // Recalculer les pages
+    this.updatePaginatedObjects();  // Mettre à jour les objets paginés
+  }
+
+  // Changer le mode (jour/nuit)
+  toggleMode(): void {
+    this.isNightMode = !this.isNightMode;
+  }
+
+  // Affecter un produit à un objet (fonctionnalité supplémentaire)
+  affecterProduit(objet: any): void {
+    // Code pour affecter un produit à un objet
+    alert('Fonctionnalité "Affecter Produit" à implémenter');
+  }
+
+  // Gérer le changement du nombre d'éléments par page
+  onItemsPerPageChange(): void {
+    this.updatePaginatedObjects();
+  }
+
+  // Aller à la page précédente
+  goToPreviousPage(): void {
+    if (this.currentPage > 1) {
+      this.currentPage--;
+      this.updatePaginatedObjects();
+    }
+  }
+
+  // Aller à la page suivante
+  goToNextPage(): void {
+    if (this.currentPage < this.totalPages) {
+      this.currentPage++;
+      this.updatePaginatedObjects();
+    }
+  }
 }

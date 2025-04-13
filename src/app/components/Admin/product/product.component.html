@@ -24,18 +24,20 @@
     <table class="table table-hover shadow-sm rounded">
       <thead class="table-header">
         <tr>
+          <th>ID</th>
           <th>Nom</th>
           <th>Description</th>
-          <th>Prix</th>
+          <th>Prix en DT</th>
           <th>Topologie</th>
           <th>Actions</th>
         </tr>
       </thead>
       <tbody>
         <tr *ngFor="let product of paginatedProducts">
+          <td>{{ product.id }}</td>
           <td>{{ product.name }}</td>
           <td>{{ product.description }}</td>
-          <td>{{ product.price | currency }}</td>
+          <td>{{ product.price }}</td>
           <td>{{ product.topologie }}</td>
           <td>
             <button class="btn btn-info btn-sm me-2" (click)="openModal(product)">
@@ -82,12 +84,13 @@
           <input type="number" [(ngModel)]="productForm.price" name="price" required>
         </div>
         <div class="form-group">
-          <label for="stock">Stock</label>
-          <input type="number" [(ngModel)]="productForm.stock" name="stock" required>
-        </div>
-        <div class="form-group">
           <label for="topologie">Topologie</label>
-          <textarea [(ngModel)]="productForm.topologie" name="topologie" required></textarea>
+          <select [(ngModel)]="productForm.topologie" name="topologie" required>
+            <option value="0-2 utilisateurs">0-2 utilisateurs</option>
+            <option value="2-6 utilisateurs">2-6 utilisateurs</option>
+            <option value="6-10 utilisateurs">6-10 utilisateurs</option>
+            <option value="plus de 10 utilisateurs">Plus de 10 utilisateurs</option>
+          </select>
         </div>
         <div class="form-actions">
           <button type="submit" class="btn btn-success">{{ editingProduct ? 'Mettre à jour' : 'Ajouter' }}</button>

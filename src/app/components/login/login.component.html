@@ -1,33 +1,32 @@
-<!-- Logo CNI en haut à gauche -->
+<div class="center-wrapper">
+  <div class="login-wrapper">
+    <div class="login-left">
+      <img src="assets/logo-cni.png" alt="Login Image" class="login-image" />
+    </div>
 
-  
-  <div class="center-wrapper">
-    <div class="login-wrapper">
-      <!-- Section contenant l'image -->
-      <div class="login-left">
-        <img src="assets/logo-cni.png" alt="Login Image" class="login-image" />
-      </div>
-  
-      <!-- Section contenant le formulaire -->
-      <div class="login-right">
-        <div class="login-card">
-          <h2 class="login-title">Login</h2>
+    <div class="login-right">
+      <div class="login-card">
+        <h2 class="login-title">Login</h2>
 
-          <form (ngSubmit)="onLogin()">
-            <div class="input-group">
-              <label for="username">Username:</label>
-              <input type="text" id="username" [(ngModel)]="form.username" name="username" required />
+        <form [formGroup]="loginForm" (ngSubmit)="onLogin()">
+          <div class="input-group">
+            <label for="email">Email:</label>
+            <input type="text" id="email" formControlName="email" required />
+          </div>
+
+          <div class="input-group">
+            <label for="password">Password:</label>
+            <input type="password" id="password" formControlName="password" required />
+          </div>
+
+          <button class="login-btn" type="submit" [disabled]="loading">Log In</button>
+          <div class="loader" *ngIf="loading">
+            <div class="spinner-border" role="status">
+              <span class="sr-only">Loading...</span>
             </div>
-  
-            <div class="input-group">
-              <label for="password">Password:</label>
-              <input type="password" id="password" [(ngModel)]="form.password" name="password" required />
-            </div>
-  
-            <button class="login-btn" type="submit">Log In</button>
-          </form>
-        </div>
+          </div>
+        </form>
       </div>
     </div>
   </div>
-  
+</div>

@@ -1,47 +1,70 @@
 /* Sidebar (Navbar verticale) */
 .sidebar {
-  position: fixed;
+  position: fixed; /* Fixe la navbar */
+  top: 50px; /* Décale la navbar sous la bande en haut */
   left: 0;
-  top: 10000;
-  width: 240px;
-  height: 100vh;
+  width: 255px; /* Augmente la largeur de la sidebar pour afficher plus d'éléments */
+  height: calc(100vh - 50px); /* Hauteur ajustée pour prendre toute la fenêtre en dessous de la bande en haut */
   background: linear-gradient(135deg, #1e3c72, #2a5298); /* Dégradé bleu foncé et bleu clair */
-  padding: 30px;
+  padding: 10px 20px; /* Réduit le padding pour un look plus compact */
   box-shadow: 4px 0 15px rgba(0, 0, 0, 0.2);
   display: flex;
   flex-direction: column;
   align-items: flex-start;
   transition: background 0.5s ease;
+  z-index: 999;
+  overflow-y: auto; /* Permet de faire défiler la navbar si nécessaire */
 }
 
 /* Logo */
-.logo img {
-  width: 120px;
-  transition: transform 0.3s;
+.logo {
+  margin-top: 50px; /* Ajuste la position verticale */
+  text-align: center; /* Centre le logo horizontalement */
+  width: 100%;
+  margin-bottom: 20px; /* Ajoute un espacement sous le logo */
 }
 
-.logo img:hover {
+/* Logo ajusté */
+.logo-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 150px; /* Réduit la largeur du logo */
+  height: 150px; /* Ajuste la hauteur */
+  background: rgba(255, 255, 255, 0.7); /* Fond semi-transparent */
+  border-radius: 15px; /* Coins arrondis */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); /* Ombre */
+  margin: 10px auto 20px; /* Espace ajusté sous le logo */
+  padding: 10px;
+}
+
+.logo-container img {
+  width: 100%; /* Ajuste l'image à la largeur du conteneur */
+  height: auto;
+  transition: transform 0.3s ease-in-out;
+}
+
+.logo-container img:hover {
   transform: scale(1.1);
 }
 
-/* Liens de navigation */
+/* Espacement des éléments de la navbar */
 .nav-links {
-  list-style: none;
-  padding: 0;
-  margin-top: 20px;
-  width: 100%;
+  list-style-type: none; /* Supprime les puces */
+  padding-left: 0;
+  margin-top: 10px; /* Ajuste l'espacement des liens */
 }
 
 .nav-links li {
-  width: 100%;
-  text-align: left;
+  padding: 6px 0; /* Réduit l'espacement entre les éléments */
 }
 
+/* Liens de la navbar */
 .nav-links a {
   display: block;
-  padding: 12px 20px;
-  margin: 8px 0;
-  font-size: 16px;
+  padding: 8px 15px; /* Réduit le padding */
+  margin: 6px 0;
+  font-size: 14px; /* Réduit la taille de la police */
   font-weight: 500;
   color: #ffffff;
   text-decoration: none;
@@ -59,38 +82,130 @@
   border-radius: 12px; /* Bordure arrondie */
 }
 
-/* Barre de recherche */
-.search-box {
-  margin-top: auto;
-  display: flex;
-  gap: 10px;
-  width: 100%;
-  padding: 12px;
+/* Icônes dans la sidebar */
+.sidebar .nav-links i {
+  font-size: 18px; /* Réduit la taille des icônes */
+  color: #ffcc00; /* Couleur jaune doré pour les icônes */
+  transition: color 0.3s ease-in-out; /* Transition de couleur au survol */
 }
 
-.search-box input {
-  flex: 1;
-  padding: 8px;
-  border: none;
-  border-radius: 20px;
-  outline: none;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-}
-
-.search-box button {
-  padding: 8px 12px;
-  border: none;
-  background: #ffcc00;
-  border-radius: 50%;
-  cursor: pointer;
-  transition: 0.3s;
-}
-
-.search-box button:hover {
-  background: #ff9900;  /* Changer la couleur au survol */
+/* Changer la couleur des icônes lors du survol */
+.sidebar .nav-links a:hover i,
+.sidebar .nav-links a.active i {
+  color: #2a5298; /* Couleur bleue au survol ou quand l'élément est actif */
 }
 
 /* Ajustement du contenu principal */
 body {
-  margin-left: 240px; /* Décalage pour ne pas cacher le contenu */
+  margin-left: 300px; /* Ajuste le contenu à la nouvelle largeur de la sidebar */
+  margin-top: 50px; /* Ajuste sous la bande en haut */
+  font-family: Arial, sans-serif;
+}
+
+/* Bande en haut */
+.top-bar {
+  position: fixed; /* Fixe la bande en haut */
+  top: 0; /* Fixe la bande en haut de la page */
+  left: 0;
+  width: 100%; /* Prend toute la largeur de l'écran */
+  background: linear-gradient(135deg, #1e3c72, #2a5298);
+  padding: 10px;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  z-index: 1000; /* Assure que la bande en haut est toujours au-dessus de la navbar */
+}
+
+/* Correction de la barre de recherche */
+.search-bar-container {
+  position: relative;
+  margin-top: 60px; /* Ajoute une marge pour éviter d'être masqué sous la top-bar */
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+.search-bar {
+  width: 50%;
+  padding: 10px;
+  border-radius: 20px;
+  border: 1px solid #ccc;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+/* Bouton de l'icône */
+.icon-btn {
+  background-color: #fff;
+  border: none;
+  padding: 8px;
+  border-radius: 50%;
+  cursor: pointer;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+.icon-btn i {
+  color: #2a5298;
+  font-size: 20px;
+}
+
+/* Menu déroulant */
+.dropdown-menu {
+  display: none; /* Caché par défaut */
+  position: absolute;
+  right: 0;
+  top: 40px;
+  background-color: #fff;
+  border-radius: 5px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  width: 150px;
+  z-index: 10;
+}
+
+.dropdown-menu.show {
+  display: block;
+}
+
+.dropdown-menu ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.dropdown-menu li {
+  padding: 10px;
+  border-bottom: 1px solid #ddd;
+}
+
+.dropdown-menu li:last-child {
+  border-bottom: none;
+}
+
+.dropdown-menu li a {
+  text-decoration: none;
+  color: #333;
+  display: block;
+}
+
+.dropdown-menu li a:hover {
+  background-color: #f1f1f1;
+}
+
+/* Ajout de la couleur rouge pour le bouton de déconnexion */
+.dropdown-menu li.logout a {
+  color: red;
+  font-weight: bold;
+}
+
+/* Icônes dans le menu déroulant */
+.dropdown-menu li a i {
+  margin-right: 8px; /* Espace entre l'icône et le texte */
+  color: #2a5298; /* Couleur des icônes (bleu foncé) */
+  font-size: 16px; /* Taille de l'icône ajustée */
+  width: 20px; /* Largeur de l'icône */
+  text-align: center;
+}
+
+/* Ajouter un effet hover pour les icônes dans le menu déroulant */
+.dropdown-menu li a:hover i {
+  color: #ffcc00; /* Couleur jaune au survol de l'icône */
 }

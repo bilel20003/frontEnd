@@ -1,72 +1,155 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
+import { UtilisateurService } from 'src/app/services/utilisateur.service'; 
+
+interface Utilisateur {
+  id: number;
+  nom: string;
+  email: string;
+  role: string;
+  ministere: string;
+  service: string;
+}
 
 @Component({
   selector: 'app-utilisateurs',
   templateUrl: './utilisateurs.component.html',
   styleUrls: ['./utilisateurs.component.css']
 })
-export class UtilisateursComponent {
-  utilisateurs = [
-    { nom: 'Ali Ben Salah', email: 'ali@example.com', role: 'client', ministere: 'Ministère A', service: 'Service 1' },
-    { nom: 'Fatma Trabelsi', email: 'fatma@example.com', role: 'guichetier', ministere: 'Ministère B', service: 'Service 2' },
-    // ... d'autres utilisateurs
-  ];
+export class UtilisateursComponent implements OnInit {
 
-  searchTerm = '';
-  filteredUtilisateurs = this.utilisateurs;
-  currentPage = 1;
-  itemsPerPage = 5;
-  isNightMode = false;
+  utilisateurs: Utilisateur[] = [];
+  newUtilisateur: Utilisateur = { id: 0, nom: '', email: '', role: '', ministere: '', service: '' };
+  editingUtilisateur: Utilisateur | null = null;
+  searchTerm: string = '';
+  itemsPerPage: number = 5;
+  currentPage: number = 1;
+  totalPages: number = 1;
+  paginatedUtilisateurs: Utilisateur[] = [];
+  isNightMode: boolean = false;
+  isModalOpen: boolean = false; // Contrôle l'ouverture de la modale
+  utilisateurForm: Utilisateur = { id: 0, nom: '', email: '', role: '', ministere: '', service: '' }; // Contient les données de l'utilisateur
 
-  get paginatedUtilisateurs() {
-    const start = (this.currentPage - 1) * this.itemsPerPage;
-    return this.filteredUtilisateurs.slice(start, start + this.itemsPerPage);
+  constructor(private utilisateurService: UtilisateurService) {}
+
+  ngOnInit() {
+    this.getUtilisateurs();
   }
 
-  get totalPages() {
-    return Math.ceil(this.filteredUtilisateurs.length / this.itemsPerPage);
+  getUtilisateurs() {
+    this.utilisateurs = this.utilisateurService.getUtilisateurs();
+    this.paginateUtilisateurs();
+  }
+
+  paginateUtilisateurs() {
+    const startIndex = (this.currentPage - 1) * this.itemsPerPage;
+    const endIndex = startIndex + this.itemsPerPage;
+    this.paginatedUtilisateurs = this.utilisateurs.slice(startIndex, endIndex);
+    this.totalPages = Math.ceil(this.utilisateurs.length / this.itemsPerPage);
+  }
+
+  // Ouvre la modale avec un utilisateur à modifier ou un formulaire vide pour un nouvel utilisateur
+  openModal(utilisateur: Utilisateur | null = null): void {
+    this.isModalOpen = true;
+    if (utilisateur) {
+      this.editingUtilisateur = { ...utilisateur };
+      this.utilisateurForm = { ...utilisateur }; // Pré-remplir le formulaire avec les données de l'utilisateur
+    } else {
+      this.editingUtilisateur = null;
+      this.utilisateurForm = { id: 0, nom: '', email: '', role: '', ministere: '', service: '' }; // Formulaire vide
+    }
+  }
+
+  // Ferme la modale
+  closeModal(): void {
+    this.isModalOpen = false;
+    this.utilisateurForm = { id: 0, nom: '', email: '', role: '', ministere: '', service: '' };
+  }
+
+  addUtilisateur() {
+    if (this.utilisateurForm.nom && this.utilisateurForm.email && this.utilisateurForm.role && this.utilisateurForm.ministere && this.utilisateurForm.service) {
+      this.utilisateurService.addUtilisateur(this.utilisateurForm);
+      this.getUtilisateurs();
+      this.closeModal();
+    } else {
+      alert('Veuillez remplir tous les champs');
+    }
+  }
+
+  updateUtilisateur() {
+    if (this.utilisateurForm && this.utilisateurForm.nom && this.utilisateurForm.email && this.utilisateurForm.role && this.utilisateurForm.ministere && this.utilisateurForm.service) {
+      this.utilisateurService.updateUtilisateur(this.utilisateurForm.id, this.utilisateurForm);
+      this.getUtilisateurs();
+      this.closeModal();
+    } else {
+      alert('Veuillez remplir tous les champs');
+    }
+  }
+
+  deleteUtilisateur(utilisateurId: number) {
+    if (confirm('Voulez-vous vraiment supprimer cet utilisateur ?')) {
+      this.utilisateurService.deleteUtilisateur(utilisateurId);
+      this.getUtilisateurs();
+    }
   }
 
   filterUtilisateurs() {
-    this.filteredUtilisateurs = this.utilisateurs.filter(user =>
-      user.nom.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
-      user.email.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
-      user.role.toLowerCase().includes(this.searchTerm.toLowerCase())
-    );
-    this.currentPage = 1;
-  }
-
-  onItemsPerPageChange(event: any) {
-    this.currentPage = 1;
+    if (this.searchTerm) {
+      const term = this.searchTerm.toLowerCase();
+      this.utilisateurs = this.utilisateurService.getUtilisateurs().filter(utilisateur =>
+        utilisateur.nom.toLowerCase().includes(term) ||
+        utilisateur.email.toLowerCase().includes(term) ||
+        utilisateur.role.toLowerCase().includes(term) ||
+        utilisateur.ministere.toLowerCase().includes(term) ||
+        utilisateur.service.toLowerCase().includes(term)
+      );
+    } else {
+      this.getUtilisateurs();
+    }
+    this.paginateUtilisateurs();
   }
 
   goToPreviousPage() {
-    if (this.currentPage > 1) this.currentPage--;
+    if (this.currentPage > 1) {
+      this.currentPage--;
+      this.paginateUtilisateurs();
+    }
   }
 
   goToNextPage() {
-    if (this.currentPage < this.totalPages) this.currentPage++;
-  }
-
-  ajouterUtilisateur() {
-    // rediriger vers une page ou ouvrir une modal
-    alert('Ajouter utilisateur');
-  }
-
-  modifierUtilisateur(user: any) {
-    alert(`Modifier ${user.nom}`);
-  }
-
-  supprimerUtilisateur(user: any) {
-    const confirmed = confirm(`Supprimer ${user.nom} ?`);
-    if (confirmed) {
-      this.utilisateurs = this.utilisateurs.filter(u => u !== user);
-      this.filterUtilisateurs();
+    if (this.currentPage < this.totalPages) {
+      this.currentPage++;
+      this.paginateUtilisateurs();
     }
+  }
+
+  onItemsPerPageChange(event: Event) {
+    const selectElement = event.target as HTMLSelectElement;
+    this.itemsPerPage = Number(selectElement.value);
+    this.currentPage = 1;
+    this.paginateUtilisateurs();
   }
 
   toggleMode() {
     this.isNightMode = !this.isNightMode;
     document.body.classList.toggle('night-mode', this.isNightMode);
+  }
+
+  // Actions de gestion des utilisateurs
+  ajouterUtilisateur() {
+    this.openModal(); // Ouvre une modale vide pour ajouter un utilisateur
+  }
+
+  modifierUtilisateur(utilisateur: Utilisateur) {
+    this.openModal(utilisateur); // Ouvre la modale avec les informations de l'utilisateur à modifier
+  }
+
+  supprimerUtilisateur(utilisateur: Utilisateur) {
+    if (confirm('Voulez-vous vraiment supprimer cet utilisateur ?')) {
+      this.deleteUtilisateur(utilisateur.id);
+    }
+  }
+
+  cancelEdit() {
+    this.closeModal();
   }
 }

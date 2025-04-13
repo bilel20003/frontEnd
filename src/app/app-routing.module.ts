@@ -13,11 +13,11 @@ import { PageRechercheComponent } from './components/Client/recherche/recherche.
 import { PageRechercheAvanceeComponent } from './components/Client/recherche-avancee/recherche-avancee.component';
 import { ReclamationComponent } from './components/Client/reclamation/reclamation.component';
 import { RendezVousComponent } from './components/Client/rendez-vous/rendez-vous.component';
-import { RendezVousDetailComponent } from './components/Client/rendez-vous/rendezvous-detail/rendezvous-detail.component';
+
 
 import { GererRdvComponent } from './components/Guichetier/gerer-rdv/gerer-rdv.component';
 import { TechHomeComponent } from './components/Technicien/tech-home/tech-home.component';
-import { TechDetailsComponent } from './components/Technicien/tech-details/tech-details.component';
+
 import { GuiHomeComponent } from './components/Guichetier/gui-home/gui-home.component';
 import { GuiRequestDetailsComponent } from './components/Guichetier/gui-request-details/gui-request-details.component';
 //admin 
@@ -32,6 +32,8 @@ import { MinistryManagementComponent } from './components/Admin/ministere/minist
 import { ClientManagementComponent } from './components/Admin/client/client.component';
 
 import { HoraireComponent } from './components/Admin/horaire/horaire.component';
+import { ServiceComponent } from './components/Admin/service/service.component';
+
 
 const routes: Routes = [
   { path: '', redirectTo: '/login', pathMatch: 'full' }, 
@@ -46,18 +48,15 @@ const routes: Routes = [
   { path: 'objet-reclamation', component: ObjetReclamationComponent},
   { path: 'role', component:  GererRoleComponent },
   { path: 'ministere', component:  MinistryManagementComponent },
+  { path: 'service', component:  ServiceComponent},
   { path: 'client', component:  ClientManagementComponent },
 
   { path: 'horaire', component:  HoraireComponent },
   // Client
   { path: 'home', component: HomeComponent },
-  { 
-    path: 'rendez-vous', 
-    component: RendezVousComponent, 
-    children: [
-      { path: 'rendezvous-detail', component: RendezVousDetailComponent }
-    ]
-  },
+  { path: 'rendez-vous', component: RendezVousComponent },
+  
+  
   { path: 'navbar', component: NavbarComponent },
   { path: 'reclamation', component: ReclamationComponent },
   { path: 'detail-demande/:id', component: DetailDemandeComponent },
@@ -66,7 +65,7 @@ const routes: Routes = [
   { path: 'documents', component: DocumentsComponent },
 
   // Technicien
-  { path: 'tech-details/:id', component: TechDetailsComponent },
+
   { path: 'renseigner-avancement/:id', component: RenseignerAvancementComponent},
   { path: 'tech-home', component: TechHomeComponent },
 

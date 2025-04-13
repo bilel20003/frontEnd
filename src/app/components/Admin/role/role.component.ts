@@ -1,98 +1,134 @@
-import { Component, OnInit } from '@angular/core';
-import { RoleService, Role } from 'src/app/services/role.service';
+import { Component } from '@angular/core';
+
+interface Role {
+  id_role: number;
+  name: string;
+}
 
 @Component({
   selector: 'app-role',
   templateUrl: './role.component.html',
   styleUrls: ['./role.component.css']
 })
-export class GererRoleComponent implements OnInit {
-  roles: Role[] = [];
-  newRole: Role = { id: 0, name: '', description: '' };
-  editingRole: Role | null = null;
-  searchTerm: string = '';
-  itemsPerPage = 5;
-  currentPage = 1;
-  totalPages = 1;
+export class GererRoleComponent {
+
+  // Liste des rôles (remplacer par une API réelle)
+  roles: Role[] = [
+    { id_role: 1, name: 'Administrateur' },
+    { id_role: 2, name: 'Utilisateur' },
+    { id_role: 3, name: 'Manager' },
+    { id_role: 4, name: 'Technicien' },
+    { id_role: 5, name: 'Superviseur' },
+    { id_role: 6, name: 'Guest' },
+  ];
+
+  // Recherche et pagination
+  searchTerm = '';
+  filteredRoles: Role[] = [...this.roles];
   paginatedRoles: Role[] = [];
+
+  // Pagination
+  currentPage = 1;
+  itemsPerPage = 5;
+
+  // Mode nuit
   isNightMode = false;
 
-  constructor(private roleService: RoleService) {}
+  // Modal
+  showModal = false;
+  modalTitle = '';
+  modalButtonText = '';
+  roleName = '';
+  currentRole: Role | null = null;
 
-  ngOnInit(): void {
-    this.loadRoles();
+  constructor() {
+    this.updatePaginatedRoles();
   }
 
-  toggleMode() {
-    this.isNightMode = !this.isNightMode;
-    document.body.classList.toggle('night-mode', this.isNightMode);
-  }
-
-  loadRoles() {
-    this.roles = this.roleService.getRoles();
-    this.paginateRoles();
-  }
-
-  paginateRoles() {
-    const startIndex = (this.currentPage - 1) * this.itemsPerPage;
-    const endIndex = startIndex + this.itemsPerPage;
-    this.paginatedRoles = this.roles.slice(startIndex, endIndex);
-    this.totalPages = Math.ceil(this.roles.length / this.itemsPerPage);
-  }
-
-  addRole() {
-    if (this.newRole.name && this.newRole.description) {
-      this.roleService.addRole(this.newRole);
-      this.loadRoles();
-      this.newRole = { id: 0, name: '', description: '' };
-    }
-  }
-
-  editRole(role: Role) {
-    this.editingRole = { ...role };
-  }
-
-  updateRole() {
-    if (this.editingRole) {
-      this.roleService.updateRole(this.editingRole.id, this.editingRole);
-      this.loadRoles();
-      this.editingRole = null;
-    }
-  }
-
-  deleteRole(id: number) {
-    if (confirm('Confirmer la suppression de ce rôle ?')) {
-      this.roleService.deleteRole(id);
-      this.loadRoles();
-    }
-  }
-
+  // Recherche
   filterRoles() {
-    if (this.searchTerm) {
-      this.paginatedRoles = this.roles.filter(r =>
-        r.name.toLowerCase().includes(this.searchTerm.toLowerCase())
-      );
-    } else {
-      this.paginateRoles();
-    }
+    const term = this.searchTerm.toLowerCase();
+    this.filteredRoles = this.roles.filter(role =>
+      role.name.toLowerCase().includes(term)
+    );
+    this.currentPage = 1;
+    this.updatePaginatedRoles();
+  }
+
+  // Pagination
+  get totalPages(): number {
+    return Math.ceil(this.filteredRoles.length / this.itemsPerPage);
+  }
+
+  updatePaginatedRoles() {
+    const start = (this.currentPage - 1) * this.itemsPerPage;
+    const end = start + this.itemsPerPage;
+    this.paginatedRoles = this.filteredRoles.slice(start, end);
   }
 
   goToPreviousPage() {
     if (this.currentPage > 1) {
       this.currentPage--;
-      this.paginateRoles();
+      this.updatePaginatedRoles();
     }
   }
 
   goToNextPage() {
     if (this.currentPage < this.totalPages) {
       this.currentPage++;
-      this.paginateRoles();
+      this.updatePaginatedRoles();
     }
   }
 
   onItemsPerPageChange() {
     this.currentPage = 1;
-    this.paginateRoles();
+    this.updatePaginatedRoles();
+  }
+
+  // Mode nuit
+  toggleMode() {
+    this.isNightMode = !this.isNightMode;
+    document.body.classList.toggle('night-mode', this.isNightMode);
+  }
+
+  // Actions CRUD
+  openModal(action: string, role?: Role) {
+    this.showModal = true;
+    if (action === 'add') {
+      this.modalTitle = 'Ajouter un Rôle';
+      this.modalButtonText = 'Ajouter';
+      this.roleName = '';
+      this.currentRole = null;
+    } else if (action === 'edit' && role) {
+      this.modalTitle = `Modifier le rôle: ${role.name}`;
+      this.modalButtonText = 'Modifier';
+      this.roleName = role.name;
+      this.currentRole = role;
+    }
+  }
+
+  closeModal() {
+    this.showModal = false;
+  }
+
+  saveRole() {
+    if (this.currentRole) {
+      // Mise à jour du rôle
+      this.currentRole.name = this.roleName;
+    } else {
+      // Ajout d'un nouveau rôle
+      const newId = this.roles.length + 1;
+      this.roles.push({ id_role: newId, name: this.roleName });
+    }
+
+    this.closeModal();
+    this.filterRoles(); // Mise à jour après ajout/modification
+  }
+
+  deleteRole(id_role: number) {
+    if (confirm('Voulez-vous vraiment supprimer ce rôle ?')) {
+      this.roles = this.roles.filter(r => r.id_role !== id_role);
+      this.filterRoles(); // Mise à jour après suppression
+    }
   }
 }

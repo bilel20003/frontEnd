@@ -186,34 +186,149 @@ body.night-mode {
     color: #0056b3;
 }
 
-/* Modal Styles */
+  /* Style général pour la modale */
 .modal {
-    display: none;
     position: fixed;
-    z-index: 1;
-    left: 0;
     top: 0;
-    width: 100%;
-    height: 100%;
-    overflow: auto;
-    background-color: rgba(0, 0, 0, 0.4);
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: none; /* La modale est cachée par défaut */
+    align-items: center;
     justify-content: center;
+    z-index: 1050;
+    transition: opacity 0.3s ease-in-out;
+  }
+  
+  /* Affichage de la modale lorsqu'elle est ouverte */
+  .modal.show {
+    display: flex;
+    opacity: 1;
+  }
+  
+  /* Conteneur de la modale */
+  .modal-dialog {
+    background: #fff;
+    border-radius: 8px;
+    width: 500px;
+    max-width: 90%;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    animation: slideIn 0.3s ease-out;
+  }
+  
+  /* Animation d'apparition de la modale */
+  @keyframes slideIn {
+    from {
+      transform: translateY(-50px);
+      opacity: 0;
+    }
+    to {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+  
+  /* Header de la modale */
+  .modal-header {
+    background-color: #007bff;
+    color: white;
+    padding: 15px;
+    border-radius: 8px 8px 0 0;
+    display: flex;
+    justify-content: space-between;
     align-items: center;
   }
   
-  .modal-open {
-    display: flex;
+  /* Titre de la modale */
+  .modal-title {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: bold;
   }
   
-  .modal-content {
-    background-color: white;
+  /* Bouton de fermeture */
+  .modal-header .close {
+    background: transparent;
+    border: none;
+    font-size: 1.5rem;
+    color: white;
+    cursor: pointer;
+  }
+  
+  /* Corps de la modale */
+  .modal-body {
     padding: 20px;
-    border-radius: 5px;
-    width: 300px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    font-size: 1rem;
+    color: #333;
   }
   
-  button {
-    margin-top: 10px;
+  /* Formulaire à l'intérieur de la modale */
+  .modal-body .form-group {
+    margin-bottom: 15px;
+  }
+  
+  .modal-body label {
+    font-weight: bold;
+  }
+  
+  .modal-body input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 1rem;
+  }
+  
+  .modal-body input:focus {
+    border-color: #007bff;
+    outline: none;
+  }
+  
+  /* Pied de la modale */
+  .modal-footer {
+    padding: 15px;
+    text-align: right;
+    border-radius: 0 0 8px 8px;
+  }
+  
+  .modal-footer .btn {
+    padding: 10px 20px;
+    font-size: 1rem;
+    border: none;
+    border-radius: 5px;
+  }
+  
+  .modal-footer .btn-secondary {
+    background-color: #6c757d;
+    color: white;
+  }
+  
+  .modal-footer .btn-primary {
+    background-color: #007bff;
+    color: white;
+  }
+  
+  /* Effet de survol sur les boutons */
+  .modal-footer .btn:hover {
+    opacity: 0.9;
+    cursor: pointer;
+  }
+  
+  /* Fermeture de la modale quand on clique en dehors */
+  .modal-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 1040;
+  }
+  
+  /* Animation pour fermer la modale */
+  .modal.fade {
+    opacity: 0;
+    visibility: hidden;
   }
   

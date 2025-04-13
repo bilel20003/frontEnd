@@ -2,43 +2,46 @@
   <app-navbar-admin></app-navbar-admin>
 
   <div class="page-content">
-    <div class="card">
-      <h2 class="page-title">Gestion des horaires de travail</h2>
+    <div class="horaire-container">
+      <h2 class="title">Gestion des horaires de travail</h2>
 
-      <!-- Formulaire -->
-      <form class="form-grid" (ngSubmit)="ajouterHoraire()">
-        <div class="form-group">
-          <label for="jour">Jour</label>
-          <select id="jour" [(ngModel)]="horaire.jour" name="jour" required>
-            <option *ngFor="let jour of jours" [value]="jour">{{ jour }}</option>
-          </select>
-        </div>
-
-        <!-- Section Matin -->
-        <div class="form-section">
-          <h3>Matin</h3>
+      <!-- FORMULAIRE -->
+      <form class="horaire-form" (ngSubmit)="ajouterHoraire()">
+        <div class="form-row">
           <div class="form-group">
-            <label for="ouvertureMatin">Heure d'ouverture</label>
-            <input type="time" id="ouvertureMatin" [(ngModel)]="horaire.ouvertureMatin" name="ouvertureMatin" required />
+            <label>Mois</label>
+            <select [(ngModel)]="horaire.mois" name="mois" required>
+              <option *ngFor="let mois of moisList" [value]="mois">{{ mois }}</option>
+            </select>
           </div>
 
           <div class="form-group">
-            <label for="fermetureMatin">Heure de fermeture</label>
-            <input type="time" id="fermetureMatin" [(ngModel)]="horaire.fermetureMatin" name="fermetureMatin" required />
+            <label>Jour</label>
+            <select [(ngModel)]="horaire.jour" name="jour" required>
+              <option *ngFor="let jour of jours" [value]="jour">{{ jour }}</option>
+            </select>
           </div>
         </div>
 
-        <!-- Section Après-midi -->
-        <div class="form-section">
-          <h3>Après-midi</h3>
+        <div class="form-row">
           <div class="form-group">
-            <label for="ouvertureSoir">Heure d'ouverture</label>
-            <input type="time" id="ouvertureSoir" [(ngModel)]="horaire.ouvertureSoir" name="ouvertureSoir" required />
+            <label>Ouverture Matin</label>
+            <input type="time" [(ngModel)]="horaire.ouvertureMatin" name="ouvertureMatin" required />
           </div>
-
           <div class="form-group">
-            <label for="fermetureSoir">Heure de fermeture</label>
-            <input type="time" id="fermetureSoir" [(ngModel)]="horaire.fermetureSoir" name="fermetureSoir" required />
+            <label>Fermeture Matin</label>
+            <input type="time" [(ngModel)]="horaire.fermetureMatin" name="fermetureMatin" required />
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Ouverture Après-midi</label>
+            <input type="time" [(ngModel)]="horaire.ouvertureSoir" name="ouvertureSoir" required />
+          </div>
+          <div class="form-group">
+            <label>Fermeture Après-midi</label>
+            <input type="time" [(ngModel)]="horaire.fermetureSoir" name="fermetureSoir" required />
           </div>
         </div>
 
@@ -47,27 +50,31 @@
         </div>
       </form>
 
-      <!-- Tableau -->
-      <table class="styled-table">
-        <thead>
-          <tr>
-            <th>Jour</th>
-            <th>Matin (Ouverture - Fermeture)</th>
-            <th>Après-midi (Ouverture - Fermeture)</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr *ngFor="let h of horaires">
-            <td>{{ h.jour }}</td>
-            <td>{{ h.ouvertureMatin }} - {{ h.fermetureMatin }}</td>
-            <td>{{ h.ouvertureSoir }} - {{ h.fermetureSoir }}</td>
-            <td>
-              <button class="btn-danger" (click)="supprimerHoraire(h)">Supprimer</button>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+      <!-- TABLEAU -->
+      <div class="horaire-table">
+        <table>
+          <thead>
+            <tr>
+              <th>Mois</th>
+              <th>Jour</th>
+              <th>Matin</th>
+              <th>Après-midi</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let h of horaires">
+              <td>{{ h.mois }}</td>
+              <td>{{ h.jour }}</td>
+              <td>{{ h.ouvertureMatin }} - {{ h.fermetureMatin }}</td>
+              <td>{{ h.ouvertureSoir }} - {{ h.fermetureSoir }}</td>
+              <td>
+                <button class="btn-danger" (click)="supprimerHoraire(h)">Supprimer</button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </div>
   </div>
 </div>

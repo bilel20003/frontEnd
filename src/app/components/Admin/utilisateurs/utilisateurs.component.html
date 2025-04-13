@@ -16,7 +16,7 @@
       <button class="mode-toggle" (click)="toggleMode()">
         <i class="fas" [ngClass]="isNightMode ? 'fa-sun' : 'fa-moon'"></i>
       </button>
-      <button class="btn btn-primary" (click)="ajouterUtilisateur()">+ Ajouter Utilisateur</button>
+      <button class="btn btn-primary" (click)="openModal()">+ Ajouter Utilisateur</button>
     </div>
   </header>
 
@@ -34,19 +34,17 @@
         </tr>
       </thead>
       <tbody>
-        <tr *ngFor="let user of paginatedUtilisateurs">
-          <td>{{ user.nom }}</td>
-          <td>{{ user.email }}</td>
+        <tr *ngFor="let utilisateur of paginatedUtilisateurs">
+          <td>{{ utilisateur.nom }}</td>
+          <td>{{ utilisateur.email }}</td>
+          <td>{{ utilisateur.role }}</td>
+          <td>{{ utilisateur.ministere }}</td>
+          <td>{{ utilisateur.service }}</td>
           <td>
-            <span class="badge badge-secondary">{{ user.role }}</span>
-          </td>
-          <td>{{ user.ministere }}</td>
-          <td>{{ user.service }}</td>
-          <td>
-            <button class="btn btn-info btn-sm me-2" (click)="modifierUtilisateur(user)">
+            <button class="btn btn-info btn-sm me-2" (click)="modifierUtilisateur(utilisateur)">
               <i class="fas fa-edit"></i> Modifier
             </button>
-            <button class="btn btn-danger btn-sm" (click)="supprimerUtilisateur(user)">
+            <button class="btn btn-danger btn-sm" (click)="supprimerUtilisateur(utilisateur)">
               <i class="fas fa-trash"></i> Supprimer
             </button>
           </td>
@@ -66,6 +64,43 @@
         <span>Page {{ currentPage }} sur {{ totalPages }}</span>
         <button (click)="goToNextPage()" [disabled]="currentPage === totalPages">Suivant</button>
       </div>
+    </div>
+  </div>
+
+  <!-- Modale pour formulaire Ajouter / Modifier Utilisateur -->
+  <div *ngIf="isModalOpen" class="modal-overlay">
+    <div class="modal-content">
+      <h3>{{ editingUtilisateur ? 'Modifier Utilisateur' : 'Ajouter Utilisateur' }}</h3>
+      <form (ngSubmit)="editingUtilisateur ? updateUtilisateur() : addUtilisateur()">
+        <div class="form-group">
+          <label for="nom">Nom</label>
+          <input type="text" [(ngModel)]="utilisateurForm.nom" name="nom" required>
+        </div>
+        <div class="form-group">
+          <label for="email">Email</label>
+          <input type="email" [(ngModel)]="utilisateurForm.email" name="email" required>
+        </div>
+        <div class="form-group">
+          <label for="role">Rôle</label>
+          <select [(ngModel)]="utilisateurForm.role" name="role" required>
+            <option value="client">Client</option>
+            <option value="guichetier">Guichetier</option>
+            <option value="technicien">Technicien</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="ministere">Ministère</label>
+          <input type="text" [(ngModel)]="utilisateurForm.ministere" name="ministere" required>
+        </div>
+        <div class="form-group">
+          <label for="service">Service</label>
+          <input type="text" [(ngModel)]="utilisateurForm.service" name="service" required>
+        </div>
+        <div class="form-actions">
+          <button type="submit" class="btn btn-success">{{ editingUtilisateur ? 'Mettre à jour' : 'Ajouter' }}</button>
+          <button type="button" class="btn btn-secondary" (click)="closeModal()">Annuler</button>
+        </div>
+      </form>
     </div>
   </div>
 </div>

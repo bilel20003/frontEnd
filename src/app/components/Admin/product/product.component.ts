@@ -7,7 +7,7 @@ interface Product {
   description: string;
   price: number;
   stock: number;
-  topologie: string; // ✅ Nouveau champ ajouté
+  topologie: string;
 }
 
 @Component({
@@ -26,8 +26,8 @@ export class ProductsComponent implements OnInit {
   totalPages: number = 1;
   paginatedProducts: Product[] = [];
   isNightMode: boolean = false;
-  isModalOpen: boolean = false; // Contrôle l'ouverture de la modale
-  productForm: Product = { id: 0, name: '', description: '', price: 0, stock: 0, topologie: '' }; // Contient les données du produit
+  isModalOpen: boolean = false;
+  productForm: Product = { id: 0, name: '', description: '', price: 0, stock: 0, topologie: '' };
 
   constructor(private productService: ProductService) {}
 
@@ -47,26 +47,24 @@ export class ProductsComponent implements OnInit {
     this.totalPages = Math.ceil(this.products.length / this.itemsPerPage);
   }
 
-  // Ouvre la modale avec un produit à modifier ou un formulaire vide pour un nouveau produit
   openModal(product: Product | null = null): void {
     this.isModalOpen = true;
     if (product) {
       this.editingProduct = { ...product };
-      this.productForm = { ...product }; // Pré-remplir le formulaire avec les données du produit
+      this.productForm = { ...product };
     } else {
       this.editingProduct = null;
-      this.productForm = { id: 0, name: '', description: '', price: 0, stock: 0, topologie: '' }; // Formulaire vide
+      this.productForm = { id: 0, name: '', description: '', price: 0, stock: 0, topologie: '' };
     }
   }
 
-  // Ferme la modale
   closeModal(): void {
     this.isModalOpen = false;
     this.productForm = { id: 0, name: '', description: '', price: 0, stock: 0, topologie: '' };
   }
 
   addProduct() {
-    if (this.productForm.name && this.productForm.description && this.productForm.price && this.productForm.stock && this.productForm.topologie) {
+    if (this.productForm.name && this.productForm.description && this.productForm.price && this.productForm.topologie) {
       this.productService.addProduct(this.productForm);
       this.getProducts();
       this.closeModal();
@@ -76,7 +74,7 @@ export class ProductsComponent implements OnInit {
   }
 
   updateProduct() {
-    if (this.productForm && this.productForm.name && this.productForm.description && this.productForm.price && this.productForm.stock && this.productForm.topologie) {
+    if (this.productForm.name && this.productForm.description && this.productForm.price && this.productForm.topologie) {
       this.productService.updateProduct(this.productForm.id, this.productForm);
       this.getProducts();
       this.closeModal();
@@ -130,24 +128,5 @@ export class ProductsComponent implements OnInit {
   toggleMode() {
     this.isNightMode = !this.isNightMode;
     document.body.classList.toggle('night-mode', this.isNightMode);
-  }
-
-  // Actions de gestion des produits
-  ajouterProduit() {
-    this.openModal(); // Ouvre une modale vide pour ajouter un produit
-  }
-
-  modifierProduit(product: Product) {
-    this.openModal(product); // Ouvre la modale avec les informations du produit à modifier
-  }
-
-  supprimerProduit(product: Product) {
-    if (confirm('Voulez-vous vraiment supprimer ce produit ?')) {
-      this.deleteProduct(product.id);
-    }
-  }
-
-  cancelEdit() {
-    this.closeModal();
   }
 }

@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Observable, of } from 'rxjs';
 
-interface Object {
+export interface ObjetReclamation {
   id: number;
   name: string;
   type: string;
@@ -14,59 +14,36 @@ interface Object {
 })
 export class ObjectService {
 
-  // Liste fictive des objets pour simuler les appels à une API backend
-  private objects: Object[] = [
-    { id: 1, name: 'Objet A', type: 'Type 1', description: 'Description de l\'objet A', status: 'En cours' },
-    { id: 2, name: 'Objet B', type: 'Type 2', description: 'Description de l\'objet B', status: 'Traitée' },
-    { id: 3, name: 'Objet C', type: 'Type 3', description: 'Description de l\'objet C', status: 'Refusée' }
+  private objects: ObjetReclamation[] = [
+    { id: 1, name: 'Objet A', type: 'Type 1', description: 'Description A', status: 'Actif' },
+    { id: 2, name: 'Objet B', type: 'Type 2', description: 'Description B', status: 'Inactif' },
+    { id: 3, name: 'Objet C', type: 'Type 1', description: 'Description C', status: 'Actif' }
   ];
 
-  constructor() { }
+  private nextId: number = 4;
 
-  // Récupérer tous les objets
-  getObjects(): Observable<Object[]> {
+  constructor() {}
+
+  getAllObjects(): Observable<ObjetReclamation[]> {
     return of(this.objects);
   }
 
-  // Ajouter un objet
-  addObject(newObject: Object): Observable<Object> {
-    const newId = this.objects.length + 1; // Génère un nouvel ID (à améliorer avec un backend)
-    newObject.id = newId;
-    this.objects.push(newObject);
-    return of(newObject);
+  addObject(object: ObjetReclamation): Observable<void> {
+    object.id = this.nextId++;
+    this.objects.push({ ...object });
+    return of();
   }
 
-  // Mettre à jour un objet
-  updateObject(id: number, updatedObject: Object): Observable<Object> {
+  updateObject(id: number, updatedObject: ObjetReclamation): Observable<void> {
     const index = this.objects.findIndex(obj => obj.id === id);
     if (index !== -1) {
-      this.objects[index] = { ...updatedObject, id };
-      return of(this.objects[index]);  // Retourne l'objet mis à jour
-    } else {
-      // Retourne un objet vide ou une valeur spécifique au lieu de null
-      return of({ id: 0, name: '', type: '', description: '', status: '' });
-    }
-  }
-  
-
-  // Supprimer un objet
-  deleteObject(id: number): Observable<void> {
-    const index = this.objects.findIndex(obj => obj.id === id);
-    if (index !== -1) {
-      this.objects.splice(index, 1);
+      this.objects[index] = { ...updatedObject };
     }
     return of();
   }
 
-  // Filtrer les objets en fonction du nom ou de la description
-  filterObjects(term: string): Observable<Object[]> {
-    if (!term) {
-      return of(this.objects);  // Si le terme est vide, on retourne tous les objets
-    }
-    const filtered = this.objects.filter(obj =>
-      obj.name.toLowerCase().includes(term.toLowerCase()) ||
-      obj.description.toLowerCase().includes(term.toLowerCase())
-    );
-    return of(filtered);
+  deleteObject(id: number): Observable<void> {
+    this.objects = this.objects.filter(obj => obj.id !== id);
+    return of();
   }
 }

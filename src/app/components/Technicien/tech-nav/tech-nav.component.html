@@ -1,14 +1,48 @@
-<nav class="sidebar">
-  <div class="logo">
-    <img src="assets/logo-cni.png" alt="Logo CNI">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+<!-- Bande en haut -->
+<div class="top-bar">
+    <button class="icon-btn" (click)="toggleDropdown($event)">
+      <i class="fas fa-bars"></i>
+    </button>
+    <ul class="dropdown-menu" [ngClass]="{ 'show': dropdownVisible }">
+      <li>
+        <a routerLink="/admin/profil">
+          <i class="fas fa-user"></i> <span>Profil</span>
+        </a>
+      </li>
+      <li>
+        <a routerLink="/admin/parametres">
+          <i class="fas fa-cog"></i> <span>Paramètres</span>
+        </a>
+      </li>
+      <li class="logout">
+        <a href="#" (click)="logout()">
+          <i class="fas fa-sign-out-alt"></i> <span>Déconnexion</span>
+        </a>
+      </li>
+    </ul>
   </div>
-  <ul class="nav-links">
-    <li>
-      <a [routerLink]="['/tech-home']" routerLinkActive="active">🏠 Home</a>
-    </li>
-    <li>
-      <a [routerLink]="['/settings']" routerLinkActive="active">⚙️ Paramètres</a>
-    </li>
-  </ul>
- 
-</nav>
+  
+  <!-- Sidebar Admin -->
+  <nav class="sidebar">
+    <div class="logo-container">
+      <img src="assets/logo.png" alt="Logo CNI" />
+    </div>
+    <ul class="nav-links">
+        <li>
+            <a routerLink="/tech_home" routerLinkActive="active">
+              <i class="fas fa-home"></i> <span>home</span>
+            </a>
+          </li>
+      <li>
+        <a routerLink="/settings" routerLinkActive="active">
+          <i class="fas fa-cog"></i> <span>paramètre</span>
+        </a>
+      </li>
+      
+      
+      
+    </ul>
+  </nav>
+  

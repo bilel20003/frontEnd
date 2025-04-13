@@ -1,27 +1,90 @@
 <app-navbar></app-navbar>
-<p>rendez-vous works!</p>
 <div class="container">
-    <button class="btn-new" (click)="navigateToDetail()">New</button>
-    <h2 class="title">Liste des Rendez-vous</h2>
-    <table>
-      <thead>
+  <!-- Barre de recherche -->
+  <div class="search-bar-container">
+    <div class="search-bar">
+      <input type="text" placeholder="Rechercher un rendez-vous..." [(ngModel)]="searchTerm" (input)="filterRendezvous()">
+      <button><i class="fas fa-search"></i></button>
+    </div>
+  </div>
+
+  <!-- Titre + actions -->
+  <header class="d-flex justify-content-between align-items-center">
+    <h2 style="margin-left: 250px;">Gestion des Rendez-vous</h2>
+    <div class="header-actions">
+      <button class="mode-toggle" (click)="toggleMode()">
+        <i class="fas" [ngClass]="isNightMode ? 'fa-sun' : 'fa-moon'"></i>
+      </button>
+      <button class="btn btn-primary" (click)="openModal()">Créer Rendez-vous</button>
+    </div>
+  </header>
+
+  <!-- Tableau -->
+  <div class="table-responsive">
+    <table class="table table-hover shadow-sm rounded">
+      <thead class="table-header">
         <tr>
-          <th>Date d'Envoi</th>
-          <th>Type de Problème</th>
+          <th>Date d'envoi</th>
+          <th>Type de problème</th>
           <th>Description</th>
-          <th>État</th> <!-- Nouvelle colonne pour l'état -->
+          <th>État</th>
         </tr>
       </thead>
       <tbody>
-        <tr *ngFor="let rendezVous of rendezVousList">
-          <td>{{ rendezVous.date }}</td>
-          <td>{{ rendezVous.typeProbleme }}</td>
-          <td>{{ rendezVous.description }}</td>
-          <td>{{ rendezVous.etat }}</td> <!-- Affichage de l'état -->
+        <tr *ngFor="let rendezvous of paginatedRendezvous">
+          <td>{{ rendezvous.dateEnvoi | date }}</td>
+          <td>{{ rendezvous.typeProbleme }}</td>
+          <td>{{ rendezvous.description }}</td>
+          <td>{{ rendezvous.etat }}</td>
         </tr>
       </tbody>
     </table>
-  
-    <!-- Router outlet pour afficher le composant enfant -->
-    <router-outlet></router-outlet>
+
+    <!-- Pagination -->
+    <div class="pagination-container">
+      <div class="page-options">
+        <select [(ngModel)]="itemsPerPage" (change)="onItemsPerPageChange($event)">
+          <option *ngFor="let option of [5, 10, 20]" [value]="option">{{ option }} lignes par page</option>
+        </select>
+      </div>
+      <div class="pagination">
+        <button (click)="goToPreviousPage()" [disabled]="currentPage === 1">Précédent</button>
+        <span>Page {{ currentPage }} sur {{ totalPages }}</span>
+        <button (click)="goToNextPage()" [disabled]="currentPage === totalPages">Suivant</button>
+      </div>
+    </div>
   </div>
+
+  <!-- Modale pour formulaire Créer Rendez-vous -->
+  <div *ngIf="isModalOpen" class="modal-overlay">
+    <div class="modal-content">
+      <h3>Créer Rendez-vous</h3>
+      <form (ngSubmit)="addRendezvous()">
+        <div class="form-group">
+          <label for="dateEnvoi">Date d'envoi</label>
+          <input type="date" [(ngModel)]="rendezvousForm.dateEnvoi" name="dateEnvoi" required>
+        </div>
+        <div class="form-group">
+          <label for="typeProbleme">Type de problème</label>
+          <input type="text" [(ngModel)]="rendezvousForm.typeProbleme" name="typeProbleme" required>
+        </div>
+        <div class="form-group">
+          <label for="description">Description</label>
+          <textarea [(ngModel)]="rendezvousForm.description" name="description" required></textarea>
+        </div>
+        <div class="form-group">
+          <label for="etat">État</label>
+          <select [(ngModel)]="rendezvousForm.etat" name="etat" required>
+            <option value="En attente">En attente</option>
+            <option value="Confirmé">Confirmé</option>
+            <option value="Annulé">Annulé</option>
+          </select>
+        </div>
+        <div class="form-actions">
+          <button type="submit" class="btn btn-success">Créer</button>
+          <button type="button" class="btn btn-secondary" (click)="closeModal()">Annuler</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
