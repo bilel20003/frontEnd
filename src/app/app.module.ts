@@ -39,7 +39,7 @@ import { NavbarComponent } from './components/Client/navbar/navbar.component';
 
  //admin
 
- import { UtilisateursComponent } from './components/Admin/utilisateurs/utilisateurs.component';
+import { UtilisateursComponent } from './components/Admin/utilisateurs/utilisateurs.component';
 import { NavbarAdminComponent } from './components/Admin/navbar-admin/navbar-admin.component';
 import { DashboardComponent } from './components/Admin/dashboard/dashboard.component';
 import { ProductsComponent } from './components/Admin/product/product.component';
@@ -51,6 +51,7 @@ import { ClientManagementComponent } from './components/Admin/client/client.comp
 
 import { HoraireComponent } from './components/Admin/horaire/horaire.component';
 import { ServiceComponent } from './components/Admin/service/service.component';
+
 
 
 
@@ -99,6 +100,7 @@ import { ServiceComponent } from './components/Admin/service/service.component';
   
     HoraireComponent,
         ServiceComponent,
+        
    
     
   ],

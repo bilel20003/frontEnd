@@ -1,3 +1,4 @@
+
 <!-- Navbar -->
 <app-navbar></app-navbar>
 
@@ -17,12 +18,11 @@
       Liste de Requêtes
     </h2>
     <div class="header-actions">
-      
       <button class="mode-toggle" (click)="toggleMode()">
-        <i class="fas" [ngClass]="isNightMode ? 'fa-sun' : 'fa-moon'"></i>
+          <i class="fas" [ngClass]="isNightMode ? 'fa-sun' : 'fa-moon'"></i>
       </button>
       <button class="btn btn-primary" (click)="goToReclamationPage()">+ Nouvelle Requête</button>
-    </div>
+  </div>
   </header>
 
   <!-- Tableau des requêtes -->
@@ -30,9 +30,9 @@
     <table class="table table-hover shadow-sm rounded">
       <thead class="table-header">
         <tr>
-          <th (click)="sort('ref')" class="sortable">Réf</th>
+          <th (click)="sort('id')" class="sortable">Réf</th>
           <th (click)="sort('objet')" class="sortable">Objet</th>
-          <th (click)="sort('typeRequete')" class="sortable">Type de requête</th>
+          <th (click)="sort('type')" class="sortable">Type de requête</th>
           <th>Description</th>
           <th (click)="sort('etat')" class="sortable">État</th>
           <th>Actions</th>
@@ -40,9 +40,9 @@
       </thead>
       <tbody>
         <tr *ngFor="let requete of paginatedRequetes">
-          <td>{{ requete.ref }}</td>
+          <td>{{ requete.id }}</td>
           <td>{{ requete.objet }}</td>
-          <td>{{ requete.typeRequete }}</td>
+          <td>{{ requete.type }}</td>
           <td>{{ requete.description }}</td>
           <td>
             <span class="badge" [ngClass]="getBadgeClass(requete.etat)">
@@ -50,31 +50,38 @@
             </span>
           </td>
           <td>
-            <button class="btn btn-info btn-sm me-2" [routerLink]="['/detail-demande', requete.ref]">
+            <button class="btn btn-info btn-sm me-2" (click)="openPopup(requete)">
               <i class="fas fa-eye"></i> Voir
             </button>
           </td>
         </tr>
       </tbody>
     </table>
-  
 
-      <!-- Pagination et Choix des lignes par page -->
-      <div class="pagination-container d-flex justify-content-between">
-        <div class="page-options">
-          <select [(ngModel)]="itemsPerPage" (change)="onItemsPerPageChange($event)">
-
-            <option *ngFor="let option of [5, 10, 20]" [value]="option">{{ option }} lignes par page</option>
-          </select>
-        </div>
- 
+    <!-- Pagination et Choix des lignes par page -->
+    <div class="pagination-container d-flex justify-content-between">
+      <div class="page-options">
+        <select [(ngModel)]="itemsPerPage" (change)="onItemsPerPageChange($event)">
+          <option *ngFor="let option of [5, 10, 20]" [value]="option">{{ option }} lignes par page</option>
+        </select>
+      </div>
       <div class="pagination">
         <button (click)="goToPreviousPage()" [disabled]="currentPage === 1">Précédent</button>
         <span>Page {{ currentPage }} sur {{ totalPages }}</span>
         <button (click)="goToNextPage()" [disabled]="currentPage === totalPages">Suivant</button>
       </div>
     </div>
+  
+    <!-- Popup pour afficher les détails de la requête -->
+<div *ngIf="isPopupOpen" class="modal-overlay" (click)="closePopup()">
+  <div class="modal-content" (click)="$event.stopPropagation()"> <!-- Empêche le clic sur la popup de fermer la popup -->
+    <h3>Détails de la Requête</h3>
+    <p><strong>Réf:</strong> {{ selectedRequete?.id }}</p>
+    <p><strong>Objet:</strong> {{ selectedRequete?.objet }}</p>
+    <p><strong>Type de requête:</strong> {{ selectedRequete?.type }}</p>
+    <p><strong>Description:</strong> {{ selectedRequete?.description }}</p>
+    <p><strong>État:</strong> <span class="badge" [ngClass]="getBadgeClass(selectedRequete?.etat)">{{ selectedRequete?.etat ?? 'Inconnu' }}</span></p>
+    <button class="btn btn-secondary" (click)="closePopup()">Fermer</button>
   </div>
-
 </div>
-
+  </div>

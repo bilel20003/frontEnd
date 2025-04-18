@@ -1,4 +1,4 @@
-
+import { AuthService } from 'src/app/services/auth.service'; 
 import { Component,  HostListener } from '@angular/core';
 
 @Component({
@@ -8,7 +8,7 @@ import { Component,  HostListener } from '@angular/core';
 })
 export class NavbarComponent {
   dropdownVisible: boolean = false;
-  
+  constructor(private authService: AuthService) {}
 
   toggleDropdown(event: Event) {
     event.stopPropagation();
@@ -32,6 +32,6 @@ export class NavbarComponent {
   }
 
   logout() {
-    console.log('Déconnexion');
+    this.authService.logout();
   }
 }

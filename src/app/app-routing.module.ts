@@ -1,6 +1,7 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { LoginComponent } from './components/login/login.component';
+import { AuthGuard } from './guards/auth.guard';  // Adjust the path according to your file structure
 
 
 import { RenseignerAvancementComponent } from './components/Technicien/renseigner-avancement/renseigner-avancement.component';
@@ -20,6 +21,7 @@ import { TechHomeComponent } from './components/Technicien/tech-home/tech-home.c
 
 import { GuiHomeComponent } from './components/Guichetier/gui-home/gui-home.component';
 import { GuiRequestDetailsComponent } from './components/Guichetier/gui-request-details/gui-request-details.component';
+
 //admin 
 import { UtilisateursComponent } from './components/Admin/utilisateurs/utilisateurs.component';
 import { NavbarAdminComponent } from './components/Admin/navbar-admin/navbar-admin.component';
@@ -36,47 +38,43 @@ import { ServiceComponent } from './components/Admin/service/service.component';
 
 
 const routes: Routes = [
-  { path: '', redirectTo: '/login', pathMatch: 'full' }, 
+  { path: '', redirectTo: '/login', pathMatch: 'full' },
   { path: 'login', component: LoginComponent },
-  
-  //admin
-  { path: 'utilisateurs', component:  UtilisateursComponent },
-  { path: 'navbar-admin', component:  NavbarAdminComponent },
-  { path: 'dashboard', component:  DashboardComponent },
-  { path: 'product', component: ProductsComponent },
- 
-  { path: 'objet-reclamation', component: ObjetReclamationComponent},
-  { path: 'role', component:  GererRoleComponent },
-  { path: 'ministere', component:  MinistryManagementComponent },
-  { path: 'service', component:  ServiceComponent},
-  { path: 'client', component:  ClientManagementComponent },
 
-  { path: 'horaire', component:  HoraireComponent },
-  // Client
-  { path: 'home', component: HomeComponent },
-  { path: 'rendez-vous', component: RendezVousComponent },
-  
-  
-  { path: 'navbar', component: NavbarComponent },
-  { path: 'reclamation', component: ReclamationComponent },
-  { path: 'detail-demande/:id', component: DetailDemandeComponent },
-  { path: 'recherche', component: PageRechercheComponent },
-  { path: 'recherche-avancee', component: PageRechercheAvanceeComponent },
-  { path: 'documents', component: DocumentsComponent },
+  // Admin routes (protected by AuthGuard and role-based authorization)
+  { path: 'utilisateurs', component: UtilisateursComponent, canActivate: [AuthGuard], data: { role: 'ADMIN' } },
+  { path: 'navbar-admin', component: NavbarAdminComponent, canActivate: [AuthGuard], data: { role: 'ADMIN' } },
+  { path: 'dashboard', component: DashboardComponent, canActivate: [AuthGuard], data: { role: 'ADMIN' } },
+  { path: 'product', component: ProductsComponent, canActivate: [AuthGuard], data: { role: 'ADMIN' } },
+  { path: 'objet-reclamation', component: ObjetReclamationComponent, canActivate: [AuthGuard], data: { role: 'ADMIN' } },
+  { path: 'role', component: GererRoleComponent, canActivate: [AuthGuard], data: { role: 'ADMIN' } },
+  { path: 'ministere', component: MinistryManagementComponent, canActivate: [AuthGuard], data: { role: 'ADMIN' } },
+  { path: 'service', component: ServiceComponent, canActivate: [AuthGuard], data: { role: 'ADMIN' } },
+  { path: 'client', component: ClientManagementComponent, canActivate: [AuthGuard], data: { role: 'ADMIN' } },
+  { path: 'horaire', component: HoraireComponent, canActivate: [AuthGuard], data: { role: 'ADMIN' } },
 
-  // Technicien
+  // Client routes (protected by AuthGuard)
+  { path: 'home', component: HomeComponent, canActivate: [AuthGuard], data: { role: 'CLIENT' }  },
+  { path: 'rendez-vous', component: RendezVousComponent, canActivate: [AuthGuard] , data: { role: 'CLIENT' } },
+  { path: 'navbar', component: NavbarComponent, canActivate: [AuthGuard], data: { role: 'CLIENT' }  },
+  { path: 'reclamation', component: ReclamationComponent, canActivate: [AuthGuard] , data: { role: 'CLIENT' } },
+  { path: 'detail-demande/:id', component: DetailDemandeComponent, canActivate: [AuthGuard], data: { role: 'CLIENT' }  },
+  { path: 'recherche', component: PageRechercheComponent, canActivate: [AuthGuard] , data: { role: 'CLIENT' } },
+  { path: 'recherche-avancee', component: PageRechercheAvanceeComponent, canActivate: [AuthGuard] , data: { role: 'CLIENT' } },
+  { path: 'documents', component: DocumentsComponent, canActivate: [AuthGuard] , data: { role: 'CLIENT' } },
 
-  { path: 'renseigner-avancement/:id', component: RenseignerAvancementComponent},
-  { path: 'tech-home', component: TechHomeComponent },
+  // Technicien routes
+  { path: 'renseigner-avancement/:id', component: RenseignerAvancementComponent, canActivate: [AuthGuard] , data: { role: 'TECHNICIEN' } },
+  { path: 'tech-home', component: TechHomeComponent, canActivate: [AuthGuard] , data: { role: 'TECHNICIEN' }},
 
-  // Guichetier
-  { path: 'gerer-rdv', component: GererRdvComponent },
-  { path: 'gui-home', component: GuiHomeComponent },
-  { path: 'request-details/:id', component: GuiRequestDetailsComponent },
+  // Guichetier routes
+  { path: 'gerer-rdv', component: GererRdvComponent, canActivate: [AuthGuard] , data: { role: 'GUICHETIER' }},
+  { path: 'gui-home', component: GuiHomeComponent, canActivate: [AuthGuard], data: { role: 'GUICHETIER' } },
+  { path: 'request-details/:id', component: GuiRequestDetailsComponent, canActivate: [AuthGuard] , data: { role: 'GUICHETIER' }},
 
   // Redirection des routes inconnues
-  
 ];
+
 
 
 @NgModule({
