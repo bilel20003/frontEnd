@@ -21,8 +21,19 @@ export class HomeComponent implements OnInit {
   totalPages: number = 1;
   isNightMode: boolean = false;
   
-  isPopupOpen: boolean = false; // Contrôle l'ouverture de la popup
-  selectedRequete: Requete | null = null; // Requête sélectionnée pour la popup
+  isPopupOpen: boolean = false;
+  isCreatePopupOpen: boolean = false;
+  selectedRequete: Requete | null = null;
+  newRequete: Omit<Requete, 'id'> = { // Omit the id field
+    type: '' as any,
+    objet: '' as any,
+    description: '',
+    etat: 'NOUVEAU',
+    date: new Date(),
+    noteRetour: '', // Optional field
+    client: { id: 0 }, // Placeholder, will be set in submitNewRequete
+    guichetier: { id: 0 } // Placeholder, will be set in submitNewRequete
+  };
 
   constructor(
     private router: Router,
@@ -36,23 +47,29 @@ export class HomeComponent implements OnInit {
       const clientId = decodedToken.id;
       
       if (clientId) {
-        this.requeteService.getRequetesByClientId(clientId).subscribe(data => {
-          this.requetes = data;
-          this.filteredRequetes = [...this.requetes];
-          this.updatePagination();
-        }, error => {
-          console.error('Erreur lors de la récupération des requêtes:', error);
+        this.requeteService.getRequetesByClientId(clientId).subscribe({
+          next: (data) => {
+            this.requetes = data;
+            this.filteredRequetes = [...this.requetes];
+            this.updatePagination();
+          },
+          error: (error) => {
+            console.error('Erreur lors de la récupération des requêtes:', error);
+            alert('Erreur lors du chargement des requêtes.');
+          }
         });
       } else {
         console.error('ID du client non trouvé dans le token');
+        alert('Session invalide. Veuillez vous reconnecter.');
       }
     } else {
       console.error('Token non trouvé dans le localStorage');
+      this.router.navigate(['/login']);
     }
 
     const storedMode = localStorage.getItem('mode');
     if (storedMode === 'night') {
-        this.enableNightMode();
+      this.enableNightMode();
     }
   }
 
@@ -90,14 +107,142 @@ export class HomeComponent implements OnInit {
     this.updatePagination();
   }
 
-  getBadgeClass(etat: string | undefined): string {
-    switch (etat) {
-      case 'Nouveau': return 'badge-primary';
-      case 'En cours de traitement': return 'badge-warning';
-      case 'Traité': return 'badge-success';
-      case 'Refusé': return 'badge-danger';
-      default: return 'badge-secondary'; // ou une classe par défaut
+  updatePagination(): void {
+    this.totalPages = Math.ceil(this.filteredRequetes.length / this.itemsPerPage);
+    this.paginatedRequetes = this.filteredRequetes.slice(
+      (this.currentPage - 1) * this.itemsPerPage,
+      this.currentPage * this.itemsPerPage
+    );
+  }
+
+  toggleMode(): void {
+    this.isNightMode = !this.isNightMode;
+    if (this.isNightMode) {
+      this.enableNightMode();
+    } else {
+      this.disableNightMode();
     }
+  }
+
+  enableNightMode(): void {
+    document.body.classList.add('night-mode');
+    localStorage.setItem('mode', 'night');
+  }
+
+  disableNightMode(): void {
+    document.body.classList.remove('night-mode');
+    localStorage.setItem('mode', 'day');
+  }
+
+  goToReclamationPage(): void {
+    this.router.navigate(['/reclamation']);
+  }
+
+  openPopup(requete: Requete): void {
+    this.selectedRequete = requete;
+    this.isPopupOpen = true;
+  }
+
+  closePopup(): void {
+    this.isPopupOpen = false;
+    this.selectedRequete = null;
+  }
+
+  openCreateRequetePopup(): void {
+    this.newRequete = {
+      type: '' as any,
+      objet: '' as any,
+      description: '',
+      etat: 'NOUVEAU',
+      date: new Date(),
+      noteRetour: '', // Optional field
+      client: { id: 0 }, // Placeholder, will be set in submitNewRequete
+      guichetier: { id: 0 } // Placeholder, will be set in submitNewRequete
+    };
+    this.isCreatePopupOpen = true;
+  }
+
+  closeCreatePopup(): void {
+    this.isCreatePopupOpen = false;
+    this.newRequete = {
+      type: '' as any,
+      objet: '' as any,
+      description: '',
+      etat: 'NOUVEAU',
+      date: new Date(),
+      noteRetour: '', // Optional field
+      client: { id: 0 }, // Reset to placeholder
+      guichetier: { id: 0 } // Reset to placeholder
+    };
+  }
+
+  submitNewRequete(): void {
+    // Set the current date and default values
+    this.newRequete.date = new Date(); // Set current date
+    this.newRequete.etat = "NOUVEAU"; // Set default state
+    this.newRequete.noteRetour = ""; // Optional field
+
+    // Extract client ID from the token
+    const token = localStorage.getItem('token');
+    if (token) {
+      const decodedToken: any = jwtDecode(token);
+      const clientId = decodedToken.id;
+
+      // Prepare the complete request body without the id field
+      const completeRequete: Omit<Requete, 'id'> = {
+        type: this.newRequete.type,
+        objet: this.newRequete.objet,
+        description: this.newRequete.description,
+        etat: this.newRequete.etat,
+        noteRetour: this.newRequete.noteRetour,
+        date: this.newRequete.date,
+        client: { id: clientId }, // Use the client ID from the token
+        guichetier: { id: 4 }, // Replace with actual guichetier ID
+      };
+
+      // Log the complete request body for debugging
+      console.log('Request Body:', completeRequete);
+
+      // Send the request to the backend
+      this.requeteService.createRequete(completeRequete).subscribe({
+        next: (response) => {
+          this.requetes.push(response);
+          this.filteredRequetes = [...this.requetes];
+          this.updatePagination();
+          this.closeCreatePopup();
+          alert('Requête créée avec succès !');
+        },
+        error: (error) => {
+          console.error('Erreur lors de la création de la requête:', error);
+          alert('Erreur lors de la création de la requête. Veuillez réessayer.');
+        }
+      });
+    } else {
+      alert('Token non trouvé. Veuillez vous reconnecter.');
+    }
+  }
+
+  getBadgeClass(etat: string | undefined): string {
+    switch (etat?.toUpperCase()) {
+      case 'NOUVEAU':
+        return 'badge-primary';
+      case 'EN_COURS_DE_TRAITEMENT':
+        return 'badge-warning';
+      case 'TRAITEE':
+        return 'badge-success';
+      case 'REFUSEE':
+        return 'badge-danger';
+      case 'BROUILLON':
+        return 'badge-secondary';
+      default:
+        return 'badge-secondary';
+    }
+  }
+
+  onItemsPerPageChange(event: Event): void {
+    this.itemsPerPage = Number((event.target as HTMLSelectElement).value);
+    this.currentPage = 1;
+    this.updatePagination();
   }
 
   goToPreviousPage(): void {
@@ -112,56 +257,5 @@ export class HomeComponent implements OnInit {
       this.currentPage++;
       this.updatePagination();
     }
-  }
-
-  onItemsPerPageChange(event: Event): void {
-    const target = event.target as HTMLSelectElement;
-    this.itemsPerPage = Number(target.value);
-    this.currentPage = 1;
-    this.updatePagination();
-  }
-
-  updatePagination(): void {
-    this.totalPages = Math.ceil(this.filteredRequetes.length / this.itemsPerPage);
-    this.paginatedRequetes = this.filteredRequetes.slice(
-      (this.currentPage - 1) * this.itemsPerPage,
-      this.currentPage * this.itemsPerPage
-    );
-  }
-
-  toggleMode(): void {
-    this.isNightMode = !this.isNightMode; // Inverser la valeur de isNightMode
-    console.log('Toggle mode:', this.isNightMode); // Vérifiez si cette ligne s'affiche dans la console
-    if (this.isNightMode) {
-        this.enableNightMode();
-    } else {
-        this.disableNightMode();
-    }
-}
-
-enableNightMode(): void {
-  document.body.classList.add('night-mode');
-  localStorage.setItem('mode', 'night');
-  console.log('Mode nuit activé');
-}
-
-disableNightMode(): void {
-  document.body.classList.remove('night-mode');
-  localStorage.setItem('mode', 'day');
-  console.log('Mode nuit désactivé');
-}
-
-  goToReclamationPage(): void {
-    this.router.navigate(['/reclamation']);
-  }
-
-  openPopup(requete: Requete): void {
-    this.selectedRequete = requete;
-    this.isPopupOpen = true;
-  }
-
-  closePopup(): void {
-    this.isPopupOpen = false;
-    this.selectedRequete = null;
   }
 }

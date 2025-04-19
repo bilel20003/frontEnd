@@ -110,8 +110,6 @@ td:last-child {
   margin-right: 5px;
 }
 
-
-
 /* Navbar */
 .header-actions {
   display: flex;
@@ -179,25 +177,43 @@ body {
 
 /* Styles pour le mode nuit */
 body.night-mode {
-  background-color: #121212; /* Couleur de fond en mode nuit */
-  color: white; /* Couleur du texte en mode nuit */
+  background-color: #121212;
+  color: white;
 }
 
-.night-mode .table-header {
-  background-color: #1e1e1e; /* Couleur d'arrière-plan pour l'en-tête du tableau */
+.night-mode .table-responsive {
+  background-color: #1e1e1e;
+}
+
+.night-mode .table-header th {
+  background: linear-gradient(135deg, #2a2a2a, #4a4a4a);
+}
+
+.night-mode .table-hover tbody tr:hover {
+  background-color: #2a2a2a;
+}
+
+.night-mode .search-bar {
+  background-color: #2a2a2a;
+  box-shadow: 0 2px 4px rgba(255, 255, 255, 0.1);
+}
+
+.night-mode .search-bar input {
+  background-color: transparent;
+  color: white;
 }
 
 .night-mode .badge {
-  background-color: #333; /* Couleur de fond pour les badges en mode nuit */
+  opacity: 0.9;
 }
 
 .night-mode .btn {
-  background-color: #007bff; /* Couleur de fond pour les boutons en mode nuit */
-  color: white; /* Couleur du texte pour les boutons en mode nuit */
+  background-color: #007bff;
+  color: white;
 }
 
 .night-mode .btn:hover {
-  background-color: #0056b3; /* Couleur de fond au survol pour les boutons en mode nuit */
+  background-color: #0056b3;
 }
 
 /* Icône de mode nuit/jour */
@@ -221,48 +237,209 @@ body.night-mode {
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.7);
+  background: rgba(0, 0, 0, 0.75);
   display: flex;
   justify-content: center;
   align-items: center;
   z-index: 1000;
+  animation: fadeIn 0.3s ease-in-out;
 }
 
 .modal-content {
   background: white;
-  padding: 30px;
-  border-radius: 8px;
-  width: 600px;
+  padding: 40px;
+  border-radius: 12px;
+  width: 700px;
   max-width: 90%;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
-  transition: transform 0.3s ease;
-  transform: translateY(-20px);
+  max-height: 80vh;
+  overflow-y: auto;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.3);
+  transition: transform 0.3s ease, opacity 0.3s ease;
+  transform: translateY(0);
+  opacity: 1;
 }
 
 .modal-content h3 {
-  margin-top: 0;
-  color: #333;
+  margin: 0 0 20px;
+  color: #1e3c72;
+  font-size: 1.8rem;
+  font-weight: 600;
 }
 
 .modal-content p {
-  margin: 10px 0;
-  color: #555;
+  margin: 12px 0;
+  color: #333;
+  font-size: 1rem;
+  line-height: 1.5;
 }
 
 .modal-content .badge {
   margin-top: 5px;
+  font-size: 0.9rem;
 }
 
 .modal-content button {
-  background-color: #01346b;
+  background-color: #1e3c72;
   color: white;
   border: none;
-  border-radius: 5px;
-  padding: 10px 15px;
+  border-radius: 6px;
+  padding: 12px 20px;
   cursor: pointer;
-  transition: background-color 0.3s;
+  transition: background-color 0.3s, transform 0.2s;
+  font-size: 1rem;
+  margin-top: 10px;
 }
 
 .modal-content button:hover {
-  background-color: #0056b3;
+  background-color: #2a5298;
+  transform: translateY(-2px);
+}
+
+.modal-content button:disabled {
+  background-color: #6c757d;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Form styling for Create New Request popup */
+.modal-content form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.modal-content .form-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.modal-content .form-group label {
+  margin-bottom: 8px;
+  color: #333;
+  font-weight: 500;
+  font-size: 0.95rem;
+}
+
+.modal-content .form-group input,
+.modal-content .form-group textarea,
+.modal-content .form-group select {
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 0.95rem;
+  transition: border-color 0.3s;
+}
+
+.modal-content .form-group select {
+  appearance: none;
+  background: url('data:image/svg+xml;utf8,<svg fill="%23333" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/></svg>') no-repeat right 10px center;
+  background-size: 12px;
+}
+
+.modal-content .form-group input:focus,
+.modal-content .form-group textarea:focus,
+.modal-content .form-group select:focus {
+  border-color: #1e3c72;
+  outline: none;
+}
+
+.modal-content .form-group textarea {
+  resize: vertical;
+  min-height: 100px;
+}
+
+.modal-content .form-group input:required:invalid,
+.modal-content .form-group textarea:required:invalid,
+.modal-content .form-group select:required:invalid {
+  border-color: #dc3545;
+}
+
+/* Night mode for popup */
+.night-mode .modal-content {
+  background: #2a2a2a;
+  color: white;
+}
+
+.night-mode .modal-content h3 {
+  color: #6caff7;
+}
+
+.night-mode .modal-content p {
+  color: #ddd;
+}
+
+.night-mode .modal-content .form-group label {
+  color: #ddd;
+}
+
+.night-mode .modal-content .form-group input,
+.night-mode .modal-content .form-group textarea,
+.night-mode .modal-content .form-group select {
+  background: #333;
+  color: white;
+  border-color: #555;
+}
+
+.night-mode .modal-content .form-group select {
+  background: url('data:image/svg+xml;utf8,<svg fill="%23ddd" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/></svg>') no-repeat right 10px center;
+  background-size: 12px;
+}
+
+.night-mode .modal-content .form-group input:focus,
+.night-mode .modal-content .form-group textarea:focus,
+.night-mode .modal-content .form-group select:focus {
+  border-color: #6caff7;
+}
+
+/* Animation for modal overlay */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Animation for modal content */
+.modal-content {
+  animation: slideIn 0.3s ease-in-out;
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateY(-50px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* Error message styling */
+.error-message {
+  color: #dc3545;
+  font-size: 0.85rem;
+  margin-top: 5px;
+}
+
+/* Override .btn-primary and .btn-secondary to prevent interference */
+.modal-content .btn-primary,
+.modal-content .btn-secondary {
+  background-color: #1e3c72;
+  padding: 12px 20px;
+  margin-right: 10px;
+}
+
+.modal-content .btn-primary:hover,
+.modal-content .btn-secondary:hover {
+  background-color: #2a5298;
+  transform: translateY(-2px);
+}
+
+.modal-content .btn-primary:disabled {
+  background-color: #6c757d;
+  cursor: not-allowed;
+  transform: none;
 }

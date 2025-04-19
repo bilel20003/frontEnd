@@ -1,4 +1,3 @@
-
 <!-- Navbar -->
 <app-navbar></app-navbar>
 
@@ -21,8 +20,8 @@
       <button class="mode-toggle" (click)="toggleMode()">
           <i class="fas" [ngClass]="isNightMode ? 'fa-sun' : 'fa-moon'"></i>
       </button>
-      <button class="btn btn-primary" (click)="goToReclamationPage()">+ Nouvelle Requête</button>
-  </div>
+      <button class="btn btn-primary" (click)="openCreateRequetePopup()">+ Nouvelle Requête</button>
+    </div>
   </header>
 
   <!-- Tableau des requêtes -->
@@ -73,15 +72,57 @@
     </div>
   
     <!-- Popup pour afficher les détails de la requête -->
-<div *ngIf="isPopupOpen" class="modal-overlay" (click)="closePopup()">
-  <div class="modal-content" (click)="$event.stopPropagation()"> <!-- Empêche le clic sur la popup de fermer la popup -->
-    <h3>Détails de la Requête</h3>
-    <p><strong>Réf:</strong> {{ selectedRequete?.id }}</p>
-    <p><strong>Objet:</strong> {{ selectedRequete?.objet }}</p>
-    <p><strong>Type de requête:</strong> {{ selectedRequete?.type }}</p>
-    <p><strong>Description:</strong> {{ selectedRequete?.description }}</p>
-    <p><strong>État:</strong> <span class="badge" [ngClass]="getBadgeClass(selectedRequete?.etat)">{{ selectedRequete?.etat ?? 'Inconnu' }}</span></p>
-    <button class="btn btn-secondary" (click)="closePopup()">Fermer</button>
+    <div *ngIf="isPopupOpen" class="modal-overlay" (click)="closePopup()">
+      <div class="modal-content" (click)="$event.stopPropagation()">
+        <h3>Détails de la Requête</h3>
+        <p><strong>Réf:</strong> {{ selectedRequete?.id }}</p>
+        <p><strong>Objet:</strong> {{ selectedRequete?.objet }}</p>
+        <p><strong>Type de requête:</strong> {{ selectedRequete?.type }}</p>
+        <p><strong>Description:</strong> {{ selectedRequete?.description }}</p>
+        <p><strong>État:</strong> <span class="badge" [ngClass]="getBadgeClass(selectedRequete?.etat)">{{ selectedRequete?.etat ?? 'Inconnu' }}</span></p>
+        <button class="btn btn-secondary" (click)="closePopup()">Fermer</button>
+      </div>
+    </div>
+
+    <!-- Popup pour créer une nouvelle requête -->
+    <div *ngIf="isCreatePopupOpen" class="modal-overlay" (click)="closeCreatePopup()">
+      <div class="modal-content" (click)="$event.stopPropagation()">
+        <h3>Nouvelle Requête</h3>
+        <form #newRequeteForm="ngForm" (ngSubmit)="submitNewRequete()">
+          <div class="form-group">
+            <label for="objet">Objet</label>
+            <select id="objet" name="objet" [(ngModel)]="newRequete.objet" required #objet="ngModel">
+              <option value="" disabled>Sélectionnez un objet</option>
+              <option value="OBJET_1">Objet 1</option>
+              <option value="OBJET_2">Objet 2</option>
+              <option value="OBJET_3">Objet 3</option>
+            </select>
+            <div *ngIf="objet.invalid && (objet.dirty || objet.touched)" class="error-message">
+              <div *ngIf="objet.errors?.['required']">L'objet est requis.</div>
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="type">Type de requête</label>
+            <select id="type" name="type" [(ngModel)]="newRequete.type" required #type="ngModel">
+              <option value="" disabled>Sélectionnez un type</option>
+              <option value="DEMANDE_DE_TRAVAUX">Demande de travaux</option>
+              <option value="RECLAMATION">Réclamation</option>
+            </select>
+            <div *ngIf="type.invalid && (type.dirty || type.touched)" class="error-message">
+              <div *ngIf="type.errors?.['required']">Le type de requête est requis.</div>
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="description">Description</label>
+            <textarea id="description" name="description" [(ngModel)]="newRequete.description" #description="ngModel" minlength="10"></textarea>
+            <div *ngIf="description.invalid && (description.dirty || description.touched)" class="error-message">
+              <div *ngIf="description.errors?.['minlength']">La description doit contenir au moins 10 caractères.</div>
+            </div>
+          </div>
+          <button type="submit" class="btn btn-primary" [disabled]="newRequeteForm.invalid">Créer</button>
+          <button type="button" class="btn btn-secondary" (click)="closeCreatePopup()">Annuler</button>
+        </form>
+      </div>
+    </div>
   </div>
 </div>
-  </div>
