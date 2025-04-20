@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Requete } from '../models/requete.model';
+import { UserInfo } from './user-info';
 
 @Injectable({
   providedIn: 'root'
@@ -31,4 +32,14 @@ export class RequeteService {
   
     return this.http.post<Requete>(`${this.apiUrl}/addrequete`, requete, { headers });
   }
+
+  getGuichetierWithLeastRequests(): Observable<UserInfo> {
+    const token = localStorage.getItem('token');
+    const headers = new HttpHeaders({
+        'Authorization': `Bearer ${token}`
+    });
+
+    return this.http.get<UserInfo>(`${this.apiUrl}/guichetier/least`, { headers });
+}
+
 }
