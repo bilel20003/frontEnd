@@ -3,13 +3,20 @@
 
 <!-- Contenu principal -->
 <div class="container">
+  <!-- Titre de l'interface -->
+<h2 class="text-center my-4">Gestion des Réclamations</h2>
   <!-- Barre de recherche -->
   <div class="search-bar-container">
     <div class="search-bar">
-      <input type="text" placeholder="Rechercher..." [(ngModel)]="searchTerm" (input)="filterReclamations()">
+      <input
+        type="text"
+        placeholder="Rechercher..."
+        [(ngModel)]="searchTerm"
+        (input)="filterReclamations()"
+      />
       <button><i class="fas fa-search"></i></button>
     </div>
-  </div> 
+  </div>
 
   <!-- Tableau des réclamations -->
   <div class="table-responsive">
@@ -29,8 +36,8 @@
         <tr *ngFor="let reclamation of filteredReclamations">
           <td>{{ reclamation.id }}</td>
           <td>{{ reclamation.type }}</td>
-          <td>{{ reclamation.date }}</td>
-          <td>{{ reclamation.client.nom }} {{ reclamation.client.prenom }}</td>
+          <td>{{ reclamation.date | date: 'dd/MM/yyyy' }}</td>
+          <td>{{ reclamation.client && reclamation.client.id ? reclamation.client.id : 'N/A' }}</td>
           <td>{{ reclamation.objet }}</td>
           <td>
             <span class="badge" [ngClass]="getBadgeClass(reclamation.etat)">
@@ -38,15 +45,62 @@
             </span>
           </td>
           <td>
-            <button class="btn btn-info btn-sm me-2" (click)="consulterReclamation(reclamation.id)" [routerLink]="['/request-details', reclamation.id]">
+            <button
+              class="btn btn-info btn-sm me-2"
+              (click)="consulterReclamation(reclamation.id)"
+            >
               <i class="fas fa-eye"></i> Consulter
             </button>
-            <button class="btn btn-danger btn-sm" (click)="refuserReclamation(reclamation.id)">
+            <button
+              class="btn btn-danger btn-sm"
+              (click)="refuserReclamation(reclamation.id)"
+            >
               <i class="fas fa-times"></i> Refuser
             </button>
           </td>
         </tr>
       </tbody>
     </table>
+  </div>
+
+  <!-- Popup pour les détails de la requête -->
+  <div *ngIf="isPopupOpen === true" class="modal-overlay">
+    <div class="modal-content">
+      <h3>📌 Détails de la requête</h3>
+      <div class="info-grid">
+        <div class="info-item">
+          <span class="label">📄 Type:</span>
+          <span class="value">{{ selectedRequete?.type || 'Non spécifié' }}</span>
+        </div>
+        <div class="info-item">
+          <span class="label">👤 Émetteur:</span>
+          <span class="value">{{ selectedRequete?.client?.id || 'ID client non disponible' }}</span>
+        </div>
+        <div class="info-item">
+          <span class="label">📌 Objet:</span>
+          <span class="value">{{ selectedRequete?.objet || 'Non spécifié' }}</span>
+        </div>
+        <div class="info-item">
+          <span class="label">⚡ État:</span>
+          <span class="badge" [ngClass]="getBadgeClass(selectedRequete?.etat || '')">
+            {{ selectedRequete?.etat || 'Non spécifié' }}
+          </span>
+        </div>
+        <div class="info-item">
+          <span class="label">📅 Date:</span>
+          <span class="value">{{ (selectedRequete?.date | date: 'dd/MM/yyyy') ?? 'Non spécifié' }}</span>
+        </div>
+        <div class="info-item full-width">
+          <span class="label">📝 Description:</span>
+          <p class="value description">{{ selectedRequete?.description || 'Aucune description' }}</p>
+        </div>
+        <div>
+          <label for="noteRetour">📋 Note de Retour:</label>
+          <textarea id="noteRetour" [(ngModel)]="noteRetour"></textarea>
+        </div>
+      </div>
+      <button (click)="confirmerTraitement()">Confirmer</button>
+      <button class="btn btn-secondary" (click)="closePopup()">Fermer</button>
+    </div>
   </div>
 </div>

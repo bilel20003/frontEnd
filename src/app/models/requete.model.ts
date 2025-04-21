@@ -1,5 +1,3 @@
-import { UserInfo } from "./user-info.model"; // Assurez-vous que ce modèle existe
-
 export interface Requete {
   id: number;
   type: 'DEMANDE_DE_TRAVAUX' | 'RECLAMATION'; // Retirer String

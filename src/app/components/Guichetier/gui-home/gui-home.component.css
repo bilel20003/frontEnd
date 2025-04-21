@@ -3,7 +3,32 @@
     max-width: 1700px;
     margin: auto;
     padding: 20px;
-    padding-top: 80px; /* Ajuste l'espace sous la top-bar */
+    padding-top: 80px;
+}
+/* Styles pour le titre de l'interface */
+h2 {
+    color: #1e3c72; /* Couleur du texte */
+    font-size: 2rem; /* Taille de la police */
+    font-weight: 600; /* Épaisseur de la police */
+    text-align: center; /* Centrer le texte */
+    text-transform: uppercase; /* Mettre le texte en majuscules */
+}
+
+/* Styles pour la zone de texte dans la popup */
+textarea {
+    width: 200%; /* Largeur de la zone de texte */
+    height: 62px; /* Hauteur de la zone de texte */
+    padding: 10px; /* Espacement intérieur */
+    border: 1px solid #ccc; /* Bordure */
+    border-radius: 5px; /* Coins arrondis */
+    font-size: 16px; /* Taille de la police */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Ombre */
+    transition: border-color 0.3s; /* Transition pour la couleur de la bordure */
+}
+
+textarea:focus {
+    border-color: #007bff; /* Couleur de la bordure au focus */
+    outline: none; /* Supprimer le contour par défaut */
 }
 
 /* Barre de recherche */
@@ -11,8 +36,6 @@
     display: flex;
     justify-content: flex-end;
     margin-bottom: 15px;
-    
-    top: 60px; /* Fixe la barre de recherche sous la top-bar */
     background-color: white; 
     padding: 10px 0;
 }
@@ -60,7 +83,6 @@
 .table {
     width: 100%;
     border-radius: 10px;
-    overflow: hidden;
     border-collapse: separate;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
 }
@@ -100,10 +122,6 @@ td:last-child {
     white-space: nowrap;
 }
 
-td:last-child .btn {
-    margin-bottom: 5px;
-}
-
 .btn {
     padding: 6px 12px;
     border-radius: 5px;
@@ -118,89 +136,127 @@ td:last-child .btn {
     margin-right: 5px;
 }
 
-/* Bande en haut */
-.top-bar {
+/* Styles pour la grille d'informations dans la popup */
+.info-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.info-item {
+    display: flex;
+    flex-direction: column;
+}
+
+.info-item.full-width {
+    grid-column: span 2;
+}
+
+.info-item .label {
+    font-weight: 500;
+    color: #1e3c72;
+    margin-bottom: 5px;
+}
+
+.info-item .value {
+    color: #333;
+    font-size: 0.95rem;
+}
+
+.info-item .description {
+    line-height: 1.5;
+    max-height: 100px;
+    overflow-y: auto;
+    padding: 5px;
+    background-color: #f9f9f9;
+    border-radius: 5px;
+}
+
+/* Mode nuit pour la grille d'informations */
+.night-mode .info-item .label {
+    color: #6caff7;
+}
+
+.night-mode .info-item .value {
+    color: #ddd;
+}
+
+.night-mode .info-item .description {
+    background-color: #333;
+    color: #ddd;
+}
+
+/* Styles existants pour la popup (déjà inclus dans votre CSS) */
+.modal-overlay {
     position: fixed;
     top: 0;
     left: 0;
-    width: 100%;
-    background: linear-gradient(135deg, #1e3c72, #2a5298);
-    padding: 10px;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.75);
     display: flex;
-    justify-content: flex-end;
+    justify-content: center;
     align-items: center;
     z-index: 1000;
+    animation: fadeIn 0.3s ease-in-out;
 }
 
-/* Bouton de l'icône */
-.icon-btn {
-    background-color: #fff;
+.modal-content {
+    background: white;
+    padding: 40px;
+    border-radius: 12px;
+    width: 700px;
+    max-width: 90%;
+    max-height: 80vh;
+    overflow-y: auto;
+    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.3);
+    transition: transform 0.3s ease, opacity 0.3s ease;
+    transform: translateY(0);
+    opacity: 1;
+}
+
+.modal-content h3 {
+    margin: 0 0 20px;
+    color: #1e3c72;
+    font-size: 1.8rem;
+    font-weight: 600;
+}
+
+.modal-content button {
+    background-color: #1e3c72;
+    color: white;
     border: none;
-    padding: 8px;
-    border-radius: 50%;
+    border-radius: 6px;
+    padding: 12px 20px;
     cursor: pointer;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    transition: background-color 0.3s, transform 0.2s;
+    font-size: 1rem;
+    margin-top: 10px;
 }
 
-.icon-btn i {
-    color: #2a5298;
-    font-size: 20px;
+.modal-content button:hover {
+    background-color: #2a5298;
+    transform: translateY(-2px);
 }
 
-/* Menu déroulant */
-.dropdown-menu {
-    display: none;
-    position: absolute;
-    right: 0;
-    top: 40px;
-    background-color: #fff;
-    border-radius: 5px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-    width: 150px;
-    z-index: 10;
+.night-mode .modal-content {
+    background: #2a2a2a;
+    color: white;
 }
 
-.dropdown-menu.show {
-    display: block;
+.night-mode .modal-content h3 {
+    color: #6caff7;
 }
 
-.dropdown-menu ul {
-    list-style: none;
-    padding: 0;
-    margin: 0;
+
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
 }
 
-.dropdown-menu li {
-    padding: 10px;
-    border-bottom: 1px solid #ddd;
-}
-
-.dropdown-menu li:last-child {
-    border-bottom: none;
-}
-
-.dropdown-menu li a {
-    text-decoration: none;
-    color: #333;
-    display: block;
-}
-
-.dropdown-menu li a:hover {
-    background-color: #f1f1f1;
-}
-
-/* Ajout de la couleur rouge pour le bouton de déconnexion */
-.dropdown-menu li.logout a {
-    color: red;
-    font-weight: bold;
-}
-
-/* Ajustement du contenu principal */
-body {
-    margin-left: 290px;
-    margin-top: 50px;
-}
-
-.sidebar .nav-links i {
-    font-size: 20px;
+@keyframes slideIn {
+    from { transform: translateY(-50px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
 }
