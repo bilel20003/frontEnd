@@ -25,20 +25,20 @@
     <table class="table table-hover shadow-sm rounded">
       <thead class="table-header">
         <tr>
-          <th>  ID ministere</th>
+          <th>ID ministère</th>
           <th>Nom du Ministère</th>
           <th>Actions</th>
         </tr>
       </thead>
       <tbody>
         <tr *ngFor="let ministry of paginatedMinistries">
-          <td>{{ ministry.id_ministere }}</td>
-          <td>{{ ministry.name }}</td>
+          <td>{{ ministry.id }}</td>
+          <td>{{ ministry.nomMinistere }}</td>
           <td>
             <button class="btn btn-info btn-sm me-2" (click)="openModal('edit', ministry)">
               <i class="fas fa-edit"></i> Modifier
             </button>
-            <button class="btn btn-danger btn-sm" (click)="deleteMinistry(ministry.id_ministere)">
+            <button class="btn btn-danger btn-sm" (click)="ministry.id !== undefined && deleteMinistere(ministry.id)">
               <i class="fas fa-trash"></i> Supprimer
             </button>
           </td>
@@ -66,10 +66,10 @@
 <div class="modal" [ngClass]="{'modal-open': showModal}">
   <div class="modal-content">
     <h4>{{ modalTitle }}</h4>
-    <form (ngSubmit)="saveMinistry()">
+    <form (ngSubmit)="saveMinistere()">
       <div class="form-group">
         <label for="ministryName">Nom du Ministère</label>
-        <input type="text" id="ministryName" [(ngModel)]="ministryName" name="ministryName" required class="form-control">
+        <input type="text" id="ministryName" [(ngModel)]="ministereName" name="ministryName" required class="form-control">
       </div>
       <button type="submit" class="btn btn-success">{{ modalButtonText }}</button>
       <button type="button" class="btn btn-secondary" (click)="closeModal()">Annuler</button>

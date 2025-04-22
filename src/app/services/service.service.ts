@@ -1,48 +1,48 @@
 import { Injectable } from '@angular/core';
-import { Observable, of } from 'rxjs';
-
-export interface ServiceModel {
-  id_service: number;
-  nom_service: string;
-}
+import { HttpClient, HttpHeaders, HttpErrorResponse } from '@angular/common/http';
+import { Observable, throwError } from 'rxjs';
+import { catchError } from 'rxjs/operators';
+import { Servicee } from '../models/service.model';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ServiceService {
 
-  private services: ServiceModel[] = [
-    { id_service: 1, nom_service: 'Informatique' },
-    { id_service: 2, nom_service: 'Ressources Humaines' },
-    { id_service: 3, nom_service: 'Logistique' },
-    { id_service: 4, nom_service: 'Comptabilité' },
-    { id_service: 5, nom_service: 'Affaires Juridiques' },
-    { id_service: 6, nom_service: 'Communication' }
-  ];
+  private apiUrl = 'http://localhost:8082/api/services';
 
-  constructor() {}
+  private getHttpOptions(): { headers: HttpHeaders } {
+    const token = localStorage.getItem('token');
+    return {
+      headers: new HttpHeaders({
+        'Content-Type': 'application/json',
+        'Authorization': token ? `Bearer ${token}` : ''
+      })
+    };
+  }
 
-  getAllServices(): Observable<ServiceModel[]> {
-    return of(this.services);
+  constructor(private http: HttpClient) {}
+
+  addNewService(service: Servicee): Observable<Servicee> {
+    return this.http.post<Servicee>(`${this.apiUrl}/addNewService`, service, this.getHttpOptions());
+  }
+
+  getAllService(): Observable<Servicee[]> {
+    return this.http.get<Servicee[]>(`${this.apiUrl}/getAllServices`, this.getHttpOptions());
   }
 
   deleteService(id: number): Observable<void> {
-    this.services = this.services.filter(s => s.id_service !== id);
-    return of();
+    return this.http.delete<void>(`${this.apiUrl}/deleteService/${id}`, this.getHttpOptions())
+      .pipe(catchError(this.handleError));
   }
 
-  addService(service: ServiceModel): Observable<ServiceModel> {
-    const newId = this.services.length ? Math.max(...this.services.map(s => s.id_service)) + 1 : 1;
-    const newService = { ...service, id_service: newId };
-    this.services.push(newService);
-    return of(newService);
+  updateService(id: number, service: Servicee): Observable<Servicee> {
+    return this.http.put<Servicee>(`${this.apiUrl}/updateService/${id}`, service, this.getHttpOptions())
+      .pipe(catchError(this.handleError));
   }
 
-  updateService(updatedService: ServiceModel): Observable<ServiceModel> {
-    const index = this.services.findIndex(s => s.id_service === updatedService.id_service);
-    if (index !== -1) {
-      this.services[index] = updatedService;
-    }
-    return of(updatedService);
+  private handleError(error: HttpErrorResponse): Observable<never> {
+    console.error('Erreur lors de la requête:', error);
+    return throwError(() => new Error('Une erreur est survenue, veuillez réessayer.'));
   }
 }

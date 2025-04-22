@@ -32,13 +32,13 @@
       </thead>
       <tbody>
         <tr *ngFor="let service of paginatedServices">
-          <td>{{ service.id_service }}</td>
-          <td>{{ service.nom_service }}</td>
+          <td>{{ service.id}}</td>
+          <td>{{ service.nomService }}</td>
           <td>
             <button class="btn btn-info btn-sm me-2" (click)="editService(service)">
               <i class="fas fa-edit"></i> Modifier
             </button>
-            <button class="btn btn-danger btn-sm" (click)="deleteService(service.id_service)">
+            <button class="btn btn-danger btn-sm" (click)="deleteService(service.id)">
               <i class="fas fa-trash"></i> Supprimer
             </button>
           </td>
@@ -76,13 +76,13 @@
         <form (ngSubmit)="saveService()">
           <div class="form-group">
             <label for="serviceName">Nom du Service</label>
-            <input type="text" id="serviceName" class="form-control" [(ngModel)]="currentService.nom_service" name="nom_service" required />
+            <input type="text" id="serviceName" class="form-control" [(ngModel)]="currentService.nomService" name="nom_service" required />
           </div>
         </form>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" (click)="closeModal()">Fermer</button>
-        <button type="submit" class="btn btn-primary" (click)="saveService()">Enregistrer</button>
+        <button type="button" class="btn btn-secondary" (click)="closeModal()">Annuler</button>
+        <button type="submit" class="btn btn-primary" (click)="saveService()">Ajuter</button>
       </div>
     </div>
   </div>

@@ -1,46 +1,50 @@
 import { Injectable } from '@angular/core';
-import { Observable, of } from 'rxjs';
-
+import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { Observable } from 'rxjs';
+import { Ministere } from '../models/ministere.model';
+import { catchError } from 'rxjs/operators';
+import { HttpErrorResponse } from '@angular/common/http';
+import { throwError } from 'rxjs';
 @Injectable({
+  
   providedIn: 'root'
 })
-export class MinistryService {
+export class MinistereService {
+  private apiUrl = 'http://localhost:8082/api/ministeres';
 
-  private ministries = [
-    { id: 1, name: 'Ministère de l\'Éducation', description: 'Responsable de l\'éducation nationale', services: [
-      { id: 1, name: 'Direction des Examens et Concours', description: 'Gestion des examens et concours' },
-      { id: 2, name: 'Service des Ressources Pédagogiques', description: 'Fourniture de ressources pédagogiques' }
-    ]},
-    { id: 2, name: 'Ministère de la Santé', description: 'Gestion des affaires sanitaires et médicales', services: [
-      { id: 3, name: 'Direction de la Santé Publique', description: 'Prévention des maladies et santé publique' },
-      { id: 4, name: 'Service des Hôpitaux', description: 'Gestion des hôpitaux et cliniques' }
-    ]},
-    { id: 3, name: 'Ministère des Finances', description: 'Responsable de la gestion économique et des finances publiques', services: [
-      { id: 5, name: 'Direction des Impôts', description: 'Gestion des impôts et des taxes' },
-      { id: 6, name: 'Service de la Comptabilité Publique', description: 'Suivi des comptes publics' }
-    ]}
-  ];
-
-  constructor() { }
-  deleteMinistry(ministryId: number): Observable<void> {
-    console.log(`Ministère avec l'ID ${ministryId} supprimé`);
-    return of();  // Simulation de la suppression, ici tu devrais interagir avec une API backend
+  private getHttpOptions(): { headers: HttpHeaders } {
+    const token = localStorage.getItem('token');
+    return {
+      headers: new HttpHeaders({
+        'Content-Type': 'application/json',
+        'Authorization': token ? `Bearer ${token}` : ''
+      })
+    };
   }
 
-  // Récupérer tous les ministères
-  getAllMinistries(): Observable<any> {
-    return of(this.ministries); // Retourner les données par défaut
+  constructor(private http: HttpClient) {}
+
+  addNewMinistere(ministere: { nomMinistere: string }): Observable<Ministere> {
+    return this.http.post<Ministere>(`${this.apiUrl}/addNewMinistere`, ministere, this.getHttpOptions());
   }
 
-  // Récupérer un ministère par son ID
-  getMinistryById(ministryId: number): Observable<any> {
-    const ministry = this.ministries.find(min => min.id === ministryId);
-    return of(ministry); // Retourner le ministère trouvé
+  getAllMinisteres(): Observable<Ministere[]> {
+    return this.http.get<Ministere[]>(`${this.apiUrl}/getAllMinisteres`, this.getHttpOptions());
   }
 
-  // Récupérer les services associés à un ministère
-  getServicesByMinistry(ministryId: number): Observable<any> {
-    const ministry = this.ministries.find(min => min.id === ministryId);
-    return of(ministry ? ministry.services : []); // Retourner les services associés au ministère
+ deleteMinistere(id: number): Observable<void> {
+  return this.http.delete<void>(`${this.apiUrl}/deleteMinistere/${id}`, this.getHttpOptions())
+    .pipe(catchError(this.handleError));
+}
+
+
+  updateMinistere(id: number, ministere: any): Observable<any> {
+    return this.http.put<any>(`${this.apiUrl}/updateMinistere/${id}`, ministere, this.getHttpOptions())
+      .pipe(catchError(this.handleError));
+  }
+
+  private handleError(error: HttpErrorResponse): Observable<never> {
+    console.error('Erreur lors de la requête:', error);
+    return throwError(() => new Error('Une erreur est survenue, veuillez réessayer.'));
   }
 }
