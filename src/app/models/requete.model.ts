@@ -9,5 +9,5 @@ export interface Requete {
 
   client?: { id: number };
   guichetier?: { id: number };
-  technicien?: { id: number };
+  technicien?: { id: number,name:String };
 }

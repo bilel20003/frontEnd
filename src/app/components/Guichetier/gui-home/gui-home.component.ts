@@ -153,6 +153,7 @@ export class GuiHomeComponent implements OnInit {
       alert('Veuillez remplir la note de retour.');
     }
   }
+  
 
   consulterReclamation(id: number): void {
     const reclamation = this.reclamations.find(r => r.id === id);

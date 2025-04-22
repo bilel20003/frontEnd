@@ -62,4 +62,15 @@ export class RequeteService {
 
     return this.http.get<UserInfo>(`${this.apiUrl}/guichetier/least`, { headers });
   }
+
+  // Dans votre RequeteService
+  getAllTechniciens(): Observable<UserInfo[]> {
+    const token = localStorage.getItem('token');
+    const headers = new HttpHeaders({
+      'Authorization': `Bearer ${token}`
+    });
+
+    return this.http.get<UserInfo[]>('http://localhost:8082/api/personnes/getalltechniciens', { headers });
+  }
+  
 }
