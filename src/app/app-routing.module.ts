@@ -20,7 +20,6 @@ import { GererRdvComponent } from './components/Guichetier/gerer-rdv/gerer-rdv.c
 import { TechHomeComponent } from './components/Technicien/tech-home/tech-home.component';
 
 import { GuiHomeComponent } from './components/Guichetier/gui-home/gui-home.component';
-import { GuiRequestDetailsComponent } from './components/Guichetier/gui-request-details/gui-request-details.component';
 
 //admin 
 import { UtilisateursComponent } from './components/Admin/utilisateurs/utilisateurs.component';
@@ -70,7 +69,6 @@ const routes: Routes = [
   // Guichetier routes
   { path: 'gerer-rdv', component: GererRdvComponent, canActivate: [AuthGuard] , data: { role: 'GUICHETIER' }},
   { path: 'gui-home', component: GuiHomeComponent, canActivate: [AuthGuard], data: { role: 'GUICHETIER' } },
-  { path: 'request-details/:id', component: GuiRequestDetailsComponent, canActivate: [AuthGuard] , data: { role: 'GUICHETIER' }},
 
   // Redirection des routes inconnues
 ];

@@ -23,7 +23,6 @@ import { TechHomeComponent } from './components/Technicien/tech-home/tech-home.c
 import { GuiHomeComponent } from './components/Guichetier/gui-home/gui-home.component';
 import { NgxPaginationModule } from 'ngx-pagination';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { GuiRequestDetailsComponent } from './components/Guichetier/gui-request-details/gui-request-details.component';
 
 //client
 
@@ -75,7 +74,6 @@ import { ServiceComponent } from './components/Admin/service/service.component';
     TechHomeComponent,
  
     GuiHomeComponent,
-    GuiRequestDetailsComponent,
   
 
     DetailDemandeComponent,

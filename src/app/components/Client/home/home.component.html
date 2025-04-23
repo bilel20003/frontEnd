@@ -1,9 +1,9 @@
 <!-- Navbar -->
 <app-navbar></app-navbar>
 
-<!-- Contenu principal -->
+<!-- Main Content -->
 <div class="container">
-  <!-- Barre de recherche -->
+  <!-- Search Bar -->
   <div class="search-bar-container">
     <div class="search-bar">
       <input type="text" placeholder="Rechercher..." [(ngModel)]="searchTerm" (input)="filterReclamations()">
@@ -11,20 +11,20 @@
     </div>
   </div>
 
-  <!-- Titre "Liste de Requêtes" avec le bouton "Nouvelle Requête" et l'icône de mode jour/nuit -->
+  <!-- Header with Title and Actions -->
   <header class="d-flex justify-content-between align-items-center">
     <h2 class="text-center" style="color: #070708; font-weight: 600; font-size: 2rem; margin-bottom: 40px; margin-left: 250px;">
       Liste de Requêtes
     </h2>
     <div class="header-actions">
       <button class="mode-toggle" (click)="toggleMode()">
-          <i class="fas" [ngClass]="isNightMode ? 'fa-sun' : 'fa-moon'"></i>
+        <i class="fas" [ngClass]="isNightMode ? 'fa-sun' : 'fa-moon'"></i>
       </button>
-      <button class="btn btn-primary" (click)="openCreateRequetePopup()">+ Nouvelle Requête</button>
+      <button *ngIf="userInfo?.role === 'CLIENT'" class="btn btn-primary" (click)="openCreateRequetePopup()">+ Nouvelle Requête</button>
     </div>
   </header>
 
-  <!-- Tableau des requêtes -->
+  <!-- Requests Table -->
   <div class="table-responsive">
     <table class="table table-hover shadow-sm rounded">
       <thead class="table-header">
@@ -33,6 +33,7 @@
           <th (click)="sort('objet')" class="sortable">Objet</th>
           <th (click)="sort('type')" class="sortable">Type de requête</th>
           <th>Description</th>
+          <th *ngIf="userInfo?.role === 'CLIENT' || userInfo?.role === 'ADMIN'" (click)="sort('produit')" class="sortable">Produit</th>
           <th (click)="sort('etat')" class="sortable">État</th>
           <th>Actions</th>
         </tr>
@@ -43,6 +44,7 @@
           <td>{{ requete.objet }}</td>
           <td>{{ requete.type }}</td>
           <td>{{ requete.description }}</td>
+          <td *ngIf="userInfo?.role === 'CLIENT' || userInfo?.role === 'ADMIN'">{{ requete.produit?.nom || 'N/A' }}</td>
           <td>
             <span class="badge" [ngClass]="getBadgeClass(requete.etat)">
               {{ requete.etat }}
@@ -57,7 +59,7 @@
       </tbody>
     </table>
 
-    <!-- Pagination et Choix des lignes par page -->
+    <!-- Pagination and Items Per Page -->
     <div class="pagination-container d-flex justify-content-between">
       <div class="page-options">
         <select [(ngModel)]="itemsPerPage" (change)="onItemsPerPageChange($event)">
@@ -70,8 +72,8 @@
         <button (click)="goToNextPage()" [disabled]="currentPage === totalPages">Suivant</button>
       </div>
     </div>
-  
-    <!-- Popup pour afficher les détails de la requête -->
+
+    <!-- Popup for Request Details -->
     <div *ngIf="isPopupOpen" class="modal-overlay" (click)="closePopup()">
       <div class="modal-content" (click)="$event.stopPropagation()">
         <h3>Détails de la Requête</h3>
@@ -79,12 +81,16 @@
         <p><strong>Objet:</strong> {{ selectedRequete?.objet }}</p>
         <p><strong>Type de requête:</strong> {{ selectedRequete?.type }}</p>
         <p><strong>Description:</strong> {{ selectedRequete?.description }}</p>
+        <p *ngIf="userInfo?.role === 'CLIENT' || userInfo?.role === 'ADMIN'"><strong>Produit:</strong> {{ selectedRequete?.produit?.nom || 'N/A' }}</p>
         <p><strong>État:</strong> <span class="badge" [ngClass]="getBadgeClass(selectedRequete?.etat)">{{ selectedRequete?.etat ?? 'Inconnu' }}</span></p>
+        <p><strong>Client:</strong> {{ selectedRequete?.client?.name || selectedRequete?.client?.id }}</p>
+        <p><strong>Guichetier:</strong> {{ selectedRequete?.guichetier?.name || selectedRequete?.guichetier?.id || 'Non assigné' }}</p>
+        <p><strong>Technicien:</strong> {{ selectedRequete?.technicien?.name || selectedRequete?.technicien?.id || 'Non assigné' }}</p>
         <button class="btn btn-secondary" (click)="closePopup()">Fermer</button>
       </div>
     </div>
 
-    <!-- Popup pour créer une nouvelle requête -->
+    <!-- Popup for Creating New Request -->
     <div *ngIf="isCreatePopupOpen" class="modal-overlay" (click)="closeCreatePopup()">
       <div class="modal-content" (click)="$event.stopPropagation()">
         <h3>Nouvelle Requête</h3>
@@ -110,6 +116,16 @@
             </select>
             <div *ngIf="type.invalid && (type.dirty || type.touched)" class="error-message">
               <div *ngIf="type.errors?.['required']">Le type de requête est requis.</div>
+            </div>
+          </div>
+          <div class="form-group" *ngIf="userInfo?.role === 'CLIENT'">
+            <label for="produit">Produit</label>
+            <select id="produit" name="produit" [(ngModel)]="newRequete.produit" required #produit="ngModel">
+              <option value="" disabled>Sélectionnez un produit</option>
+              <option *ngFor="let prod of produits" [ngValue]="prod">{{ prod.nom }}</option>
+            </select>
+            <div *ngIf="produit.invalid && (produit.dirty || produit.touched)" class="error-message">
+              <div *ngIf="produit.errors?.['required']">Le produit est requis.</div>
             </div>
           </div>
           <div class="form-group">

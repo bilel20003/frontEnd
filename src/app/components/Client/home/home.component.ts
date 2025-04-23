@@ -1,8 +1,12 @@
 import { Component, OnInit } from "@angular/core";
 import { Router } from "@angular/router";
 import { Requete } from 'src/app/models/requete.model';
+import { UserInfo } from 'src/app/models/user-info.model';
+import { Produit } from "src/app/models/produit.model";
 import { RequeteService } from 'src/app/services/requete.service';
+import { ProduitService } from 'src/app/services/produit.service';
 import { jwtDecode } from "jwt-decode";
+import { Observable } from "rxjs";
 
 @Component({
   selector: 'app-home',
@@ -26,61 +30,120 @@ export class HomeComponent implements OnInit {
   selectedRequete: Requete | null = null;
 
   newRequete: Omit<Requete, 'id'> = this.getEmptyRequete();
+  userInfo: { id: number; role: string; produit?: Produit } | null = null;
+  produits: Produit[] = [];
+  isProduitsLoaded: boolean = false;
 
   constructor(
     private router: Router,
-    private requeteService: RequeteService
+    private requeteService: RequeteService,
+    private produitService: ProduitService
   ) {}
 
   ngOnInit(): void {
-    const clientId = this.getClientIdFromToken();
+    this.loadUserInfo();
+    this.loadProduits();
+    this.loadRequetes();
 
-    if (clientId) {
-      this.requeteService.getRequetesByClientId(clientId).subscribe({
-        next: (data) => {
-          this.requetes = data;
-          this.filteredRequetes = [...this.requetes];
-          this.updatePagination();
-        },
-        error: (err) => {
-          console.error('Erreur de chargement des requêtes:', err);
-          alert('Impossible de charger les requêtes.');
-        }
-      });
-    } else {
-      alert('Session invalide. Veuillez vous reconnecter.');
-      this.router.navigate(['/login']);
-    }
-
-    // Appliquer le mode nuit si besoin
     const storedMode = localStorage.getItem('mode');
     if (storedMode === 'night') this.enableNightMode();
   }
 
-  private getClientIdFromToken(): number | null {
+  private loadUserInfo(): void {
     const token = localStorage.getItem('token');
-    if (!token) return null;
+    if (!token) {
+      this.redirectToLogin();
+      return;
+    }
 
     try {
-      const decoded = jwtDecode<{ id: number }>(token);
-      return decoded.id ?? null;
+      const decoded = jwtDecode<{ id: number; role: string; produit: Produit }>(token);
+      this.userInfo = {
+        id: decoded.id,
+        role: decoded.role,
+        produit: decoded.produit
+      };
     } catch (e) {
-      console.error('Erreur de décodage du token:', e);
-      return null;
+      console.error('Error decoding token:', e);
+      this.redirectToLogin();
     }
+  }
+
+  private loadProduits(): void {
+    if (this.userInfo?.role === 'CLIENT') {
+      this.produitService.getAllProduits().subscribe({
+        next: (produits) => {
+          this.produits = produits.filter(p => p.nom !== 'Any');
+          if (this.userInfo?.produit) {
+            const userProduit = this.produits.find(p => p.id === this.userInfo!.produit!.id);
+            this.newRequete.produit = userProduit || this.produits[0];
+          }
+          this.isProduitsLoaded = true;
+        },
+        error: (err) => {
+          console.error('Error loading produits:', err);
+          alert('Impossible de charger les produits.');
+          this.isProduitsLoaded = true; // Allow UI to proceed even if error
+        }
+      });
+    } else {
+      this.produits = [{ id: 1, nom: 'Any' }];
+      this.isProduitsLoaded = true;
+    }
+  }
+
+  private loadRequetes(): void {
+    if (!this.userInfo) return;
+
+    let observable: Observable<Requete[]>;
+    switch (this.userInfo.role) {
+      case 'CLIENT':
+        observable = this.requeteService.getRequetesByClientId(this.userInfo.id);
+        break;
+      case 'GUICHETIER':
+        observable = this.requeteService.getRequetesByGuichetierId(this.userInfo.id);
+        break;
+      case 'TECHNICIEN':
+        observable = this.requeteService.getRequetesByTechnicienId(this.userInfo.id);
+        break;
+      case 'ADMIN':
+        observable = this.requeteService.getAllRequetes();
+        break;
+      default:
+        this.redirectToLogin();
+        return;
+    }
+
+    observable.subscribe({
+      next: (data) => {
+        this.requetes = data;
+        this.filteredRequetes = [...this.requetes];
+        this.updatePagination();
+      },
+      error: (err) => {
+        console.error('Error loading requetes:', err);
+        alert('Impossible de charger les requêtes.');
+      }
+    });
   }
 
   private getEmptyRequete(): Omit<Requete, 'id'> {
     return {
-      type: '' as any,
-      objet: '' as any,
+      type: 'DEMANDE_DE_TRAVAUX',
+      objet: 'OBJET_1',
       description: '',
       etat: 'NOUVEAU',
       date: new Date(),
       noteRetour: '',
-      client: { id: 0 },
-      guichetier: { id: 0 }
+      client: { id: this.userInfo?.id || 0 },
+      guichetier: { id: 0 },
+      produit: this.userInfo?.role === 'CLIENT' ? this.userInfo?.produit : { id: 1, nom: 'Any' }
     };
+  }
+
+  private redirectToLogin(): void {
+    alert('Session invalide. Veuillez vous reconnecter.');
+    this.router.navigate(['/login']);
   }
 
   filterReclamations(): void {
@@ -89,7 +152,7 @@ export class HomeComponent implements OnInit {
       Object.values(req).some(val =>
         (typeof val === 'string' || typeof val === 'number') &&
         val.toString().toLowerCase().includes(term)
-      )
+      ) || (req.produit?.nom?.toLowerCase()?.includes(term) ?? false)
     );
     this.currentPage = 1;
     this.updatePagination();
@@ -100,11 +163,20 @@ export class HomeComponent implements OnInit {
     const dir = this.sortDirection[column] ? 1 : -1;
 
     this.filteredRequetes.sort((a, b) => {
-      const valA = a[column];
-      const valB = b[column];
+      let valA = a[column];
+      let valB = b[column];
 
-      const strA = (valA ?? '').toString();
-      const strB = (valB ?? '').toString();
+      if (column === 'produit') {
+        valA = a.produit?.nom ?? 'N/A';
+        valB = b.produit?.nom ?? 'N/A';
+      } else {
+        valA = valA ?? '';
+        valB = valB ?? '';
+      }
+
+      const strA = valA.toString();
+      const strB = valB.toString();
+
       return dir * strA.localeCompare(strB, 'fr', { numeric: true });
     });
 
@@ -125,15 +197,13 @@ export class HomeComponent implements OnInit {
   enableNightMode(): void {
     document.body.classList.add('night-mode');
     localStorage.setItem('mode', 'night');
+    this.isNightMode = true;
   }
 
   disableNightMode(): void {
     document.body.classList.remove('night-mode');
     localStorage.setItem('mode', 'day');
-  }
-
-  goToReclamationPage(): void {
-    this.router.navigate(['/reclamation']);
+    this.isNightMode = false;
   }
 
   openPopup(requete: Requete): void {
@@ -147,6 +217,18 @@ export class HomeComponent implements OnInit {
   }
 
   openCreateRequetePopup(): void {
+    if (this.userInfo?.role !== 'CLIENT') {
+      alert('Seuls les clients peuvent créer des requêtes.');
+      return;
+    }
+    if (!this.isProduitsLoaded) {
+      alert('Les produits sont en cours de chargement. Veuillez réessayer dans un instant.');
+      return;
+    }
+    if (this.produits.length === 0) {
+      alert('Aucun produit disponible. Veuillez contacter l\'administrateur.');
+      return;
+    }
     this.newRequete = this.getEmptyRequete();
     this.isCreatePopupOpen = true;
   }
@@ -157,9 +239,8 @@ export class HomeComponent implements OnInit {
   }
 
   submitNewRequete(): void {
-    const clientId = this.getClientIdFromToken();
-    if (!clientId) {
-      alert('Token invalide. Veuillez vous reconnecter.');
+    if (!this.userInfo) {
+      this.redirectToLogin();
       return;
     }
 
@@ -168,8 +249,9 @@ export class HomeComponent implements OnInit {
         const completeRequete: Omit<Requete, 'id'> = {
           ...this.newRequete,
           date: new Date(),
-          client: { id: clientId },
-          guichetier: { id: (guichetier as any).id }
+          client: { id: this.userInfo!.id },
+          guichetier: { id: guichetier.id },
+          produit: this.userInfo!.role === 'CLIENT' ? this.newRequete.produit : { id: 1, nom: 'Any' }
         };
 
         this.requeteService.createRequete(completeRequete).subscribe({
@@ -181,13 +263,13 @@ export class HomeComponent implements OnInit {
             alert('Requête créée avec succès !');
           },
           error: (error) => {
-            console.error('Erreur lors de la création de la requête:', error);
+            console.error('Error creating requete:', error);
             alert('Erreur lors de la création de la requête. Veuillez réessayer.');
           }
         });
       },
       error: (error) => {
-        console.error('Erreur récupération guichetier:', error);
+        console.error('Error fetching guichetier:', error);
         alert('Impossible de récupérer le guichetier.');
       }
     });
