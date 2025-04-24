@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders, HttpErrorResponse } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { Produit } from '../models/produit.model';
@@ -17,18 +17,30 @@ export class ProduitService {
     return {
       headers: new HttpHeaders({
         'Content-Type': 'application/json',
-        'Authorization': token ? `Bearer ${token}` : ''
+        'Authorization': token ?` Bearer ${token}` : ''
       })
     };
   }
 
   getAllProduits(): Observable<Produit[]> {
-    return this.http.get<Produit[]>(`${this.apiUrl}/getallproduits`, this.getHttpOptions())
-      .pipe(catchError(this.handleError));
+    return this.http.get<Produit[]>(`${this.apiUrl}/getallproduits`, this.getHttpOptions());
   }
 
-  private handleError(error: HttpErrorResponse): Observable<never> {
-    console.error('Erreur lors de la requête:', error);
-    return throwError(() => new Error('Une erreur est survenue, veuillez réessayer.'));
+  
+  addProduit(produit: Produit): Observable<Produit> {
+    const headers = new HttpHeaders({
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer ' + localStorage.getItem('token')  // ou autre méthode de stockage du token
+    });
+  
+    return this.http.post<Produit>(`${this.apiUrl}/addproduit`,produit,{ headers: headers });
   }
+
+  updateProduit(id: number, produit: Produit): Observable<Produit> {
+    return this.http.put<Produit>(`${this.apiUrl}/updateproduit/${produit.id}`, produit, this.getHttpOptions());
+  }
+  deleteProduit(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/deleteproduit/${id}`, this.getHttpOptions());
+  }
+  
 }

@@ -1,51 +1,40 @@
-import { Component } from '@angular/core';
-
-interface Role {
-  id_role: number;
-  name: string;
-}
+import { Component, OnInit } from '@angular/core';
+import { RoleService } from 'src/app/services/role.service';
+import { Role } from 'src/app/models/role.model';
 
 @Component({
   selector: 'app-role',
   templateUrl: './role.component.html',
   styleUrls: ['./role.component.css']
 })
-export class GererRoleComponent {
+export class GererRoleComponent implements OnInit {
 
-  // Liste des rôles (remplacer par une API réelle)
-  roles: Role[] = [
-    { id_role: 1, name: 'Administrateur' },
-    { id_role: 2, name: 'Utilisateur' },
-    { id_role: 3, name: 'Manager' },
-    { id_role: 4, name: 'Technicien' },
-    { id_role: 5, name: 'Superviseur' },
-    { id_role: 6, name: 'Guest' },
-  ];
-
-  // Recherche et pagination
-  searchTerm = '';
-  filteredRoles: Role[] = [...this.roles];
+  roles: Role[] = [];
+  filteredRoles: Role[] = [];
   paginatedRoles: Role[] = [];
-
-  // Pagination
+  searchTerm = '';
   currentPage = 1;
   itemsPerPage = 5;
-
-  // Mode nuit
   isNightMode = false;
-
-  // Modal
   showModal = false;
   modalTitle = '';
   modalButtonText = '';
   roleName = '';
   currentRole: Role | null = null;
 
-  constructor() {
-    this.updatePaginatedRoles();
+  constructor(private roleService: RoleService) {}
+
+  ngOnInit(): void {
+    this.fetchRoles();
   }
 
-  // Recherche
+  fetchRoles() {
+    this.roleService.getAllRoles().subscribe(data => {
+      this.roles = data;
+      this.filterRoles();
+    });
+  }
+
   filterRoles() {
     const term = this.searchTerm.toLowerCase();
     this.filteredRoles = this.roles.filter(role =>
@@ -55,7 +44,6 @@ export class GererRoleComponent {
     this.updatePaginatedRoles();
   }
 
-  // Pagination
   get totalPages(): number {
     return Math.ceil(this.filteredRoles.length / this.itemsPerPage);
   }
@@ -85,26 +73,17 @@ export class GererRoleComponent {
     this.updatePaginatedRoles();
   }
 
-  // Mode nuit
   toggleMode() {
     this.isNightMode = !this.isNightMode;
     document.body.classList.toggle('night-mode', this.isNightMode);
   }
 
-  // Actions CRUD
-  openModal(action: string, role?: Role) {
+  openModal(action: string, role: Role) {
     this.showModal = true;
-    if (action === 'add') {
-      this.modalTitle = 'Ajouter un Rôle';
-      this.modalButtonText = 'Ajouter';
-      this.roleName = '';
-      this.currentRole = null;
-    } else if (action === 'edit' && role) {
-      this.modalTitle = `Modifier le rôle: ${role.name}`;
-      this.modalButtonText = 'Modifier';
-      this.roleName = role.name;
-      this.currentRole = role;
-    }
+    this.modalTitle = `Modifier le rôle: ${role.name}`;
+    this.modalButtonText = 'Modifier';
+    this.roleName = role.name;
+    this.currentRole = { ...role };
   }
 
   closeModal() {
@@ -113,22 +92,11 @@ export class GererRoleComponent {
 
   saveRole() {
     if (this.currentRole) {
-      // Mise à jour du rôle
       this.currentRole.name = this.roleName;
-    } else {
-      // Ajout d'un nouveau rôle
-      const newId = this.roles.length + 1;
-      this.roles.push({ id_role: newId, name: this.roleName });
-    }
-
-    this.closeModal();
-    this.filterRoles(); // Mise à jour après ajout/modification
-  }
-
-  deleteRole(id_role: number) {
-    if (confirm('Voulez-vous vraiment supprimer ce rôle ?')) {
-      this.roles = this.roles.filter(r => r.id_role !== id_role);
-      this.filterRoles(); // Mise à jour après suppression
+      this.roleService.updateRole(this.currentRole).subscribe(() => {
+        this.fetchRoles(); // Recharger après modification
+        this.closeModal();
+      });
     }
   }
 }

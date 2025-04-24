@@ -35,9 +35,9 @@
       <tbody>
         <tr *ngFor="let product of paginatedProducts">
           <td>{{ product.id }}</td>
-          <td>{{ product.name }}</td>
+          <td>{{ product.nom }}</td>
           <td>{{ product.description }}</td>
-          <td>{{ product.price }}</td>
+          <td>{{ product.prix }}</td>
           <td>{{ product.topologie }}</td>
           <td>
             <button class="btn btn-info btn-sm me-2" (click)="openModal(product)">
@@ -73,16 +73,13 @@
       <form (ngSubmit)="editingProduct ? updateProduct() : addProduct()">
         <div class="form-group">
           <label for="name">Nom</label>
-          <input type="text" [(ngModel)]="productForm.name" name="name" required>
+          <input type="text" [(ngModel)]="productForm.nom" name="name" required>
         </div>
         <div class="form-group">
           <label for="description">Description</label>
           <textarea [(ngModel)]="productForm.description" name="description" required></textarea>
         </div>
-        <div class="form-group">
-          <label for="price">Prix</label>
-          <input type="number" [(ngModel)]="productForm.price" name="price" required>
-        </div>
+       
         <div class="form-group">
           <label for="topologie">Topologie</label>
           <select [(ngModel)]="productForm.topologie" name="topologie" required>
@@ -91,6 +88,10 @@
             <option value="6-10 utilisateurs">6-10 utilisateurs</option>
             <option value="plus de 10 utilisateurs">Plus de 10 utilisateurs</option>
           </select>
+        </div>
+        <div class="form-group">
+          <label for="price">Prix</label>
+          <input type="number" [(ngModel)]="productForm.prix" name="price" required>
         </div>
         <div class="form-actions">
           <button type="submit" class="btn btn-success">{{ editingProduct ? 'Mettre à jour' : 'Ajouter' }}</button>

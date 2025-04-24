@@ -1,7 +1,8 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Observable } from 'rxjs';
-import { Role } from '../models/role.model';
+import { Observable, throwError } from 'rxjs';
+import { catchError } from 'rxjs/operators';
+import { Role } from '../models/role.model'; // Assure-toi que ce chemin est correct
 
 @Injectable({
   providedIn: 'root'
@@ -11,15 +12,32 @@ export class RoleService {
 
   constructor(private http: HttpClient) {}
 
-  private getHeaders(): HttpHeaders {
+  private getHttpOptions(): { headers: HttpHeaders } {
     const token = localStorage.getItem('token');
-    return new HttpHeaders({
-      'Authorization': `Bearer ${token}`,
-      'Content-Type': 'application/json'
-    });
+    return {
+      headers: new HttpHeaders({
+        'Content-Type': 'application/json',
+        'Authorization': token ? `Bearer ${token}` : ''
+      })
+    };
   }
 
   getAllRoles(): Observable<Role[]> {
-    return this.http.get<Role[]>(`${this.apiUrl}/all`, { headers: this.getHeaders() });
+    return this.http.get<Role[]>(`${this.apiUrl}/getall`, this.getHttpOptions())
+      .pipe(
+        catchError(this.handleError)
+      );
+  }
+
+  updateRole(role: Role): Observable<Role> {
+    return this.http.put<Role>(`${this.apiUrl}/update/${role.id}`, role, this.getHttpOptions())
+      .pipe(
+        catchError(this.handleError)
+      );
+  }
+
+  private handleError(error: any) {
+    console.error('Erreur détectée dans RoleService:', error);
+    return throwError(() => new Error('Une erreur est survenue. Veuillez réessayer.'));
   }
 }

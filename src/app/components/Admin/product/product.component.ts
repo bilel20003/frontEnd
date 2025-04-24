@@ -1,14 +1,6 @@
 import { Component, OnInit } from '@angular/core';
-import { ProductService } from 'src/app/services/product.service';
-
-interface Product {
-  id: number;
-  name: string;
-  description: string;
-  price: number;
-  stock: number;
-  topologie: string;
-}
+import { ProduitService } from 'src/app/services/produit.service'; 
+import { Produit } from 'src/app/models/produit.model';
 
 @Component({
   selector: 'app-product',
@@ -17,27 +9,71 @@ interface Product {
 })
 export class ProductsComponent implements OnInit {
 
-  products: Product[] = [];
-  newProduct: Product = { id: 0, name: '', description: '', price: 0, stock: 0, topologie: '' };
-  editingProduct: Product | null = null;
+  products: Produit[] = [];
+  paginatedProducts: Produit[] = [];
+  productForm: Produit = { id: 0, nom: '', description: '', topologie: '' , prix: 0 };
+  editingProduct: Produit | null = null;
+  isModalOpen: boolean = false;
   searchTerm: string = '';
   itemsPerPage: number = 5;
   currentPage: number = 1;
   totalPages: number = 1;
-  paginatedProducts: Product[] = [];
   isNightMode: boolean = false;
-  isModalOpen: boolean = false;
-  productForm: Product = { id: 0, name: '', description: '', price: 0, stock: 0, topologie: '' };
 
-  constructor(private productService: ProductService) {}
+  constructor(private productService: ProduitService) {}
 
   ngOnInit() {
     this.getProducts();
   }
 
   getProducts() {
-    this.products = this.productService.getProducts();
-    this.paginateProducts();
+    this.productService.getAllProduits().subscribe(data => {
+      this.products = data;
+      this.paginateProducts();
+    });
+  }
+
+  addProduct() {
+    this.productService.addProduit(this.productForm).subscribe(() => {
+      this.getProducts();
+      this.closeModal();
+    });
+  }
+
+  updateProduct() {
+    if (this.editingProduct) {
+      this.productService.updateProduit(this.editingProduct.id, this.productForm).subscribe(() => {
+        this.getProducts();
+        this.closeModal();
+      });
+    }
+  }
+
+  deleteProduct(id: number) {
+    if (confirm('Voulez-vous vraiment supprimer ce produit ?')) {
+      this.productService.deleteProduit(id).subscribe(() => this.getProducts());
+    }
+  }
+
+  openModal(product: Produit | null = null): void {
+    this.isModalOpen = true;
+    this.productForm = product ? { ...product } : { id: 0, nom: '', description: '', topologie: '', prix: 0 };
+    this.editingProduct = product;
+  }
+
+  closeModal(): void {
+    this.isModalOpen = false;
+    this.productForm = { id: 0, nom: '', description: '', topologie: '', prix: 0 };
+    this.editingProduct = null;
+  }
+
+  filterProducts() {
+    const term = this.searchTerm.toLowerCase();
+    this.paginatedProducts = this.products.filter(product =>
+      product.nom.toLowerCase().includes(term) ||
+      (product.description || '').toLowerCase().includes(term) ||
+      (product.topologie || '').toLowerCase().includes(term)
+    );
   }
 
   paginateProducts() {
@@ -45,63 +81,6 @@ export class ProductsComponent implements OnInit {
     const endIndex = startIndex + this.itemsPerPage;
     this.paginatedProducts = this.products.slice(startIndex, endIndex);
     this.totalPages = Math.ceil(this.products.length / this.itemsPerPage);
-  }
-
-  openModal(product: Product | null = null): void {
-    this.isModalOpen = true;
-    if (product) {
-      this.editingProduct = { ...product };
-      this.productForm = { ...product };
-    } else {
-      this.editingProduct = null;
-      this.productForm = { id: 0, name: '', description: '', price: 0, stock: 0, topologie: '' };
-    }
-  }
-
-  closeModal(): void {
-    this.isModalOpen = false;
-    this.productForm = { id: 0, name: '', description: '', price: 0, stock: 0, topologie: '' };
-  }
-
-  addProduct() {
-    if (this.productForm.name && this.productForm.description && this.productForm.price && this.productForm.topologie) {
-      this.productService.addProduct(this.productForm);
-      this.getProducts();
-      this.closeModal();
-    } else {
-      alert('Veuillez remplir tous les champs');
-    }
-  }
-
-  updateProduct() {
-    if (this.productForm.name && this.productForm.description && this.productForm.price && this.productForm.topologie) {
-      this.productService.updateProduct(this.productForm.id, this.productForm);
-      this.getProducts();
-      this.closeModal();
-    } else {
-      alert('Veuillez remplir tous les champs');
-    }
-  }
-
-  deleteProduct(productId: number) {
-    if (confirm('Voulez-vous vraiment supprimer ce produit ?')) {
-      this.productService.deleteProduct(productId);
-      this.getProducts();
-    }
-  }
-
-  filterProducts() {
-    if (this.searchTerm) {
-      const term = this.searchTerm.toLowerCase();
-      this.products = this.productService.getProducts().filter(product =>
-        product.name.toLowerCase().includes(term) ||
-        product.description.toLowerCase().includes(term) ||
-        product.topologie.toLowerCase().includes(term)
-      );
-    } else {
-      this.getProducts();
-    }
-    this.paginateProducts();
   }
 
   goToPreviousPage() {
