@@ -113,6 +113,15 @@
           <span class="label">📅 Date:</span>
           <span class="value">{{ (selectedRequete.date | date: 'dd/MM/yyyy') ?? 'Non spécifié' }}</span>
         </div>
+        <div class="info-item" *ngIf="selectedRequete as req">
+          <span class="label">👷 Technicien:</span>
+          <ng-container *ngIf="req.technicien as tech">
+            <span class="value">ID: {{ tech.id }}</span>
+          </ng-container>
+          <ng-container *ngIf="!req.technicien">
+            <span class="value">Non affecté</span>
+          </ng-container>
+        </div>
         <div class="info-item full-width">
           <span class="label">📝 Description:</span>
           <p class="value description">{{ selectedRequete.description || 'Aucune description' }}</p>
@@ -123,7 +132,28 @@
         </div>
       </div>
       <button (click)="confirmerTraitement()">Confirmer</button>
+      <button class="btn btn-primary" (click)="openTechnicienPopup()" [disabled]="selectedRequete.technicien || selectedRequete.etat === 'TRAITEE' || selectedRequete.etat === 'REFUSEE'">
+        <i class="fas fa-user-cog"></i> Affecter Technicien
+      </button>
       <button class="btn btn-secondary" (click)="closePopup()">Fermer</button>
+
+      <!-- Popup pour sélectionner un technicien -->
+      <div *ngIf="isTechnicienPopupOpen" class="modal-overlay technicien-popup">
+        <div class="modal-content">
+          <h3>👷 Sélectionner un Technicien</h3>
+          <div class="technicien-select">
+            <label for="technicienSelect">Technicien:</label>
+            <select id="technicienSelect" [(ngModel)]="selectedTechnicienId">
+              <option value="" disabled selected>Sélectionner un technicien</option>
+              <option *ngFor="let technicien of techniciens" [value]="technicien.id">
+                {{ technicien.name }} (ID: {{ technicien.id }})
+              </option>
+            </select>
+          </div>
+          <button class="btn btn-primary" (click)="assignTechnicien()">Affecter</button>
+          <button class="btn btn-secondary" (click)="closePopup()">Annuler</button>
+        </div>
+      </div>
     </div>
   </div>
 </div>

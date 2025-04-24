@@ -1,12 +1,12 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpErrorResponse } from '@angular/common/http';
 import { RequeteService } from 'src/app/services/requete.service';
 import { ObjetService } from 'src/app/services/objet.service';
+import { UserInfoService, Technicien } from 'src/app/services/user-info.service';
 import { Requete } from 'src/app/models/requete.model';
 import { Objet } from 'src/app/models/objet.model';
 import { jwtDecode } from 'jwt-decode';
-import { HttpErrorResponse } from '@angular/common/http';
 
 @Component({
   selector: 'app-gui-home',
@@ -19,20 +19,24 @@ export class GuiHomeComponent implements OnInit {
   paginatedReclamations: Requete[] = [];
   objets: Objet[] = [];
   objetMap: { [key: number]: Objet } = {};
+  techniciens: Technicien[] = [];
   searchTerm: string = '';
   sortDirection: { [key: string]: boolean } = {};
   currentPage: number = 1;
   itemsPerPage: number = 5;
   totalPages: number = 1;
   isPopupOpen: boolean = false;
+  isTechnicienPopupOpen: boolean = false;
   selectedRequete: Requete | null = null;
+  selectedTechnicienId: number | null = null;
   noteRetour: string = '';
   isObjetsLoaded: boolean = false;
 
   constructor(
     private router: Router,
     private requeteService: RequeteService,
-    private objetService: ObjetService
+    private objetService: ObjetService,
+    private userInfoService: UserInfoService
   ) {}
 
   ngOnInit(): void {
@@ -74,6 +78,19 @@ export class GuiHomeComponent implements OnInit {
         console.error('Error loading objets:', err);
         alert('Impossible de charger les objets.');
         this.isObjetsLoaded = true;
+      }
+    });
+  }
+
+  private loadTechniciens(): void {
+    this.userInfoService.getAllTechniciens().subscribe({
+      next: (techniciens) => {
+        console.log('Techniciens received:', techniciens);
+        this.techniciens = techniciens;
+      },
+      error: (err: HttpErrorResponse) => {
+        console.error('Error loading techniciens:', err);
+        alert('Impossible de charger la liste des techniciens.');
       }
     });
   }
@@ -215,6 +232,7 @@ export class GuiHomeComponent implements OnInit {
     if (reclamation) {
       this.selectedRequete = reclamation;
       this.isPopupOpen = true;
+      this.loadTechniciens();
 
       if (reclamation.etat === 'NOUVEAU') {
         reclamation.etat = 'EN_COURS_DE_TRAITEMENT';
@@ -231,7 +249,35 @@ export class GuiHomeComponent implements OnInit {
       }
 
       this.noteRetour = reclamation.noteRetour || '';
+      this.selectedTechnicienId = reclamation.technicien?.id || null;
     }
+  }
+
+  openTechnicienPopup(): void {
+    if (this.selectedRequete && !this.selectedRequete.technicien) {
+      this.isTechnicienPopupOpen = true;
+    }
+  }
+
+  assignTechnicien(): void {
+    if (!this.selectedRequete || !this.selectedTechnicienId) {
+      alert('Veuillez sélectionner un technicien.');
+      return;
+    }
+
+    this.selectedRequete.technicien = { id: this.selectedTechnicienId };
+    this.requeteService.updateRequete(this.selectedRequete.id, this.selectedRequete).subscribe({
+      next: () => {
+        console.log('Technicien affecté');
+        this.loadReclamations(this.getGuichetierIdFromToken()!);
+        this.isTechnicienPopupOpen = false;
+        this.selectedTechnicienId = null;
+      },
+      error: (error: HttpErrorResponse) => {
+        console.error('Erreur lors de l\'affectation du technicien', error);
+        alert('Erreur lors de l\'affectation du technicien.');
+      }
+    });
   }
 
   confirmerTraitement(): void {
@@ -277,7 +323,9 @@ export class GuiHomeComponent implements OnInit {
 
   closePopup(): void {
     this.isPopupOpen = false;
+    this.isTechnicienPopupOpen = false;
     this.selectedRequete = null;
+    this.selectedTechnicienId = null;
     this.noteRetour = '';
   }
 }

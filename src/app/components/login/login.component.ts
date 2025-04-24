@@ -41,7 +41,9 @@ export class LoginComponent implements OnInit {
             this.router.navigate(['/home']);
           } else if (role === 'GUICHETIER') {
             this.router.navigate(['/gui-home']);
-          } else {
+          }else if (role === 'TECHNICIEN') {
+            this.router.navigate(['/tech-home']);
+          }  else {
             alert('Rôle non reconnu');
           }
         } else {

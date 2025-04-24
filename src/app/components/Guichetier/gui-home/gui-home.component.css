@@ -132,6 +132,8 @@ td:last-child {
 
 .btn-info { background-color: #17a2b8; color: white; }
 .btn-danger { background-color: #dc3545; color: white; }
+.btn-primary { background-color: #007bff; color: white; }
+.btn-secondary { background-color: #6c757d; color: white; }
 
 .btn i {
     margin-right: 5px;
@@ -241,7 +243,7 @@ td:last-child {
     color: #ddd;
 }
 
-/* Styles existants pour la popup */
+/* Styles pour la popup */
 .modal-overlay {
     position: fixed;
     top: 0;
@@ -286,10 +288,10 @@ td:last-child {
     cursor: pointer;
     transition: background-color 0.3s, transform 0.2s;
     font-size: 1rem;
-    margin-top: 10px;
+    margin: 10px 5px 0 5px;
 }
 
-.modal-content button:hover {
+.modal-content button:hover:not(:disabled) {
     background-color: #2a5298;
     transform: translateY(-2px);
 }
@@ -301,6 +303,37 @@ td:last-child {
 
 .night-mode .modal-content h3 {
     color: #6caff7;
+}
+
+/* Styles pour la popup de sélection de technicien */
+.technicien-popup .modal-content {
+    width: 500px;
+    padding: 20px;
+}
+
+.technicien-select {
+    margin: 20px 0;
+}
+
+.technicien-select label {
+    display: block;
+    font-weight: 500;
+    color: #1e3c72;
+    margin-bottom: 10px;
+}
+
+.technicien-select select {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+.technicien-select select:focus {
+    border-color: #007bff;
+    outline: none;
 }
 
 @keyframes fadeIn {
