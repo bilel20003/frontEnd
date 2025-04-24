@@ -270,8 +270,7 @@ export class GuiHomeComponent implements OnInit {
       next: () => {
         console.log('Technicien affecté');
         this.loadReclamations(this.getGuichetierIdFromToken()!);
-        this.isTechnicienPopupOpen = false;
-        this.selectedTechnicienId = null;
+        this.closePopup();
       },
       error: (error: HttpErrorResponse) => {
         console.error('Erreur lors de l\'affectation du technicien', error);

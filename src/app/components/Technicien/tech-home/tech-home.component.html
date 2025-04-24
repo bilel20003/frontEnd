@@ -1,10 +1,10 @@
-<app-tech-nav></app-tech-nav>>
+<app-tech-nav></app-tech-nav>
 <div class="container">
   <!-- Barre de recherche -->
   <div class="search-bar-container">
     <div class="search-bar">
       <input type="text" placeholder="Rechercher une réclamation..." [(ngModel)]="searchTerm" (input)="filterReclamations()">
-<button><i class="fas fa-search"></i></button>
+      <button><i class="fas fa-search"></i></button>
     </div>
   </div>
 
@@ -24,28 +24,32 @@
       <thead class="table-header">
         <tr>
           <th (click)="sort('id')" class="sortable">ID</th>
-          <th (click)="sort('date')" class="sortable">Date de Création</th>
-          <th (click)="sort('ministere')" class="sortable">Ministère</th>
-          <th (click)="sort('service')" class="sortable">Service</th>
+          <th (click)="sort('type')" class="sortable">Type</th>
+          <th (click)="sort('date')" class="sortable">Date</th>
+          <th (click)="sort('client')" class="sortable">Émetteur</th>
           <th (click)="sort('objet')" class="sortable">Objet</th>
-          <th (click)="sort('description')" class="sortable">Description</th>
+          <th (click)="sort('etat')" class="sortable">État</th>
           <th>Actions</th>
         </tr>
       </thead>
       <tbody>
         <tr *ngFor="let reclamation of paginatedReclamations">
           <td>{{ reclamation.id }}</td>
-          <td>{{ reclamation.date }}</td>
-          <td>{{ reclamation.ministere }}</td>
-          <td>{{ reclamation.service }}</td>
-          <td>{{ reclamation.objet }}</td>
-          <td>{{ reclamation.description }}</td>
+          <td>{{ reclamation.type }}</td>
+          <td>{{ reclamation.date | date: 'dd/MM/yyyy' }}</td>
+          <td>{{ reclamation.client.id || 'N/A' }}</td>
+          <td>{{ objetMap[reclamation.objet.id].name || 'N/A' }}</td>
+          <td>
+            <span class="badge" [ngClass]="getBadgeClass(reclamation.etat)">
+              {{ reclamation.etat }}
+            </span>
+          </td>
           <td>
             <button class="btn btn-info btn-sm me-2" (click)="openPopup(reclamation)">
               <i class="fas fa-eye"></i> Consulter
             </button>
             <button class="btn btn-danger btn-sm" (click)="refuserReclamation(reclamation.id)">
-              <i class="fas fa-trash"></i> Refuser
+              <i class="fas fa-times"></i> Refuser
             </button>
           </td>
         </tr>
@@ -53,38 +57,67 @@
     </table>
 
     <!-- Pagination -->
-    <div class="pagination-container">
+    <div class="pagination-container d-flex justify-content-between align-items-center">
       <div class="page-options">
         <select [(ngModel)]="itemsPerPage" (change)="onItemsPerPageChange($event)">
           <option *ngFor="let option of [5, 10, 20]" [value]="option">{{ option }} lignes par page</option>
         </select>
       </div>
       <div class="pagination">
-        <button (click)="previousPage()" [disabled]="currentPage === 1">Précédent</button>
-        <span>Page {{ currentPage }} sur {{ totalPages }}</span>
-        <button (click)="nextPage()" [disabled]="currentPage === totalPages">Suivant</button>
+        <button class="btn btn-pagination" (click)="previousPage()" [disabled]="currentPage === 1">
+          <i class="fas fa-chevron-left"></i>
+        </button>
+        <button *ngFor="let page of getPageNumbers()"
+                class="btn btn-pagination"
+                [ngClass]="{'active': page === currentPage}"
+                (click)="goToPage(page)">
+          {{ page }}
+        </button>
+        <button class="btn btn-pagination" (click)="nextPage()" [disabled]="currentPage === totalPages">
+          <i class="fas fa-chevron-right"></i>
+        </button>
       </div>
     </div>
   </div>
 
   <!-- Popup pour consulter la réclamation -->
-  <div *ngIf="popupOpen" class="modal-overlay">
+  <div *ngIf="popupOpen && selectedReclamation" class="modal-overlay">
     <div class="modal-content">
-      <h3>Détails de la Réclamation</h3>
-      <p><strong>ID:</strong> {{ selectedReclamation?.id }}</p>
-      <p><strong>Date:</strong> {{ selectedReclamation?.date }}</p>
-      <p><strong>Ministère:</strong> {{ selectedReclamation?.ministere }}</p>
-      <p><strong>Service:</strong> {{ selectedReclamation?.service }}</p>
-      <p><strong>Objet:</strong> {{ selectedReclamation?.objet }}</p>
-      <p><strong>Description:</strong> {{ selectedReclamation?.description }}</p>
-      <div class="form-group">
-        <label for="note">Ajouter une note</label>
-        <textarea [(ngModel)]="note" placeholder="Ajouter une note" rows="4"></textarea>
+      <h3>📌 Détails de la requête</h3>
+      <div class="info-grid">
+        <div class="info-item">
+          <span class="label">📄 Type:</span>
+          <span class="value">{{ selectedReclamation.type || 'Non spécifié' }}</span>
+        </div>
+        <div class="info-item">
+          <span class="label">👤 Émetteur:</span>
+          <span class="value">{{ selectedReclamation.client.id || 'ID client non disponible' }}</span>
+        </div>
+        <div class="info-item">
+          <span class="label">📌 Objet:</span>
+          <span class="value">{{ objetMap[selectedReclamation.objet.id].name || 'Non spécifié' }}</span>
+        </div>
+        <div class="info-item">
+          <span class="label">⚡ État:</span>
+          <span class="badge" [ngClass]="getBadgeClass(selectedReclamation.etat || '')">
+            {{ selectedReclamation.etat || 'Non spécifié' }}
+          </span>
+        </div>
+        <div class="info-item">
+          <span class="label">📅 Date:</span>
+          <span class="value">{{ (selectedReclamation.date | date: 'dd/MM/yyyy') || 'Non spécifié' }}</span>
+        </div>
+        <div class="info-item full-width">
+          <span class="label">📝 Description:</span>
+          <p class="value description">{{ selectedReclamation.description || 'Aucune description' }}</p>
+        </div>
+        <div>
+          <label for="noteRetour">📋 Note de Retour:</label>
+          <textarea id="noteRetour" [(ngModel)]="noteRetour" placeholder="Ajouter une note de retour"></textarea>
+        </div>
       </div>
-      <div class="form-actions">
-        <button class="btn btn-success" (click)="saveNote()">Travail effectué</button>
-        <button class="btn btn-secondary" (click)="closePopup()">Annuler</button>
-      </div>
+      <button class="btn btn-success" (click)="confirmerTraitement()">Confirmer</button>
+      <button class="btn btn-secondary" (click)="closePopup()">Annuler</button>
     </div>
   </div>
 </div>
