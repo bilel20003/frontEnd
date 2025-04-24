@@ -1,43 +1,25 @@
 import { Injectable } from '@angular/core';
-
-export interface Role {
-  id: number;
-  name: string;
-  description: string;
-}
+import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { Observable } from 'rxjs';
+import { Role } from '../models/role.model';
 
 @Injectable({
   providedIn: 'root'
 })
 export class RoleService {
-  private roles: Role[] = [
-    { id: 1, name: 'Admin', description: 'Accès total à l’application' },
-    { id: 2, name: 'Technicien', description: 'Gère les réclamations techniques' },
-    { id: 3, name: 'Guichetier', description: 'Interagit avec les clients' },
-    { id: 4, name: 'Client', description: 'Soumet des réclamations' }
-  ];
+  private apiUrl = 'http://localhost:8082/api/roles';
 
-  private nextId: number = this.roles.length + 1;
+  constructor(private http: HttpClient) {}
 
-  constructor() {}
-
-  getRoles(): Role[] {
-    return [...this.roles];
+  private getHeaders(): HttpHeaders {
+    const token = localStorage.getItem('token');
+    return new HttpHeaders({
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json'
+    });
   }
 
-  addRole(role: Role): void {
-    role.id = this.nextId++;
-    this.roles.push({ ...role });
-  }
-
-  updateRole(id: number, updatedRole: Role): void {
-    const index = this.roles.findIndex(r => r.id === id);
-    if (index !== -1) {
-      this.roles[index] = { ...updatedRole };
-    }
-  }
-
-  deleteRole(id: number): void {
-    this.roles = this.roles.filter(r => r.id !== id);
+  getAllRoles(): Observable<Role[]> {
+    return this.http.get<Role[]>(`${this.apiUrl}/all`, { headers: this.getHeaders() });
   }
 }

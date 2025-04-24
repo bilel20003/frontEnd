@@ -16,7 +16,13 @@ import { TechNavComponent } from './components/Technicien/tech-nav/tech-nav.comp
 import { GuiNavComponent } from './components/Guichetier/gui-nav/gui-nav.component';
 
 import { GererRdvComponent } from './components/Guichetier/gerer-rdv/gerer-rdv.component';
+import { MinistereService } from './services/ministere.service';
 
+import { ProduitService } from './services/produit.service';
+import { ObjetService } from './services/objet.service';
+import { RoleService } from './services/role.service';
+
+import { RequeteService } from './services/requete.service';
 
 import { TechHomeComponent } from './components/Technicien/tech-home/tech-home.component';
 
@@ -46,7 +52,7 @@ import { ProductsComponent } from './components/Admin/product/product.component'
 import { ObjetReclamationComponent } from './components/Admin/objet-reclamation/objet-reclamation.component';
 import { GererRoleComponent } from './components/Admin/role/role.component';
 import { MinistryManagementComponent } from './components/Admin/ministere/ministere.component';
-import { ClientManagementComponent } from './components/Admin/client/client.component';
+
 
 import { HoraireComponent } from './components/Admin/horaire/horaire.component';
 import { ServiceComponent } from './components/Admin/service/service.component';
@@ -94,7 +100,7 @@ import { ServiceComponent } from './components/Admin/service/service.component';
     ObjetReclamationComponent,
     GererRoleComponent,
     MinistryManagementComponent,
-    ClientManagementComponent,
+   
   
     HoraireComponent,
         ServiceComponent,
@@ -112,7 +118,14 @@ import { ServiceComponent } from './components/Admin/service/service.component';
     HttpClientModule,
    
   ],
-  providers: [],
+  providers: [
+    MinistereService,
+    ProduitService,
+    ObjetService,
+    RoleService,
+    
+    RequeteService,
+  ],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

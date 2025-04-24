@@ -32,7 +32,7 @@
       </thead>
       <tbody>
         <tr *ngFor="let service of paginatedServices">
-          <td>{{ service.id}}</td>
+          <td>{{ service.id }}</td>
           <td>{{ service.nomService }}</td>
           <td>
             <button class="btn btn-info btn-sm me-2" (click)="editService(service)">
@@ -47,7 +47,7 @@
     </table>
 
     <!-- Pagination -->
-    <div class="pagination-container">
+    <div class="pagination-container d-flex justify-content-between">
       <div class="page-options">
         <select [(ngModel)]="itemsPerPage" (change)="onItemsPerPageChange()">
           <option *ngFor="let option of [5, 10, 20]" [value]="option">{{ option }} services par page</option>
@@ -63,26 +63,37 @@
 </div>
 
 <!-- Popup pour Ajouter ou Modifier un Service -->
-<div class="modal" tabindex="-1" role="dialog" [ngClass]="{'show': isModalOpen}" style="display: block;" *ngIf="isModalOpen">
-  <div class="modal-dialog" role="document">
+<div class="modal fade" tabindex="-1" [ngClass]="{'show': isModalOpen}" *ngIf="isModalOpen" style="display: block;">
+  <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title">{{ isEditMode ? 'Modifier' : 'Ajouter' }} un Service</h5>
-        <button type="button" class="close" (click)="closeModal()">
-          <span aria-hidden="true">&times;</span>
-        </button>
+        <button type="button" class="btn-close" (click)="closeModal()" aria-label="Close"></button>
       </div>
       <div class="modal-body">
-        <form (ngSubmit)="saveService()">
-          <div class="form-group">
+        <form #serviceForm="ngForm" (ngSubmit)="saveService()">
+          <div class="form-group mb-3">
             <label for="serviceName">Nom du Service</label>
-            <input type="text" id="serviceName" class="form-control" [(ngModel)]="currentService.nomService" name="nom_service" required />
+            <input
+              type="text"
+              id="serviceName"
+              class="form-control"
+              [(ngModel)]="currentService.nomService"
+              name="nomService"
+              required
+              #nomService="ngModel"
+            />
+            <div *ngIf="nomService.invalid && (nomService.dirty || nomService.touched)" class="text-danger mt-1">
+              <small *ngIf="nomService.errors?.['required']">Le nom du service est requis.</small>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" (click)="closeModal()">Annuler</button>
+            <button type="submit" class="btn btn-primary" [disabled]="serviceForm.invalid">
+              {{ isEditMode ? 'Enregistrer' : 'Ajouter' }}
+            </button>
           </div>
         </form>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" (click)="closeModal()">Annuler</button>
-        <button type="submit" class="btn btn-primary" (click)="saveService()">Ajuter</button>
       </div>
     </div>
   </div>

@@ -30,7 +30,6 @@ import { ProductsComponent } from './components/Admin/product/product.component'
 import { ObjetReclamationComponent } from './components/Admin/objet-reclamation/objet-reclamation.component';
 import { GererRoleComponent } from './components/Admin/role/role.component';
 import { MinistryManagementComponent } from './components/Admin/ministere/ministere.component';
-import { ClientManagementComponent } from './components/Admin/client/client.component';
 
 import { HoraireComponent } from './components/Admin/horaire/horaire.component';
 import { ServiceComponent } from './components/Admin/service/service.component';
@@ -49,7 +48,7 @@ const routes: Routes = [
   { path: 'role', component: GererRoleComponent, canActivate: [AuthGuard], data: { role: 'ADMIN' } },
   { path: 'ministere', component: MinistryManagementComponent, canActivate: [AuthGuard], data: { role: 'ADMIN' } },
   { path: 'service', component: ServiceComponent, canActivate: [AuthGuard], data: { role: 'ADMIN' } },
-  { path: 'client', component: ClientManagementComponent, canActivate: [AuthGuard], data: { role: 'ADMIN' } },
+  
   { path: 'horaire', component: HoraireComponent, canActivate: [AuthGuard], data: { role: 'ADMIN' } },
 
   // Client routes (protected by AuthGuard)

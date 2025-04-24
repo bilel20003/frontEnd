@@ -5,30 +5,31 @@
     padding: 20px;
     padding-top: 80px;
 }
+
 /* Styles pour le titre de l'interface */
 h2 {
-    color: #1e3c72; /* Couleur du texte */
-    font-size: 2rem; /* Taille de la police */
-    font-weight: 600; /* Épaisseur de la police */
-    text-align: center; /* Centrer le texte */
-    text-transform: uppercase; /* Mettre le texte en majuscules */
+    color: #1e3c72;
+    font-size: 2rem;
+    font-weight: 600;
+    text-align: center;
+    text-transform: uppercase;
 }
 
 /* Styles pour la zone de texte dans la popup */
 textarea {
-    width: 200%; /* Largeur de la zone de texte */
-    height: 62px; /* Hauteur de la zone de texte */
-    padding: 10px; /* Espacement intérieur */
-    border: 1px solid #ccc; /* Bordure */
-    border-radius: 5px; /* Coins arrondis */
-    font-size: 16px; /* Taille de la police */
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Ombre */
-    transition: border-color 0.3s; /* Transition pour la couleur de la bordure */
+    width: 200%;
+    height: 62px;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 16px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    transition: border-color 0.3s;
 }
 
 textarea:focus {
-    border-color: #007bff; /* Couleur de la bordure au focus */
-    outline: none; /* Supprimer le contour par défaut */
+    border-color: #007bff;
+    outline: none;
 }
 
 /* Barre de recherche */
@@ -36,7 +37,7 @@ textarea:focus {
     display: flex;
     justify-content: flex-end;
     margin-bottom: 15px;
-    background-color: white; 
+    background-color: white;
     padding: 10px 0;
 }
 
@@ -136,6 +137,59 @@ td:last-child {
     margin-right: 5px;
 }
 
+/* Pagination */
+.pagination-container {
+    margin-top: 20px;
+    padding: 10px 0;
+}
+
+.page-options select {
+    padding: 8px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+.pagination {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.btn-pagination {
+    background-color: #fff;
+    border: 1px solid #1e3c72;
+    color: #1e3c72;
+    padding: 8px 12px;
+    border-radius: 5px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background-color 0.3s, color 0.3s;
+}
+
+.btn-pagination:hover:not(:disabled) {
+    background-color: #1e3c72;
+    color: white;
+}
+
+.btn-pagination.active {
+    background-color: #1e3c72;
+    color: white;
+    font-weight: bold;
+}
+
+.btn-pagination:disabled {
+    background-color: #e9ecef;
+    border-color: #ced4da;
+    color: #6c757d;
+    cursor: not-allowed;
+}
+
+.btn-pagination i {
+    font-size: 14px;
+}
+
 /* Styles pour la grille d'informations dans la popup */
 .info-grid {
     display: grid;
@@ -187,7 +241,7 @@ td:last-child {
     color: #ddd;
 }
 
-/* Styles existants pour la popup (déjà inclus dans votre CSS) */
+/* Styles existants pour la popup */
 .modal-overlay {
     position: fixed;
     top: 0;
@@ -248,8 +302,6 @@ td:last-child {
 .night-mode .modal-content h3 {
     color: #6caff7;
 }
-
-
 
 @keyframes fadeIn {
     from { opacity: 0; }

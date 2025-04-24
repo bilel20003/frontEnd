@@ -30,10 +30,10 @@
       <thead class="table-header">
         <tr>
           <th (click)="sort('id')" class="sortable">ID</th>
-          <th (click)="sort('objet')" class="sortable">Objet</th>
+          <th (click)="sort('objetName')" class="sortable">Objet</th>
           <th (click)="sort('type')" class="sortable">Type de requête</th>
-          <th>Description</th>
-          <th *ngIf="userInfo?.role === 'CLIENT' || userInfo?.role === 'ADMIN'" (click)="sort('produit')" class="sortable">Produit</th>
+          <th *ngIf="userInfo?.role === 'CLIENT' || userInfo?.role === 'ADMIN'" (click)="sort('produitName')" class="sortable">Produit</th>
+          <th (click)="sort('date')" class="sortable">Date</th>
           <th (click)="sort('etat')" class="sortable">État</th>
           <th>Actions</th>
         </tr>
@@ -41,10 +41,14 @@
       <tbody>
         <tr *ngFor="let requete of paginatedRequetes">
           <td>{{ requete.id }}</td>
-          <td>{{ requete.objet }}</td>
+          <td>{{ objetMap[requete.objet.id].name || 'N/A' }}</td>
           <td>{{ requete.type }}</td>
-          <td>{{ requete.description }}</td>
-          <td *ngIf="userInfo?.role === 'CLIENT' || userInfo?.role === 'ADMIN'">{{ requete.produit?.nom || 'N/A' }}</td>
+          <td *ngIf="userInfo?.role === 'CLIENT' || userInfo?.role === 'ADMIN'">
+            <ng-container *ngIf="objetMap[requete.objet.id] as objet">
+              {{ produitMap[objet.produit.id].nom || 'N/A' }}
+            </ng-container>
+          </td>
+          <td>{{ requete.date | date:'dd/MM/yyyy' }}</td>
           <td>
             <span class="badge" [ngClass]="getBadgeClass(requete.etat)">
               {{ requete.etat }}
@@ -74,18 +78,18 @@
     </div>
 
     <!-- Popup for Request Details -->
-    <div *ngIf="isPopupOpen" class="modal-overlay" (click)="closePopup()">
+    <div *ngIf="isPopupOpen && selectedRequete" class="modal-overlay" (click)="closePopup()">
       <div class="modal-content" (click)="$event.stopPropagation()">
         <h3>Détails de la Requête</h3>
-        <p><strong>Réf:</strong> {{ selectedRequete?.id }}</p>
-        <p><strong>Objet:</strong> {{ selectedRequete?.objet }}</p>
-        <p><strong>Type de requête:</strong> {{ selectedRequete?.type }}</p>
-        <p><strong>Description:</strong> {{ selectedRequete?.description }}</p>
-        <p *ngIf="userInfo?.role === 'CLIENT' || userInfo?.role === 'ADMIN'"><strong>Produit:</strong> {{ selectedRequete?.produit?.nom || 'N/A' }}</p>
-        <p><strong>État:</strong> <span class="badge" [ngClass]="getBadgeClass(selectedRequete?.etat)">{{ selectedRequete?.etat ?? 'Inconnu' }}</span></p>
-        <p><strong>Client:</strong> {{ selectedRequete?.client?.name || selectedRequete?.client?.id }}</p>
-        <p><strong>Guichetier:</strong> {{ selectedRequete?.guichetier?.name || selectedRequete?.guichetier?.id || 'Non assigné' }}</p>
-        <p><strong>Technicien:</strong> {{ selectedRequete?.technicien?.name || selectedRequete?.technicien?.id || 'Non assigné' }}</p>
+        <p><strong>Réf:</strong> {{ selectedRequete.id }}</p>
+        <p><strong>Objet:</strong> {{ objetMap[selectedRequete.objet.id].name || 'N/A' }}</p>
+        <p><strong>Type de requête:</strong> {{ selectedRequete.type }}</p>
+        <p><strong>Description:</strong> {{ selectedRequete.description }}</p>
+        <p><strong>Date:</strong> {{ selectedRequete.date | date:'dd/MM/yyyy' }}</p>
+        <p><strong>État:</strong> <span class="badge" [ngClass]="getBadgeClass(selectedRequete.etat)">{{ selectedRequete.etat }}</span></p>
+        <p><strong>Client:</strong> {{ selectedRequete.client.id }}</p>
+        <p><strong>Guichetier:</strong> {{ selectedRequete.guichetier.id || 'Non assigné' }}</p>
+        <p><strong>Technicien:</strong> {{ selectedRequete.technicien?.id || 'Non assigné' }}</p>
         <button class="btn btn-secondary" (click)="closePopup()">Fermer</button>
       </div>
     </div>
@@ -97,11 +101,11 @@
         <form #newRequeteForm="ngForm" (ngSubmit)="submitNewRequete()">
           <div class="form-group">
             <label for="objet">Objet</label>
-            <select id="objet" name="objet" [(ngModel)]="newRequete.objet" required #objet="ngModel">
-              <option value="" disabled>Sélectionnez un objet</option>
-              <option value="OBJET_1">Objet 1</option>
-              <option value="OBJET_2">Objet 2</option>
-              <option value="OBJET_3">Objet 3</option>
+            <select id="objet" name="objet" [(ngModel)]="newRequete.objet.id" required #objet="ngModel">
+              <option value="0" disabled>Sélectionnez un objet</option>
+              <option *ngFor="let obj of objets" [value]="obj.id">
+                {{ obj.name }}
+              </option>
             </select>
             <div *ngIf="objet.invalid && (objet.dirty || objet.touched)" class="error-message">
               <div *ngIf="objet.errors?.['required']">L'objet est requis.</div>
@@ -118,20 +122,11 @@
               <div *ngIf="type.errors?.['required']">Le type de requête est requis.</div>
             </div>
           </div>
-          <div class="form-group" *ngIf="userInfo?.role === 'CLIENT'">
-            <label for="produit">Produit</label>
-            <select id="produit" name="produit" [(ngModel)]="newRequete.produit" required #produit="ngModel">
-              <option value="" disabled>Sélectionnez un produit</option>
-              <option *ngFor="let prod of produits" [ngValue]="prod">{{ prod.nom }}</option>
-            </select>
-            <div *ngIf="produit.invalid && (produit.dirty || produit.touched)" class="error-message">
-              <div *ngIf="produit.errors?.['required']">Le produit est requis.</div>
-            </div>
-          </div>
           <div class="form-group">
             <label for="description">Description</label>
-            <textarea id="description" name="description" [(ngModel)]="newRequete.description" #description="ngModel" minlength="10"></textarea>
+            <textarea id="description" name="description" [(ngModel)]="newRequete.description" required #description="ngModel" minlength="10"></textarea>
             <div *ngIf="description.invalid && (description.dirty || description.touched)" class="error-message">
+              <div *ngIf="description.errors?.['required']">La description est requise.</div>
               <div *ngIf="description.errors?.['minlength']">La description doit contenir au moins 10 caractères.</div>
             </div>
           </div>
