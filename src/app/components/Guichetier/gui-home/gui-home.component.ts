@@ -3,7 +3,8 @@ import { Router } from '@angular/router';
 import { HttpErrorResponse } from '@angular/common/http';
 import { RequeteService } from 'src/app/services/requete.service';
 import { ObjetService } from 'src/app/services/objet.service';
-import { UserInfoService, Technicien } from 'src/app/services/user-info.service';
+import { UserInfoService } from 'src/app/services/user-info.service';
+import { UserInfo } from 'src/app/models/user-info.model';
 import { Requete } from 'src/app/models/requete.model';
 import { Objet } from 'src/app/models/objet.model';
 import { jwtDecode } from 'jwt-decode';
@@ -19,7 +20,7 @@ export class GuiHomeComponent implements OnInit {
   paginatedReclamations: Requete[] = [];
   objets: Objet[] = [];
   objetMap: { [key: number]: Objet } = {};
-  techniciens: Technicien[] = [];
+  techniciens: UserInfo[] = [];
   searchTerm: string = '';
   sortDirection: { [key: string]: boolean } = {};
   currentPage: number = 1;

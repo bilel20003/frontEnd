@@ -1,6 +1,11 @@
 <app-navbar-admin></app-navbar-admin>
 
 <div class="container">
+  <!-- Error Message -->
+  <div *ngIf="errorMessage" class="alert alert-danger" role="alert">
+    {{ errorMessage }}
+  </div>
+
   <!-- Barre de recherche -->
   <div class="search-bar-container">
     <div class="search-bar">
@@ -41,7 +46,7 @@
           <td>{{ utilisateur.ministere }}</td>
           <td>{{ utilisateur.service }}</td>
           <td>
-            <button class="btn btn-info btn-sm me-2" (click)="modifierUtilisateur(utilisateur)">
+            <button class="btn btn-info btn-sm me-2" (click)="openModal(utilisateur)">
               <i class="fas fa-edit"></i> Modifier
             </button>
             <button class="btn btn-danger btn-sm" (click)="supprimerUtilisateur(utilisateur)">
@@ -53,54 +58,72 @@
     </table>
 
     <!-- Pagination -->
-    <div class="pagination-container">
+    <div class="pagination-container d-flex justify-content-between align-items-center">
       <div class="page-options">
         <select [(ngModel)]="itemsPerPage" (change)="onItemsPerPageChange($event)">
           <option *ngFor="let option of [5, 10, 20]" [value]="option">{{ option }} lignes par page</option>
         </select>
       </div>
       <div class="pagination">
-        <button (click)="goToPreviousPage()" [disabled]="currentPage === 1">Précédent</button>
-        <span>Page {{ currentPage }} sur {{ totalPages }}</span>
-        <button (click)="goToNextPage()" [disabled]="currentPage === totalPages">Suivant</button>
+        <button class="btn btn-pagination" (click)="goToPreviousPage()" [disabled]="currentPage === 1">
+          <i class="fas fa-chevron-left"></i>
+        </button>
+        <button *ngFor="let page of getPageNumbers()"
+                class="btn btn-pagination"
+                [ngClass]="{'active': page === currentPage}"
+                (click)="goToPage(page)">
+          {{ page }}
+        </button>
+        <button class="btn btn-pagination" (click)="goToNextPage()" [disabled]="currentPage === totalPages">
+          <i class="fas fa-chevron-right"></i>
+        </button>
       </div>
     </div>
   </div>
 
-  <!-- Modale pour formulaire Ajouter / Modifier Utilisateur -->
+  <!-- Modale pour ajouter/modifier utilisateur -->
   <div *ngIf="isModalOpen" class="modal-overlay">
     <div class="modal-content">
-      <h3>{{ editingUtilisateur ? 'Modifier Utilisateur' : 'Ajouter Utilisateur' }}</h3>
-      <form (ngSubmit)="editingUtilisateur ? updateUtilisateur() : addUtilisateur()">
-        <div class="form-group">
-          <label for="nom">Nom</label>
-          <input type="text" [(ngModel)]="utilisateurForm.nom" name="nom" required>
+      <h3>📌 {{ editingUtilisateur ? 'Modifier Utilisateur' : 'Ajouter Utilisateur' }}</h3>
+      <div class="info-grid">
+        <div class="info-item">
+          <span class="label">👤 Nom:</span>
+          <input type="text" [(ngModel)]="utilisateurForm.nom" placeholder="Entrez le nom" required>
         </div>
-        <div class="form-group">
-          <label for="email">Email</label>
-          <input type="email" [(ngModel)]="utilisateurForm.email" name="email" required>
+        <div class="info-item">
+          <span class="label">📧 Email:</span>
+          <input type="email" [(ngModel)]="utilisateurForm.email" placeholder="Entrez l'email" required>
         </div>
-        <div class="form-group">
-          <label for="role">Rôle</label>
-          <select [(ngModel)]="utilisateurForm.role" name="role" required>
-            <option value="client">Client</option>
-            <option value="guichetier">Guichetier</option>
-            <option value="technicien">Technicien</option>
+        <div class="info-item">
+          <span class="label">🔒 Mot de passe:</span>
+          <input type="password" [(ngModel)]="utilisateurForm.password" placeholder="Entrez le mot de passe" [required]="!editingUtilisateur">
+        </div>
+        <div class="info-item">
+          <span class="label">🎭 Rôle:</span>
+          <select [(ngModel)]="utilisateurForm.role" required>
+            <option value="CLIENT">Client</option>
+            <option value="GUICHETIER">Guichetier</option>
+            <option value="TECHNICIEN">Technicien</option>
+            <option value="ADMIN">Admin</option>
           </select>
         </div>
-        <div class="form-group">
-          <label for="ministere">Ministère</label>
-          <input type="text" [(ngModel)]="utilisateurForm.ministere" name="ministere" required>
+        <div class="info-item">
+          <span class="label">🛠️ Service:</span>
+          <select [(ngModel)]="utilisateurForm.serviceId" (change)="updateServiceName()" required>
+            <option value="" disabled>Sélectionnez un service</option>
+            <option *ngFor="let service of services" [ngValue]="service.id">{{ service.nomService }}</option>
+          </select>
         </div>
-        <div class="form-group">
-          <label for="service">Service</label>
-          <input type="text" [(ngModel)]="utilisateurForm.service" name="service" required>
+        <div class="info-item">
+          <span class="label">📦 Produit:</span>
+          <select [(ngModel)]="utilisateurForm.produitId" required>
+            <option value="" disabled>Sélectionnez un produit</option>
+            <option *ngFor="let produit of produits" [ngValue]="produit.id">{{ produit.nom }}</option>
+          </select>
         </div>
-        <div class="form-actions">
-          <button type="submit" class="btn btn-success">{{ editingUtilisateur ? 'Mettre à jour' : 'Ajouter' }}</button>
-          <button type="button" class="btn btn-secondary" (click)="closeModal()">Annuler</button>
-        </div>
-      </form>
+      </div>
+      <button class="btn btn-success" (click)="editingUtilisateur ? updateUtilisateur() : addUtilisateur()">Confirmer</button>
+      <button class="btn btn-secondary" (click)="closeModal()">Annuler</button>
     </div>
   </div>
 </div>

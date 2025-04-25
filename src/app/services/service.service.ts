@@ -8,7 +8,7 @@ import { Servicee } from '../models/service.model';
   providedIn: 'root'
 })
 export class ServiceService {
-  private apiUrl = 'http://localhost:8082/api/roles'; // Assuming Servicee is managed by RoleRest
+  private apiUrl = 'http://localhost:8082/api/services';
 
   constructor(private http: HttpClient) {}
 
@@ -22,23 +22,23 @@ export class ServiceService {
     };
   }
 
+  getAllServices(): Observable<Servicee[]> {
+    return this.http.get<Servicee[]>(`${this.apiUrl}/getAllServices`, this.getHttpOptions())
+      .pipe(catchError(this.handleError));
+  }
+
   addNewService(service: Servicee): Observable<Servicee> {
-    return this.http.post<Servicee>(`${this.apiUrl}/add`, service, this.getHttpOptions())
-      .pipe(catchError(this.handleError));
-  }
-
-  getAllService(): Observable<Servicee[]> {
-    return this.http.get<Servicee[]>(`${this.apiUrl}/getall`, this.getHttpOptions())
-      .pipe(catchError(this.handleError));
-  }
-
-  deleteService(id: number): Observable<void> {
-    return this.http.delete<void>(`${this.apiUrl}/delete/${id}`, this.getHttpOptions())
+    return this.http.post<Servicee>(`${this.apiUrl}/addNewService`, service, this.getHttpOptions())
       .pipe(catchError(this.handleError));
   }
 
   updateService(id: number, service: Servicee): Observable<Servicee> {
-    return this.http.put<Servicee>(`${this.apiUrl}/update/${id}`, service, this.getHttpOptions())
+    return this.http.put<Servicee>(`${this.apiUrl}/updateService/${id}`, service, this.getHttpOptions())
+      .pipe(catchError(this.handleError));
+  }
+
+  deleteService(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/deleteService/${id}`, this.getHttpOptions())
       .pipe(catchError(this.handleError));
   }
 

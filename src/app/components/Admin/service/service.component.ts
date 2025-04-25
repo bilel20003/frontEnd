@@ -1,8 +1,7 @@
 import { Component, OnInit } from '@angular/core';
-import { Servicee } from 'src/app/models/service.model';
-import { Ministere } from 'src/app/models/ministere.model';
 import { ServiceService } from 'src/app/services/service.service';
-import { MinistereService } from 'src/app/services/ministere.service';
+import { Servicee } from 'src/app/models/service.model';
+import { HttpErrorResponse } from '@angular/common/http';
 
 @Component({
   selector: 'app-service',
@@ -11,167 +10,109 @@ import { MinistereService } from 'src/app/services/ministere.service';
 })
 export class ServiceComponent implements OnInit {
   services: Servicee[] = [];
-  filteredServices: Servicee[] = [];
-  paginatedServices: Servicee[] = [];
-  ministeres: Ministere[] = [];
+  errorMessage: string | null = null;
+  isModalOpen: boolean = false;
+  editingService: Servicee | null = null;
+  serviceForm: Servicee = {
+    id: 0,
+    nomService: '',
+    ministere: { id: 0 }
+  };
 
-  isModalOpen = false;
-  isEditMode = false;
-  currentService: Servicee = { id: 0, nomService: '', ministere: { id: 0 } };
+  constructor(private serviceService: ServiceService) {}
 
-  searchTerm = '';
-  currentPage = 1;
-  itemsPerPage = 5;
-  isNightMode = false;
-
-  constructor(
-    private serviceService: ServiceService,
-    private ministereService: MinistereService
-  ) {}
-
-  ngOnInit(): void {
-    const storedMode = localStorage.getItem('mode');
-    if (storedMode === 'night') this.toggleMode();
+  ngOnInit() {
     this.loadServices();
-    this.loadMinisteres();
   }
 
-  loadServices(): void {
-    this.serviceService.getAllService().subscribe({
-      next: (services) => {
-        console.log('Services received:', services);
+  loadServices() {
+    this.serviceService.getAllServices().subscribe({
+      next: (services: Servicee[]) => {
         this.services = services;
-        this.filteredServices = [...this.services];
-        this.updatePaginatedServices();
+        this.errorMessage = null;
       },
-      error: (err) => {
+      error: (err: HttpErrorResponse) => {
         console.error('Erreur lors du chargement des services:', err);
-        alert(`Erreur: ${err.message}`);
+        this.errorMessage = 'Impossible de charger les services. Veuillez vérifier votre connexion ou vos permissions.';
+        this.services = [];
       }
     });
   }
 
-  loadMinisteres(): void {
-    this.ministereService.getAllMinisteres().subscribe({
-      next: (ministeres) => {
-        console.log('Ministères received:', ministeres);
-        this.ministeres = ministeres;
-      },
-      error: (err) => {
-        console.error('Erreur lors du chargement des ministères:', err);
-        alert(`Erreur: ${err.message}`);
-      }
-    });
-  }
-
-  filterServices(): void {
-    const term = this.searchTerm.toLowerCase();
-    this.filteredServices = this.services.filter(service =>
-      service.nomService.toLowerCase().includes(term)
-    );
-    this.currentPage = 1;
-    this.updatePaginatedServices();
-  }
-
-  updatePaginatedServices(): void {
-    const start = (this.currentPage - 1) * this.itemsPerPage;
-    const end = start + this.itemsPerPage;
-    this.paginatedServices = this.filteredServices.slice(start, end);
-  }
-
-  goToPreviousPage(): void {
-    if (this.currentPage > 1) {
-      this.currentPage--;
-      this.updatePaginatedServices();
-    }
-  }
-
-  goToNextPage(): void {
-    if (this.currentPage < this.totalPages) {
-      this.currentPage++;
-      this.updatePaginatedServices();
-    }
-  }
-
-  get totalPages(): number {
-    return Math.ceil(this.filteredServices.length / this.itemsPerPage);
-  }
-
-  onItemsPerPageChange(): void {
-    this.currentPage = 1;
-    this.updatePaginatedServices();
-  }
-
-  toggleMode(): void {
-    this.isNightMode = !this.isNightMode;
-    document.body.classList.toggle('night-mode', this.isNightMode);
-    localStorage.setItem('mode', this.isNightMode ? 'night' : 'day');
-  }
-
-  openServiceModal(): void {
-    this.isEditMode = false;
-    this.currentService = { id: 0, nomService: '', ministere: { id: 0 } };
+  openModal(service: Servicee | null = null) {
     this.isModalOpen = true;
-  }
-
-  editService(service: Servicee): void {
-    this.isEditMode = true;
-    this.currentService = { ...service };
-    this.isModalOpen = true;
-  }
-
-  closeModal(): void {
-    this.isModalOpen = false;
-    this.currentService = { id: 0, nomService: '', ministere: { id: 0 } };
-  }
-
-  saveService(): void {
-    if (!this.currentService.nomService.trim()) {
-      alert('Le nom du service est requis.');
-      return;
-    }
-    if (!this.currentService.ministere.id) {
-      alert('Veuillez sélectionner un ministère.');
-      return;
-    }
-
-    if (this.isEditMode) {
-      this.serviceService.updateService(this.currentService.id, this.currentService).subscribe({
-        next: () => {
-          this.loadServices();
-          this.closeModal();
-          alert('Service mis à jour avec succès.');
-        },
-        error: (err) => {
-          console.error('Erreur lors de la mise à jour du service:', err);
-          alert(`Erreur: ${err.message}`);
-        }
-      });
+    if (service) {
+      this.editingService = service;
+      this.serviceForm = { ...service };
     } else {
-      this.serviceService.addNewService(this.currentService).subscribe({
-        next: () => {
-          this.loadServices();
-          this.closeModal();
-          alert('Service ajouté avec succès.');
-        },
-        error: (err) => {
-          console.error('Erreur lors de l\'ajout du service:', err);
-          alert(`Erreur: ${err.message}`);
-        }
-      });
+      this.editingService = null;
+      this.serviceForm = {
+        id: 0,
+        nomService: '',
+        ministere: { id: 0 }
+      };
     }
   }
 
-  deleteService(id: number): void {
+  closeModal() {
+    this.isModalOpen = false;
+    this.editingService = null;
+    this.serviceForm = {
+      id: 0,
+      nomService: '',
+      ministere: { id: 0 }
+    };
+  }
+
+  addService() {
+    if (!this.serviceForm.nomService || !this.serviceForm.ministere.id) {
+      alert('Veuillez remplir tous les champs obligatoires (Nom du service, Ministère).');
+      return;
+    }
+    this.serviceService.addNewService(this.serviceForm).subscribe({
+      next: () => {
+        console.log('Service ajouté');
+        this.loadServices();
+        this.closeModal();
+        this.errorMessage = null;
+      },
+      error: (err: HttpErrorResponse) => {
+        console.error('Erreur lors de l\'ajout du service:', err);
+        this.errorMessage = 'Erreur lors de l\'ajout du service. Veuillez vérifier vos permissions ou les données saisies.';
+      }
+    });
+  }
+
+  updateService() {
+    if (!this.serviceForm.nomService || !this.serviceForm.ministere.id) {
+      alert('Veuillez remplir tous les champs obligatoires (Nom du service, Ministère).');
+      return;
+    }
+    this.serviceService.updateService(this.serviceForm.id, this.serviceForm).subscribe({
+      next: () => {
+        console.log('Service mis à jour');
+        this.loadServices();
+        this.closeModal();
+        this.errorMessage = null;
+      },
+      error: (err: HttpErrorResponse) => {
+        console.error('Erreur lors de la mise à jour du service:', err);
+        this.errorMessage = 'Erreur lors de la mise à jour du service. Veuillez vérifier vos permissions ou les données saisies.';
+      }
+    });
+  }
+
+  deleteService(id: number) {
     if (confirm('Voulez-vous vraiment supprimer ce service ?')) {
       this.serviceService.deleteService(id).subscribe({
         next: () => {
+          console.log('Service supprimé');
           this.loadServices();
-          alert('Service supprimé avec succès.');
+          this.errorMessage = null;
         },
-        error: (err) => {
+        error: (err: HttpErrorResponse) => {
           console.error('Erreur lors de la suppression du service:', err);
-          alert(`Erreur: ${err.message}`);
+          this.errorMessage = 'Erreur lors de la suppression du service. Veuillez vérifier vos permissions.';
         }
       });
     }
