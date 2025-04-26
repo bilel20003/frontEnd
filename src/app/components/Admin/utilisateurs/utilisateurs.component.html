@@ -94,17 +94,20 @@
           <span class="label">📧 Email:</span>
           <input type="email" [(ngModel)]="utilisateurForm.email" placeholder="Entrez l'email" required>
         </div>
-        <div class="info-item">
+        <div class="info-item" *ngIf="editingUtilisateur">
           <span class="label">🔒 Mot de passe:</span>
-          <input type="password" [(ngModel)]="utilisateurForm.password" placeholder="Entrez le mot de passe" [required]="!editingUtilisateur">
+          <div>
+            <button class="btn btn-warning btn-sm" (click)="generateNewPassword()">Générer un nouveau mot de passe</button>
+            <input *ngIf="generatedPassword" type="text" [(ngModel)]="utilisateurForm.password" readonly>
+            <small *ngIf="generatedPassword" class="text-muted">Nouveau mot de passe: {{ generatedPassword }}. Notez-le pour l'utilisateur.</small>
+            <small *ngIf="!generatedPassword" class="text-muted">Le mot de passe actuel est chiffré et ne peut pas être affiché.</small>
+          </div>
         </div>
         <div class="info-item">
           <span class="label">🎭 Rôle:</span>
           <select [(ngModel)]="utilisateurForm.role" required>
-            <option value="CLIENT">Client</option>
-            <option value="GUICHETIER">Guichetier</option>
-            <option value="TECHNICIEN">Technicien</option>
-            <option value="ADMIN">Admin</option>
+            <option value="" disabled>Sélectionnez un rôle</option>
+            <option *ngFor="let option of getSortedRoleOptions()" [ngValue]="option.value">{{ option.label }}</option>
           </select>
         </div>
         <div class="info-item">

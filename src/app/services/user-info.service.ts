@@ -18,9 +18,9 @@ export interface UserDisplay {
   role: string;
   ministere: string;
   service: string;
-  password?: string;
   produitId?: number;
   serviceId?: number;
+  password?: string;
 }
 
 export { UserInfo as Technicien };
@@ -51,6 +51,15 @@ export class UserInfoService {
     };
   }
 
+  private generateDefaultPassword(): string {
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*';
+    let password = '';
+    for (let i = 0; i < 12; i++) {
+      password += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return password;
+  }
+
   getAllUsers(): Observable<UserDisplay[]> {
     return forkJoin({
       users: this.http.get<UserInfo[]>(`${this.apiUrl}/getallappuser`, this.getHttpOptions()),
@@ -60,6 +69,7 @@ export class UserInfoService {
     }).pipe(
       map(({ users, roles, services, ministeres }) => {
         console.log('getAllUsers API Responses:', { users, roles, services, ministeres });
+        console.log('Ministeres fetched:', JSON.stringify(ministeres, null, 2));
 
         const roleMap = roles.reduce((map, role) => {
           map[role.id] = role.name;
@@ -75,13 +85,22 @@ export class UserInfoService {
           map[ministere.id] = ministere.nomMinistere;
           return map;
         }, {} as { [key: number]: string });
+        console.log('MinistereMap created:', ministereMap);
 
         return users.map(user => {
           const roleName = user.role && user.role.id ? roleMap[user.role.id] || 'N/A' : 'N/A';
           const service = user.service && user.service.id && serviceMap[user.service.id] ? serviceMap[user.service.id] : null;
-          const ministereName = service && service.ministere && service.ministere.id
-            ? ministereMap[service.ministere.id] || 'N/A'
-            : 'N/A';
+          let ministereName = 'N/A';
+          if (service) {
+            if (service.ministere && service.ministere.id) {
+              ministereName = ministereMap[service.ministere.id] || 'N/A';
+              console.log(`Mapping ministere for user ${user.id}: serviceId=${service.id}, ministereId=${service.ministere.id}, ministereName=${ministereName}`);
+            } else {
+              console.warn(`No ministere for user ${user.id}: serviceId=${service.id}, service.ministere=${JSON.stringify(service.ministere)}`);
+            }
+          } else {
+            console.warn(`No service for user ${user.id}: serviceId=${user.service?.id}, serviceMap=${Object.keys(serviceMap)}`);
+          }
 
           return {
             id: user.id || 0,
@@ -89,7 +108,10 @@ export class UserInfoService {
             email: user.email || 'N/A',
             role: roleName,
             ministere: ministereName,
-            service: service ? service.nomService || 'N/A' : 'N/A'
+            service: service ? service.nomService || 'N/A' : 'N/A',
+            produitId: user.produit && user.produit.id ? user.produit.id : undefined,
+            serviceId: user.service && user.service.id ? user.service.id : undefined,
+            password: ''
           };
         });
       }),
@@ -129,20 +151,17 @@ export class UserInfoService {
           return throwError(() => new Error('Produit ID is required'));
         }
         const produitId = Number(user.produitId);
-        if (!user.password) {
-          console.error('Password is undefined');
-          return throwError(() => new Error('Password is required'));
-        }
         const roleId = this.getRoleId(user.role);
         if (!roleId) {
           console.error('Invalid role:', user.role);
           return throwError(() => new Error(`Invalid role '${user.role}'`));
         }
+        console.log('Role ID for addUser:', roleId, 'for role:', user.role);
 
         const userInfo: Partial<UserInfo> = {
           name: user.nom,
           email: user.email,
-          password: user.password,
+          password: this.generateDefaultPassword(),
           isDeletable: 'true',
           status: 'true',
           role: { id: roleId },
@@ -152,7 +171,12 @@ export class UserInfoService {
 
         console.log('POST Payload for addNewAppuser:', JSON.stringify(userInfo, null, 2));
 
-        return this.http.post(`${this.apiUrl}/addNewAppuser`, userInfo, this.getHttpOptions());
+        return this.http.post(`${this.apiUrl}/addNewAppuser`, userInfo, this.getHttpOptions()).pipe(
+          catchError(error => {
+            console.error('POST request failed for addNewAppuser:', error);
+            return throwError(() => error);
+          })
+        );
       }),
       catchError(this.handleError)
     );
@@ -183,11 +207,13 @@ export class UserInfoService {
           console.error('Invalid role:', user.role);
           return throwError(() => new Error(`Invalid role '${user.role}'`));
         }
+        console.log('Role ID for updateUser:', roleId, 'for role:', user.role);
 
         const userInfo: Partial<UserInfo> = {
           id: user.id,
           name: user.nom,
           email: user.email,
+          password: user.password || undefined,
           role: { id: roleId },
           service: { id: serviceId },
           produit: { id: produitId },
@@ -212,12 +238,17 @@ export class UserInfoService {
 
   private getRoleId(roleName: string): number {
     const roleMap: { [key: string]: number } = {
-      'CLIENT': 1,
+      'CLIENT': 4,
       'GUICHETIER': 2,
       'TECHNICIEN': 3,
-      'ADMIN': 4
+      'ADMIN': 1
     };
-    return roleMap[roleName.toUpperCase()] || 0;
+    const roleId = roleMap[roleName.toUpperCase()];
+    console.log(`getRoleId called with roleName: ${roleName}, returning roleId: ${roleId || 'undefined'}`);
+    if (!roleId) {
+      console.error(`No role ID found for roleName: ${roleName}`);
+    }
+    return roleId || 0;
   }
 
   private handleError(error: HttpErrorResponse): Observable<never> {
@@ -228,6 +259,8 @@ export class UserInfoService {
     } else if (error.status === 400) {
       const serverMessage = error.error ? JSON.stringify(error.error, null, 2) : 'Détails non disponibles';
       errorMessage = `Données invalides envoyées au serveur. Vérifiez les champs saisis. Erreur serveur: ${serverMessage}`;
+    } else if (error.status === 403) {
+      errorMessage = 'Accès interdit. Vérifiez vos permissions ou le token JWT.';
     }
     return throwError(() => new Error(errorMessage));
   }

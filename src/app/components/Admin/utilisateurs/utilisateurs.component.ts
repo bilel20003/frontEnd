@@ -6,6 +6,7 @@ import { Servicee } from 'src/app/models/service.model';
 import { Ministere } from 'src/app/models/ministere.model';
 import { Produit } from 'src/app/models/produit.model';
 import { HttpErrorResponse } from '@angular/common/http';
+import { forkJoin } from 'rxjs';
 
 @Component({
   selector: 'app-utilisateurs',
@@ -38,6 +39,7 @@ export class UtilisateursComponent implements OnInit {
     produitId: undefined,
     password: ''
   };
+  generatedPassword: string | null = null;
 
   constructor(
     private userInfoService: UserInfoService,
@@ -46,63 +48,49 @@ export class UtilisateursComponent implements OnInit {
   ) {}
 
   ngOnInit() {
-    this.loadUtilisateurs();
-    this.loadServices();
-    this.loadProduits();
+    this.loadInitialData();
   }
 
-  loadUtilisateurs() {
-    this.userInfoService.getAllUsers().subscribe({
-      next: (data) => {
-        console.log('Utilisateurs received:', data);
-        this.utilisateurs = data;
-        this.filteredUtilisateurs = [...this.utilisateurs];
+  loadInitialData() {
+    forkJoin({
+      utilisateurs: this.userInfoService.getAllUsers(),
+      services: this.serviceService.getAllServices(),
+      produits: this.produitService.getAllProduits()
+    }).subscribe({
+      next: ({ utilisateurs, services, produits }) => {
+        console.log('Initial data loaded:', { utilisateurs, services, produits });
+        this.utilisateurs = utilisateurs;
+        this.filteredUtilisateurs = [...utilisateurs];
+        this.services = services;
+        this.produits = produits;
         this.updatePagination();
         this.errorMessage = null;
       },
-      error: (error: HttpErrorResponse | Error) => {
-        console.error('Erreur lors du chargement des utilisateurs:', error);
-        this.errorMessage = error instanceof HttpErrorResponse
-          ? `Erreur réseau (statut ${error.status}): Impossible de charger les utilisateurs. Vérifiez votre connexion ou vos permissions.`
-          : `Erreur client: ${error.message}. Les données des utilisateurs sont incomplètes ou mal formatées.`;
+      error: (error: HttpErrorResponse) => {
+        console.error('Erreur lors du chargement des données initiales:', error);
+        this.errorMessage = `Erreur réseau (statut ${error.status}): Impossible de charger les données.`;
         this.utilisateurs = [];
         this.filteredUtilisateurs = [];
         this.paginatedUtilisateurs = [];
-      }
-    });
-  }
-
-  loadServices() {
-    this.serviceService.getAllServices().subscribe({
-      next: (services) => {
-        this.services = services;
-        console.log('Services loaded:', services);
-        this.errorMessage = null;
-      },
-      error: (error: HttpErrorResponse) => {
-        console.error('Erreur lors du chargement des services:', error);
-        this.errorMessage = 'Impossible de charger les services. Le sélecteur de services peut être vide.';
         this.services = [];
-      }
-    });
-  }
-
-  loadProduits() {
-    this.produitService.getAllProduits().subscribe({
-      next: (produits) => {
-        this.produits = produits;
-        console.log('Produits loaded:', produits);
-        this.errorMessage = null;
-      },
-      error: (error: HttpErrorResponse) => {
-        console.error('Erreur lors du chargement des produits:', error);
-        this.errorMessage = 'Impossible de charger les produits. Le sélecteur de produits peut être vide.';
         this.produits = [];
       }
     });
   }
 
+  generateNewPassword() {
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*';
+    let password = '';
+    for (let i = 0; i < 12; i++) {
+      password += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    this.utilisateurForm.password = password;
+    this.generatedPassword = password;
+    console.log('Generated new password:', password);
+  }
+
   filterUtilisateurs() {
+    console.log('filterUtilisateurs called, searchTerm:', this.searchTerm);
     const term = this.searchTerm.toLowerCase();
     this.filteredUtilisateurs = this.utilisateurs.filter(utilisateur =>
       utilisateur.nom.toLowerCase().includes(term) ||
@@ -111,6 +99,7 @@ export class UtilisateursComponent implements OnInit {
       utilisateur.ministere.toLowerCase().includes(term) ||
       utilisateur.service.toLowerCase().includes(term)
     );
+    console.log('filteredUtilisateurs:', this.filteredUtilisateurs);
     this.currentPage = 1;
     this.updatePagination();
   }
@@ -120,6 +109,7 @@ export class UtilisateursComponent implements OnInit {
     this.currentPage = Math.min(this.currentPage, this.totalPages || 1);
     const start = (this.currentPage - 1) * this.itemsPerPage;
     this.paginatedUtilisateurs = this.filteredUtilisateurs.slice(start, start + this.itemsPerPage);
+    console.log('updatePagination called, paginatedUtilisateurs:', this.paginatedUtilisateurs);
   }
 
   onItemsPerPageChange(event: Event) {
@@ -174,15 +164,20 @@ export class UtilisateursComponent implements OnInit {
   }
 
   openModal(utilisateur: UserDisplay | null = null) {
+    console.log('openModal called, utilisateur:', utilisateur, 'produits:', this.produits, 'roleOptions:', this.getSortedRoleOptions());
     this.isModalOpen = true;
     this.errorMessage = null;
+    this.generatedPassword = null;
+    this.searchTerm = '';
+    this.filterUtilisateurs();
     if (utilisateur) {
       this.editingUtilisateur = utilisateur;
       const service = this.services.find(s => s.nomService === utilisateur.service);
+      const produit = this.produits.find(p => p.id === utilisateur.produitId);
       this.utilisateurForm = {
         ...utilisateur,
-        serviceId: service?.id,
-        produitId: utilisateur.produitId,
+        serviceId: service ? service.id : utilisateur.serviceId,
+        produitId: produit ? produit.id : utilisateur.produitId,
         password: ''
       };
       console.log('Opening modal for edit, utilisateurForm:', this.utilisateurForm);
@@ -202,12 +197,24 @@ export class UtilisateursComponent implements OnInit {
       };
       console.log('Opening modal for add, utilisateurForm:', this.utilisateurForm);
     }
+    this.updatePagination();
+  }
+
+  getSortedRoleOptions(): { value: string; label: string }[] {
+    return [
+      { value: 'CLIENT', label: 'Client' },
+      { value: 'GUICHETIER', label: 'Guichetier' },
+      { value: 'TECHNICIEN', label: 'Technicien' },
+      { value: 'ADMIN', label: 'Admin' }
+    ];
   }
 
   closeModal() {
+    console.log('closeModal called');
     this.isModalOpen = false;
     this.editingUtilisateur = null;
     this.errorMessage = null;
+    this.generatedPassword = null;
     this.utilisateurForm = {
       id: 0,
       nom: '',
@@ -220,6 +227,7 @@ export class UtilisateursComponent implements OnInit {
       password: ''
     };
     console.log('Modal closed, utilisateurForm reset:', this.utilisateurForm);
+    this.updatePagination();
   }
 
   updateServiceName() {
@@ -232,9 +240,10 @@ export class UtilisateursComponent implements OnInit {
 
   addUtilisateur() {
     console.log('addUtilisateur called, utilisateurForm:', this.utilisateurForm);
-    if (!this.utilisateurForm.nom || !this.utilisateurForm.email || !this.utilisateurForm.role || !this.utilisateurForm.serviceId || !this.utilisateurForm.produitId || !this.utilisateurForm.password) {
-      this.errorMessage = 'Veuillez remplir tous les champs obligatoires (Nom, Email, Mot de passe, Rôle, Service, Produit).';
+    if (!this.utilisateurForm.nom || !this.utilisateurForm.email || !this.utilisateurForm.role || !this.utilisateurForm.serviceId || !this.utilisateurForm.produitId) {
+      this.errorMessage = 'Veuillez remplir tous les champs obligatoires (Nom, Email, Rôle, Service, Produit).';
       console.error('Form validation failed:', this.utilisateurForm);
+      console.error('Role validation failed: role=', this.utilisateurForm.role);
       return;
     }
     if (this.services.length === 0) {
@@ -262,6 +271,7 @@ export class UtilisateursComponent implements OnInit {
       console.error('Invalid role:', this.utilisateurForm.role);
       return;
     }
+    console.log('Validated role for add:', this.utilisateurForm.role);
     const userDisplay: UserDisplay = {
       id: this.utilisateurForm.id,
       nom: this.utilisateurForm.nom,
@@ -269,15 +279,14 @@ export class UtilisateursComponent implements OnInit {
       role: this.utilisateurForm.role,
       ministere: service.ministere ? this.getMinistereName(service.ministere.id) : 'N/A',
       service: service.nomService || 'N/A',
-      password: this.utilisateurForm.password,
       produitId: produitId,
       serviceId: serviceId
     };
-    console.log('Submitting userDisplay:', userDisplay);
+    console.log('Submitting userDisplay for add:', userDisplay);
     this.userInfoService.addUser(userDisplay).subscribe({
       next: () => {
         console.log('Utilisateur ajouté avec succès');
-        this.loadUtilisateurs();
+        this.loadInitialData();
         this.closeModal();
         this.errorMessage = null;
       },
@@ -295,6 +304,7 @@ export class UtilisateursComponent implements OnInit {
     if (!this.utilisateurForm.id || !this.utilisateurForm.nom || !this.utilisateurForm.email || !this.utilisateurForm.role || !this.utilisateurForm.serviceId || !this.utilisateurForm.produitId) {
       this.errorMessage = 'Veuillez remplir tous les champs obligatoires (ID, Nom, Email, Rôle, Service, Produit).';
       console.error('Form validation failed:', this.utilisateurForm);
+      console.error('Role validation failed: role=', this.utilisateurForm.role);
       return;
     }
     if (this.services.length === 0) {
@@ -322,7 +332,8 @@ export class UtilisateursComponent implements OnInit {
       console.error('Invalid role:', this.utilisateurForm.role);
       return;
     }
-    const userDisplay: UserDisplay = {
+    console.log('Validated role for update:', this.utilisateurForm.role);
+    const userDisplay: UserDisplay & { password?: string } = {
       id: this.utilisateurForm.id,
       nom: this.utilisateurForm.nom,
       email: this.utilisateurForm.email,
@@ -330,13 +341,14 @@ export class UtilisateursComponent implements OnInit {
       ministere: service.ministere ? this.getMinistereName(service.ministere.id) : 'N/A',
       service: service.nomService || 'N/A',
       produitId: produitId,
-      serviceId: serviceId
+      serviceId: serviceId,
+      password: this.utilisateurForm.password
     };
     console.log('Submitting userDisplay for update:', userDisplay);
     this.userInfoService.updateUser(this.utilisateurForm.id, userDisplay).subscribe({
       next: () => {
         console.log('Utilisateur mis à jour avec succès');
-        this.loadUtilisateurs();
+        this.loadInitialData();
         this.closeModal();
         this.errorMessage = null;
       },
@@ -352,7 +364,7 @@ export class UtilisateursComponent implements OnInit {
       this.userInfoService.deleteUser(utilisateur.id).subscribe({
         next: () => {
           console.log('Utilisateur supprimé avec succès');
-          this.loadUtilisateurs();
+          this.loadInitialData();
           this.errorMessage = null;
         },
         error: (error: HttpErrorResponse) => {

@@ -1,5 +1,8 @@
 export interface Servicee {
   id: number;
   nomService: string;
-  ministere: { id: number };
+  ministere: {
+    id: number;
+    nomMinistere?: string;
+  };
 }

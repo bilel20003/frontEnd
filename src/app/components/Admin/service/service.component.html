@@ -1,33 +1,43 @@
+<app-navbar-admin></app-navbar-admin>
+
 <div class="container">
-  <!-- Error Message -->
-  <div *ngIf="errorMessage" class="alert alert-danger" role="alert">
-    {{ errorMessage }}
+  <!-- Barre de recherche -->
+  <div class="search-bar-container">
+    <div class="search-bar">
+      <input type="text" placeholder="Rechercher un service..." [(ngModel)]="searchTerm" (input)="filterServices()">
+      <button><i class="fas fa-search"></i></button>
+    </div>
   </div>
 
   <!-- Titre + actions -->
   <header class="d-flex justify-content-between align-items-center">
-    <h2 style="margin-left: 250px;">Gestion des Services</h2>
+    <h2 style="margin-left: 250px">Gérer les Services</h2>
     <div class="header-actions">
-      <button class="btn btn-primary" (click)="openModal()">+ Ajouter Service</button>
+      <button class="mode-toggle" (click)="toggleMode()">
+        <i class="fas" [ngClass]="isNightMode ? 'fa-sun' : 'fa-moon'"></i>
+      </button>
+      <button class="btn btn-primary" (click)="openServiceModal()">+ Ajouter Service</button>
     </div>
   </header>
 
-  <!-- Tableau -->
+  <!-- Liste des services -->
   <div class="table-responsive">
     <table class="table table-hover shadow-sm rounded">
       <thead class="table-header">
         <tr>
-          <th>Nom du Service</th>
-          <th>Ministère</th>
+          <th (click)="sort('id')" class="sortable">ID Service</th>
+          <th (click)="sort('nomService')" class="sortable">Nom du Service</th>
+          <th (click)="sort('ministere')" class="sortable">Ministère</th>
           <th>Actions</th>
         </tr>
       </thead>
       <tbody>
-        <tr *ngFor="let service of services">
+        <tr *ngFor="let service of paginatedServices">
+          <td>{{ service.id }}</td>
           <td>{{ service.nomService }}</td>
-          <td>{{ service.ministere.id }}</td>
+          <td>{{ service.ministere ? getMinistereName(service.ministere.id) : 'Inconnu' }}</td>
           <td>
-            <button class="btn btn-info btn-sm me-2" (click)="openModal(service)">
+            <button class="btn btn-info btn-sm me-2" (click)="editService(service)">
               <i class="fas fa-edit"></i> Modifier
             </button>
             <button class="btn btn-danger btn-sm" (click)="deleteService(service.id)">
@@ -37,24 +47,79 @@
         </tr>
       </tbody>
     </table>
-  </div>
 
-  <!-- Modale pour ajouter/modifier service -->
-  <div *ngIf="isModalOpen" class="modal-overlay">
-    <div class="modal-content">
-      <h3>📌 {{ editingService ? 'Modifier Service' : 'Ajouter Service' }}</h3>
+    <!-- Pagination -->
+    <div class="pagination-container d-flex justify-content-between align-items-center">
+      <div class="page-options">
+        <select [(ngModel)]="itemsPerPage" (change)="onItemsPerPageChange()">
+          <option *ngFor="let option of [5, 10, 20]" [value]="option">{{ option }} services par page</option>
+        </select>
+      </div>
+      <div class="pagination">
+        <button class="btn btn-pagination" (click)="goToPreviousPage()" [disabled]="currentPage === 1">
+          <i class="fas fa-chevron-left"></i>
+        </button>
+        <button *ngFor="let page of getPageNumbers()"
+                class="btn btn-pagination"
+                [ngClass]="{'active': page === currentPage}"
+                (click)="goToPage(page)">
+          {{ page }}
+        </button>
+        <button class="btn btn-pagination" (click)="goToNextPage()" [disabled]="currentPage === totalPages">
+          <i class="fas fa-chevron-right"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Popup pour Ajouter ou Modifier un Service -->
+<div class="modal-overlay" *ngIf="isModalOpen">
+  <div class="modal-content">
+    <h3>{{ isEditMode ? 'Modifier un Service' : 'Ajouter un Service' }}</h3>
+    <form #serviceForm="ngForm" (ngSubmit)="saveService()">
       <div class="info-grid">
         <div class="info-item">
-          <span class="label">🛠️ Nom du Service:</span>
-          <input type="text" [(ngModel)]="serviceForm.nomService" placeholder="Entrez le nom du service" required>
+          <span class="label">Nom du Service</span>
+          <input
+            type="text"
+            class="form-control"
+            [(ngModel)]="currentService.nomService"
+            name="nomService"
+            required
+            #nomService="ngModel"
+          />
+          <div *ngIf="nomService.invalid && (nomService.dirty || nomService.touched)" class="text-danger mt-1">
+            <small>Le nom du service est requis.</small>
+          </div>
         </div>
         <div class="info-item">
-          <span class="label">🏛️ ID du Ministère:</span>
-          <input type="number" [(ngModel)]="serviceForm.ministere.id" placeholder="Entrez l'ID du ministère" required>
+          <span class="label">Ministère</span>
+          <select
+            class="form-control"
+            [(ngModel)]="currentService.ministere.id"
+            name="ministereId"
+            required
+            #ministereId="ngModel"
+            *ngIf="currentService.ministere"
+          >
+            <option value="" disabled>-- Sélectionner un ministère --</option>
+            <option *ngFor="let min of ministeres" [value]="min.id">{{ min.nomMinistere }}</option>
+          </select>
+          <div *ngIf="serviceForm.submitted && serviceForm.controls['ministereId']?.invalid" class="text-danger mt-1">
+            <small>Le ministère est requis.</small>
+          </div>
+          <div *ngIf="!currentService.ministere" class="text-danger mt-1">
+            <small>Erreur: Ministère non chargé.</small>
+          </div>
         </div>
       </div>
-      <button class="btn btn-success" (click)="editingService ? updateService() : addService()">Confirmer</button>
-      <button class="btn btn-secondary" (click)="closeModal()">Annuler</button>
-    </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" (click)="closeModal()">Annuler</button>
+        <button type="submit" class="btn btn-primary" [disabled]="serviceForm.invalid || !currentService.ministere">
+          {{ isEditMode ? 'Enregistrer' : 'Ajouter' }}
+        </button>
+      </div>
+    </form>
   </div>
 </div>

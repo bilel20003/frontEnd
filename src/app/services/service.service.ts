@@ -22,18 +22,14 @@ export class ServiceService {
     };
   }
 
-  getAllServices(): Observable<Servicee[]> {
-    return this.http.get<Servicee[]>(`${this.apiUrl}/getAllServices`, this.getHttpOptions())
-      .pipe(catchError(this.handleError));
-  }
-
-  addNewService(service: Servicee): Observable<Servicee> {
+  addNewService(service: Omit<Servicee, 'id'>): Observable<Servicee> {
+    console.log('Données envoyées au backend (POST):', service);
     return this.http.post<Servicee>(`${this.apiUrl}/addNewService`, service, this.getHttpOptions())
       .pipe(catchError(this.handleError));
   }
 
-  updateService(id: number, service: Servicee): Observable<Servicee> {
-    return this.http.put<Servicee>(`${this.apiUrl}/updateService/${id}`, service, this.getHttpOptions())
+  getAllServices(): Observable<Servicee[]> {
+    return this.http.get<Servicee[]>(`${this.apiUrl}/getAllServices`, this.getHttpOptions())
       .pipe(catchError(this.handleError));
   }
 
@@ -42,8 +38,18 @@ export class ServiceService {
       .pipe(catchError(this.handleError));
   }
 
+  updateService(id: number, service: Omit<Servicee, 'id'>): Observable<Servicee> {
+    console.log('Données envoyées au backend (PUT):', service);
+    return this.http.put<Servicee>(`${this.apiUrl}/updateService/${id}`, service, this.getHttpOptions())
+      .pipe(catchError(this.handleError));
+  }
+
   private handleError(error: HttpErrorResponse): Observable<never> {
     console.error('Erreur lors de la requête:', error);
+    if (error.status === 401) {
+      alert('Session expirée. Veuillez vous reconnecter.');
+      window.location.href = '/login';
+    }
     return throwError(() => new Error('Une erreur est survenue, veuillez réessayer.'));
   }
 }

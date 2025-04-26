@@ -56,6 +56,7 @@ import { MinistryManagementComponent } from './components/Admin/ministere/minist
 
 import { HoraireComponent } from './components/Admin/horaire/horaire.component';
 import { ServiceComponent } from './components/Admin/service/service.component';
+import { ServiceService } from './services/service.service';
 
 
 
@@ -103,7 +104,7 @@ import { ServiceComponent } from './components/Admin/service/service.component';
    
   
     HoraireComponent,
-        ServiceComponent,
+    ServiceComponent,
         
    
     
@@ -123,6 +124,7 @@ import { ServiceComponent } from './components/Admin/service/service.component';
     ProduitService,
     ObjetService,
     RoleService,
+    ServiceService,
     
     RequeteService,
   ],
