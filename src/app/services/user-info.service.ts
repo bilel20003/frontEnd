@@ -21,6 +21,7 @@ export interface UserDisplay {
   produitId?: number;
   serviceId?: number;
   password?: string;
+  status: string; // Ajout du champ status
 }
 
 export { UserInfo as Technicien };
@@ -111,7 +112,8 @@ export class UserInfoService {
             service: service ? service.nomService || 'N/A' : 'N/A',
             produitId: user.produit && user.produit.id ? user.produit.id : undefined,
             serviceId: user.service && user.service.id ? user.service.id : undefined,
-            password: ''
+            password: '',
+            status: user.status || 'false' // Inclure le status
           };
         });
       }),
@@ -163,7 +165,7 @@ export class UserInfoService {
           email: user.email,
           password: this.generateDefaultPassword(),
           isDeletable: 'true',
-          status: 'true',
+          status: user.status || 'true', // Utiliser le status du formulaire
           role: { id: roleId },
           produit: { id: produitId },
           service: { id: serviceId }
@@ -218,7 +220,7 @@ export class UserInfoService {
           service: { id: serviceId },
           produit: { id: produitId },
           isDeletable: 'true',
-          status: 'true'
+          status: user.status || 'true' // Utiliser le status du formulaire
         };
 
         console.log('PUT Payload for updateAppuser:', JSON.stringify(userInfo, null, 2));
@@ -232,6 +234,13 @@ export class UserInfoService {
   deleteUser(id: number): Observable<any> {
     console.log('deleteUser called with id:', id);
     return this.http.delete(`${this.apiUrl}/deleteAppuser/${id}`, this.getHttpOptions()).pipe(
+      catchError(this.handleError)
+    );
+  }
+
+  toggleUserStatus(id: number): Observable<void> {
+    console.log('toggleUserStatus called with id:', id);
+    return this.http.put<void>(`${this.apiUrl}/toggleStatus/${id}`, {}, this.getHttpOptions()).pipe(
       catchError(this.handleError)
     );
   }

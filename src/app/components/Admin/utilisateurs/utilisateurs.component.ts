@@ -37,7 +37,8 @@ export class UtilisateursComponent implements OnInit {
     service: '',
     serviceId: undefined,
     produitId: undefined,
-    password: ''
+    password: '',
+    status: 'false' // Ajout du status
   };
   generatedPassword: string | null = null;
 
@@ -97,7 +98,8 @@ export class UtilisateursComponent implements OnInit {
       utilisateur.email.toLowerCase().includes(term) ||
       utilisateur.role.toLowerCase().includes(term) ||
       utilisateur.ministere.toLowerCase().includes(term) ||
-      utilisateur.service.toLowerCase().includes(term)
+      utilisateur.service.toLowerCase().includes(term) ||
+      utilisateur.status.toLowerCase().includes(term) // Inclure status dans la recherche
     );
     console.log('filteredUtilisateurs:', this.filteredUtilisateurs);
     this.currentPage = 1;
@@ -178,7 +180,8 @@ export class UtilisateursComponent implements OnInit {
         ...utilisateur,
         serviceId: service ? service.id : utilisateur.serviceId,
         produitId: produit ? produit.id : utilisateur.produitId,
-        password: ''
+        password: '',
+        status: utilisateur.status // Conserver le status
       };
       console.log('Opening modal for edit, utilisateurForm:', this.utilisateurForm);
       this.updateServiceName();
@@ -193,7 +196,8 @@ export class UtilisateursComponent implements OnInit {
         service: '',
         serviceId: undefined,
         produitId: undefined,
-        password: ''
+        password: '',
+        status: 'false' // Status par défaut pour un nouvel utilisateur
       };
       console.log('Opening modal for add, utilisateurForm:', this.utilisateurForm);
     }
@@ -224,7 +228,8 @@ export class UtilisateursComponent implements OnInit {
       service: '',
       serviceId: undefined,
       produitId: undefined,
-      password: ''
+      password: '',
+      status: 'false' // Réinitialiser avec status par défaut
     };
     console.log('Modal closed, utilisateurForm reset:', this.utilisateurForm);
     this.updatePagination();
@@ -280,7 +285,8 @@ export class UtilisateursComponent implements OnInit {
       ministere: service.ministere ? this.getMinistereName(service.ministere.id) : 'N/A',
       service: service.nomService || 'N/A',
       produitId: produitId,
-      serviceId: serviceId
+      serviceId: serviceId,
+      status: this.utilisateurForm.status // Inclure le status
     };
     console.log('Submitting userDisplay for add:', userDisplay);
     this.userInfoService.addUser(userDisplay).subscribe({
@@ -342,7 +348,8 @@ export class UtilisateursComponent implements OnInit {
       service: service.nomService || 'N/A',
       produitId: produitId,
       serviceId: serviceId,
-      password: this.utilisateurForm.password
+      password: this.utilisateurForm.password,
+      status: this.utilisateurForm.status // Inclure le status
     };
     console.log('Submitting userDisplay for update:', userDisplay);
     this.userInfoService.updateUser(this.utilisateurForm.id, userDisplay).subscribe({
@@ -373,6 +380,22 @@ export class UtilisateursComponent implements OnInit {
         }
       });
     }
+  }
+
+  toggleUserStatus(utilisateur: UserDisplay) {
+    console.log('toggleUserStatus called for user:', utilisateur);
+    this.userInfoService.toggleUserStatus(utilisateur.id).subscribe({
+      next: () => {
+        utilisateur.status = utilisateur.status === 'true' ? 'false' : 'true';
+        console.log(`Statut de l'utilisateur ${utilisateur.id} basculé à ${utilisateur.status}`);
+        this.updatePagination(); // Rafraîchir l'affichage
+        this.errorMessage = null;
+      },
+      error: (error: HttpErrorResponse) => {
+        console.error('Erreur lors de la bascule du statut:', error);
+        this.errorMessage = `Erreur serveur (statut ${error.status}): Impossible de basculer le statut.`;
+      }
+    });
   }
 
   toggleMode() {

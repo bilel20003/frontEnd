@@ -35,6 +35,7 @@
           <th>Rôle</th>
           <th>Ministère</th>
           <th>Service</th>
+          <th>Statut</th> <!-- Nouvelle colonne -->
           <th>Actions</th>
         </tr>
       </thead>
@@ -45,6 +46,12 @@
           <td>{{ utilisateur.role }}</td>
           <td>{{ utilisateur.ministere }}</td>
           <td>{{ utilisateur.service }}</td>
+          <td>
+            <label class="switch">
+              <input type="checkbox" [checked]="utilisateur.status === 'true'" (change)="toggleUserStatus(utilisateur)">
+              <span class="slider round"></span>
+            </label>
+          </td>
           <td>
             <button class="btn btn-info btn-sm me-2" (click)="openModal(utilisateur)">
               <i class="fas fa-edit"></i> Modifier
