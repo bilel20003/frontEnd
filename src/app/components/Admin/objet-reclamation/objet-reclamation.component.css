@@ -185,84 +185,89 @@ body.night-mode {
 .mode-toggle:hover {
   color: #0056b3;
 }
+/* Modal pour ajouter/modifier - Modifications pour garantir l'affichage */
+.modal {
+  display: block !important; /* Force l'affichage lorsque *ngIf="showModal" est true */
+  position: fixed; /* Positionnement absolu par rapport à la fenêtre */
+  top: 0;
+  left: 0;
+  width: 100vw; /* Pleine largeur */
+  height: 100vh; /* Pleine hauteur */
+  background-color: rgba(0, 0, 0, 0.6); /* Fond semi-transparent plus sombre */
+  z-index: 9999; /* Très élevé pour être au-dessus de tout */
+  overflow-y: auto; /* Défilement si le contenu est trop grand */
+  visibility: visible; /* Assure que le modal est visible */
+  opacity: 1; /* Pas de transparence */
+  transition: opacity 0.3s ease; /* Animation fluide */
+}
 
-
-
-/* Modale */
+/* Modal pour consultation - Modifications pour garantir l'affichage */
 .modal-overlay {
+  display: block !important; /* Force l'affichage lorsque *ngIf="showViewModal" est true */
   position: fixed;
   top: 0;
   left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 1000;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.6);
+  z-index: 9999;
+  overflow-y: auto;
+  visibility: visible;
+  opacity: 1;
+  transition: opacity 0.3s ease;
 }
 
+/* Contenu des modals - Optimisé pour la visibilité */
 .modal-content {
-  background-color: #fff;
-  padding: 30px;
-  border-radius: 8px;
-  max-width: 600px;
-  width: 100%;
+  background-color: #ffffff;
+  margin: 5% auto; /* Réduit la marge supérieure pour les petits écrans */
+  padding: 25px;
+  border: none; /* Supprime la bordure pour un look moderne */
+  width: 90%;
+  max-width: 550px; /* Légèrement plus large pour le confort */
+  border-radius: 10px;
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3); /* Ombre plus prononcée */
+  position: relative; /* Pour les éléments internes */
+  transform: translateY(0); /* Évite les décalages */
+  animation: fadeIn 0.3s ease; /* Animation d'apparition */
 }
 
-.modal-content h3 {
-  margin-bottom: 20px;
-  font-size: 20px;
+/* Animation pour l'apparition du modal */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
+/* Styles pour les formulaires dans les modals */
 .form-group {
-  margin-bottom: 15px;
+  margin-bottom: 20px;
 }
 
 .form-group label {
-  font-size: 14px;
-  margin-bottom: 5px;
   display: block;
+  margin-bottom: 6px;
+  font-weight: 600;
+  font-size: 15px;
 }
 
-.form-group input, .form-group textarea {
+.form-control {
   width: 100%;
-  padding: 8px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
+  padding: 10px;
+  border: 1px solid #ced4da;
+  border-radius: 5px;
+  box-sizing: border-box;
   font-size: 14px;
+  transition: border-color 0.2s ease;
 }
 
-.form-group textarea {
-  resize: vertical;
-  min-height: 80px;
-}
-
-.form-actions {
-  display: flex;
-  justify-content: space-between;
-}
-
-.form-actions .btn {
-  font-size: 14px;
-  padding: 8px 15px;
-  border-radius: 4px;
-}
-
-.form-actions .btn-success {
-  background-color: #28a745;
-  color: white;
-}
-
-.form-actions .btn-secondary {
-  background-color: #6c757d;
-  color: white;
-}
-
-.form-actions .btn-success:hover {
-  background-color: #218838;
-}
-
-.form-actions .btn-secondary:hover {
-  background-color: #5a6268;
+.form-control:focus {
+  border-color: #007bff;
+  outline: none;
+  box-shadow: 0 0 5px rgba(0, 123, 255, 0.3);
 }

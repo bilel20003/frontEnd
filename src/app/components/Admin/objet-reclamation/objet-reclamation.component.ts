@@ -1,6 +1,8 @@
 import { Component, OnInit } from '@angular/core';
-import { ObjectService } from 'src/app/services/object.service';  // Assurez-vous que le service existe
-  // Utilisation de ng-bootstrap pour les modales si nécessaire
+import { Objet } from 'src/app/models/objet.model';
+import { Produit } from 'src/app/models/produit.model';
+import { ObjetService } from 'src/app/services/objet.service';
+import { ProduitService } from 'src/app/services/produit.service';
 
 @Component({
   selector: 'app-objet-reclamation',
@@ -8,157 +10,233 @@ import { ObjectService } from 'src/app/services/object.service';  // Assurez-vou
   styleUrls: ['./objet-reclamation.component.css']
 })
 export class ObjetReclamationComponent implements OnInit {
-  objects: any[] = [];  // Tableau pour stocker les objets
-  itemsPerPage: number = 5;
-  paginatedObjects: any[] = [];  // Objets paginés à afficher
-  currentPage: number = 1;  // Page actuelle
-  pageSize: number = 5;  // Taille des pages pour la pagination
-  totalPages: number = 1;  // Nombre total de pages
-  searchTerm: string = '';  // Termes de recherche
-  showModal: boolean = false;  // Détermine si la modale est affichée ou non
-  editingObject: any = null;  // Objet en cours de modification
-  newObject: any = {  // Objet qui sera ajouté ou modifié
-    id: 0,
+
+  objets: Objet[] = [];
+  paginatedObjects: Objet[] = [];
+
+  availableProducts: Produit[] = [];
+  searchTerm: string = '';
+  isLoadingProducts = true;
+
+  itemsPerPage = 5;
+  currentPage = 1;
+  totalPages = 1;
+
+  showModal = false;
+  showViewModal = false;
+  editingObject: boolean = false;
+  editingObjectId: number | null = null;
+
+  newObject: Omit<Objet, 'id'> = {
     name: '',
-    type: '',
-    description: '',
-    status: ''
+    produit: { id: 0 }
   };
-  isNightMode: boolean = false;  // Mode nuit
 
-  constructor(private objectService: ObjectService) {}
+  selectedObject?: Objet;
+  isNightMode = false;
 
-  ngOnInit(): void {
-    this.getObjects();
+  constructor(
+    private objetService: ObjetService,
+    private produitService: ProduitService
+  ) {
+    console.log('Constructor: showModal initial:', this.showModal);
   }
 
-  // Récupérer tous les objets
-  getObjects(): void {
-    this.objectService.getAllObjects().subscribe(data => {
-      this.objects = data;
-      this.totalPages = Math.ceil(this.objects.length / this.pageSize);  // Calcul du nombre de pages
-      this.updatePaginatedObjects();
+  ngOnInit(): void {
+    this.loadObjects();
+    this.loadProducts();
+  }
+
+  loadObjects(): void {
+    this.objetService.getAllObjets().subscribe({
+      next: (data) => {
+        this.objets = data;
+        this.updatePagination();
+      },
+      error: (err) => {
+        console.error('Erreur lors du chargement des objets:', err);
+        alert('Erreur lors du chargement des objets. Veuillez réessayer.');
+      }
     });
   }
 
-  // Mettre à jour la liste paginée des objets à afficher
-  updatePaginatedObjects(): void {
-    const startIndex = (this.currentPage - 1) * this.pageSize;
-    const endIndex = startIndex + this.pageSize;
-    this.paginatedObjects = this.objects.slice(startIndex, endIndex);
+  loadProducts(): void {
+    this.isLoadingProducts = true;
+    this.produitService.getAllProduits().subscribe({
+      next: (data) => {
+        this.availableProducts = data;
+        this.isLoadingProducts = false;
+        console.log('Produits chargés:', JSON.stringify(this.availableProducts, null, 2));
+        if (this.availableProducts.length === 0) {
+          console.warn('Aucun produit disponible. Vérifiez l\'endpoint des produits.');
+          alert('Aucun produit disponible. Veuillez vérifier l\'endpoint des produits.');
+        } else {
+          console.log('IDs des produits disponibles:', this.availableProducts.map(p => p.id));
+        }
+      },
+      error: (err) => {
+        this.isLoadingProducts = false;
+        console.error('Erreur lors du chargement des produits:', err);
+        alert('Erreur lors du chargement des produits: ' + err.message);
+      }
+    });
   }
 
-  // Gérer le changement de page
-  previousPage(): void {
-    if (this.currentPage > 1) {
-      this.currentPage--;
-      this.updatePaginatedObjects();
-    }
+  updatePagination(): void {
+    this.totalPages = Math.ceil(this.objets.length / this.itemsPerPage);
+    this.paginate();
   }
 
-  nextPage(): void {
-    if (this.currentPage < this.totalPages) {
-      this.currentPage++;
-      this.updatePaginatedObjects();
-    }
+  paginate(): void {
+    const start = (this.currentPage - 1) * this.itemsPerPage;
+    const end = start + this.itemsPerPage;
+    this.paginatedObjects = this.objets.slice(start, end);
   }
 
-  // Ouvrir la modale pour ajouter un objet
-  addObject(): void {
-    this.editingObject = null;  // Pas d'objet en édition
-    this.newObject = { id: 0, name: '', type: '', description: '', status: '' };  // Réinitialiser l'objet
-    this.showModal = true;
-  }
-
-  // Ouvrir la modale pour modifier un objet
-  editObject(object: any): void {
-    this.editingObject = { ...object };  // Dupliquer l'objet pour l'éditer
-    this.newObject = { ...object };  // Pré-remplir les champs du formulaire
-    this.showModal = true;
-  }
-
-  // Fermer la modale sans sauvegarder
-  closeModal(): void {
-    this.showModal = false;
-    this.newObject = { id: 0, name: '', type: '', description: '', status: '' };  // Réinitialiser l'objet
-    this.editingObject = null;
-  }
-
-  // Sauvegarder l'objet (ajout ou modification)
-  saveObject(): void {
-    if (!this.newObject.name || !this.newObject.type || !this.newObject.description || !this.newObject.status) {
-      alert('Veuillez remplir tous les champs');
-      return;
-    }
-
-    if (this.editingObject) {
-      // Si l'objet est en édition, le mettre à jour
-      this.objectService.updateObject(this.newObject.id, this.newObject).subscribe(() => {
-        this.getObjects();  // Recharger les objets
-        this.closeModal();  // Fermer la modale
-      });
-    } else {
-      // Sinon, ajouter un nouvel objet
-      this.objectService.addObject(this.newObject).subscribe(() => {
-        this.getObjects();  // Recharger les objets
-        this.closeModal();  // Fermer la modale
-      });
-    }
-  }
-
-  // Supprimer un objet
-  deleteObject(id: number): void {
-    if (confirm('Voulez-vous vraiment supprimer cet objet ?')) {
-      this.objectService.deleteObject(id).subscribe(() => {
-        this.getObjects();  // Recharger les objets après suppression
-      });
-    }
-  }
-
-  // Filtrer les objets en fonction du terme de recherche
-  filterObjects(): void {
-    if (this.searchTerm) {
-      this.objects = this.objects.filter(obj =>
-        obj.name.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
-        obj.type.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
-        obj.description.toLowerCase().includes(this.searchTerm.toLowerCase())
-      );
-    } else {
-      this.getObjects();  // Recharger les objets si aucun terme de recherche n'est donné
-    }
-    this.totalPages = Math.ceil(this.objects.length / this.pageSize);  // Recalculer les pages
-    this.updatePaginatedObjects();  // Mettre à jour les objets paginés
-  }
-
-  // Changer le mode (jour/nuit)
-  toggleMode(): void {
-    this.isNightMode = !this.isNightMode;
-  }
-
-  // Affecter un produit à un objet (fonctionnalité supplémentaire)
-  affecterProduit(objet: any): void {
-    // Code pour affecter un produit à un objet
-    alert('Fonctionnalité "Affecter Produit" à implémenter');
-  }
-
-  // Gérer le changement du nombre d'éléments par page
   onItemsPerPageChange(): void {
-    this.updatePaginatedObjects();
+    this.currentPage = 1;
+    this.updatePagination();
   }
 
-  // Aller à la page précédente
   goToPreviousPage(): void {
     if (this.currentPage > 1) {
       this.currentPage--;
-      this.updatePaginatedObjects();
+      this.paginate();
     }
   }
 
-  // Aller à la page suivante
   goToNextPage(): void {
     if (this.currentPage < this.totalPages) {
       this.currentPage++;
-      this.updatePaginatedObjects();
+      this.paginate();
     }
+  }
+
+  filterObjects(): void {
+    const filtered = this.objets.filter(objet =>
+      objet.name.toLowerCase().includes(this.searchTerm.toLowerCase())
+    );
+    this.totalPages = Math.ceil(filtered.length / this.itemsPerPage);
+    this.paginatedObjects = filtered.slice(0, this.itemsPerPage);
+  }
+
+  toggleMode(): void {
+    this.isNightMode = !this.isNightMode;
+    document.body.classList.toggle('dark-mode', this.isNightMode);
+  }
+
+  addObject(): void {
+    console.log('addObject appelé, isLoadingProducts:', this.isLoadingProducts, 'availableProducts:', JSON.stringify(this.availableProducts, null, 2));
+    this.editingObject = false;
+    this.editingObjectId = null;
+    if (this.isLoadingProducts) {
+      console.warn('Les produits sont encore en cours de chargement.');
+      alert('Les produits sont encore en cours de chargement. Veuillez attendre.');
+      return;
+    }
+    if (this.availableProducts.length === 0) {
+      console.warn('Aucun produit disponible.');
+      alert('Aucun produit disponible. Veuillez vérifier les produits.');
+      return;
+    }
+    const defaultProduitId = this.availableProducts[0].id;
+    this.newObject = {
+      name: '',
+      produit: { id: defaultProduitId }
+    };
+    this.showModal = true;
+    console.log('showModal défini à true, newObject:', JSON.stringify(this.newObject, null, 2));
+  }
+
+  editObject(objet: Objet): void {
+    console.log('editObject appelé pour objet:', JSON.stringify(objet, null, 2));
+    this.editingObject = true;
+    this.editingObjectId = objet.id;
+    this.newObject = {
+      name: objet.name,
+      produit: { id: objet.produit.id }
+    };
+    this.showModal = true;
+    console.log('showModal défini à true, newObject:', JSON.stringify(this.newObject, null, 2));
+  }
+
+  saveObject(): void {
+    console.log('saveObject appelé, editingObject:', this.editingObject);
+    if (this.editingObject) {
+      if (!this.editingObjectId) {
+        alert('Erreur: ID de l\'objet à modifier manquant.');
+        return;
+      }
+      const objetToUpdate: Objet = {
+        id: this.editingObjectId,
+        name: this.newObject.name,
+        produit: this.newObject.produit
+      };
+      this.objetService.updateObjet(objetToUpdate.id, objetToUpdate).subscribe({
+        next: () => {
+          this.loadObjects();
+          this.closeModal();
+        },
+        error: (err) => {
+          console.error('Erreur lors de la mise à jour:', err);
+          alert('Erreur lors de la mise à jour de l\'objet: ' + err.message);
+        }
+      });
+    } else {
+      console.log('Payload à envoyer:', JSON.stringify(this.newObject, null, 2));
+      if (!this.newObject.name || !this.newObject.produit.id) {
+        alert('Veuillez entrer un nom et sélectionner un produit valide.');
+        return;
+      }
+      // Convertir l'ID en nombre pour la comparaison
+      const selectedProductId = Number(this.newObject.produit.id);
+      console.log('availableProducts:', JSON.stringify(this.availableProducts, null, 2));
+      console.log('selectedProductId:', selectedProductId);
+      const isValidProduit = this.availableProducts.some(p => p.id === selectedProductId);
+      if (!isValidProduit) {
+        console.error('Produit invalide. ID sélectionné:', selectedProductId, 'availableProducts:', this.availableProducts);
+        alert('Le produit sélectionné est invalide ou n\'existe pas.');
+        return;
+      }
+      this.objetService.addObjet(this.newObject).subscribe({
+        next: (created) => {
+          this.objets.push(created);
+          this.updatePagination();
+          this.closeModal();
+        },
+        error: (err) => {
+          console.error('Erreur lors de l\'ajout:', err);
+          alert('Erreur lors de l\'ajout de l\'objet: ' + err.message);
+        }
+      });
+    }
+  }
+
+  deleteObject(id: number): void {
+    this.objetService.deleteObjet(id).subscribe({
+      next: () => {
+        this.objets = this.objets.filter(o => o.id !== id);
+        this.updatePagination();
+      },
+      error: (err) => {
+        console.error('Erreur lors de la suppression:', err);
+        alert('Erreur lors de la suppression de l\'objet: ' + err.message);
+      }
+    });
+  }
+
+  viewObject(objet: Objet): void {
+    this.selectedObject = objet;
+    this.showViewModal = true;
+  }
+
+  closeModal(): void {
+    this.showModal = false;
+    this.editingObjectId = null;
+    console.log('closeModal appelé, showModal:', this.showModal);
+  }
+
+  closeViewModal(): void {
+    this.showViewModal = false;
   }
 }

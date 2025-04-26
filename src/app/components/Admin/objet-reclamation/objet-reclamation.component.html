@@ -27,9 +27,6 @@
         <tr>
           <th>ID</th>
           <th>Nom de l'objet</th>
-          <th>Type</th>
-          <th>Description</th>
-          <th>Statut</th>
           <th>Actions</th>
         </tr>
       </thead>
@@ -37,18 +34,15 @@
         <tr *ngFor="let objet of paginatedObjects">
           <td>{{ objet.id }}</td>
           <td>{{ objet.name }}</td>
-          <td>{{ objet.type }}</td>
-          <td>{{ objet.description }}</td>
-          <td>{{ objet.status }}</td>
           <td>
             <button class="btn btn-info btn-sm me-2" (click)="editObject(objet)">
               <i class="fas fa-edit"></i> Modifier
             </button>
-            <button class="btn btn-danger btn-sm" (click)="deleteObject(objet.id)">
+            <button class="btn btn-danger btn-sm me-2" (click)="deleteObject(objet.id)">
               <i class="fas fa-trash"></i> Supprimer
             </button>
-            <button class="btn btn-warning btn-sm me-2" (click)="affecterProduit(objet)">
-              <i class="fas fa-link"></i> Affecter Produit
+            <button class="btn btn-primary btn-sm" (click)="viewObject(objet)">
+              <i class="fas fa-eye"></i> Voir
             </button>
           </td>
         </tr>
@@ -70,33 +64,45 @@
     </div>
   </div>
 
-  <!-- Popup (Modal) pour ajouter/éditer un objet -->
-  <div class="modal-overlay" *ngIf="showModal">
+  <!-- Modal Ajouter / Modifier -->
+  <div class="modal" *ngIf="showModal">
     <div class="modal-content">
-      <h3>{{ editingObject ? 'Modifier l\'Objet' : 'Ajouter un Objet' }}</h3>
+      <h2>{{ editingObject ? 'Modifier l\'objet' : 'Ajouter un objet' }}</h2>
       <form (ngSubmit)="saveObject()">
         <div class="form-group">
-          <label for="name">Nom de l'objet</label>
-          <input type="text" id="name" [(ngModel)]="newObject.name" name="name" required>
+          <label for="name">Nom</label>
+          <input id="name" [(ngModel)]="newObject.name" name="name" class="form-control" required>
         </div>
         <div class="form-group">
-          <label for="type">Type</label>
-          <input type="text" id="type" [(ngModel)]="newObject.type" name="type" required>
+          <label for="produit">Produit</label>
+          <select id="produit" [(ngModel)]="newObject.produit.id" name="produit" class="form-control" required>
+            <option *ngFor="let produit of availableProducts" [ngValue]="produit.id">{{ produit.nom }}</option>
+          </select>
         </div>
-        <div class="form-group">
-          <label for="description">Description</label>
-          <textarea id="description" [(ngModel)]="newObject.description" name="description" required></textarea>
-        </div>
-        <div class="form-group">
-          <label for="status">Statut</label>
-          <input type="text" id="status" [(ngModel)]="newObject.status" name="status" required>
-        </div>
-        <div class="form-actions">
-          <button type="button" class="btn btn-secondary" (click)="closeModal()">Fermer</button>
-          <button type="submit" class="btn btn-success">{{ editingObject ? 'Enregistrer' : 'Ajouter' }}</button>
-        </div>
+        <button type="submit" class="btn btn-success" [disabled]="!newObject.name || !newObject.produit.id">Enregistrer</button>
+        <button type="button" class="btn btn-secondary" (click)="closeModal()">Annuler</button>
       </form>
     </div>
   </div>
-
+  <!-- Modal Consultation -->
+  <div class="modal-overlay" *ngIf="showViewModal">
+    <div class="modal-content">
+      <h3>Détails de l'Objet</h3>
+      <div class="form-group">
+        <label>ID de l'objet</label>
+        <p>{{ selectedObject?.id }}</p>
+      </div>
+      <div class="form-group">
+        <label>Nom de l'objet</label>
+        <p>{{ selectedObject?.name }}</p>
+      </div>
+      <div class="form-group">
+        <label>Produit associé</label>
+        <p>{{ selectedObject?.produit?.id || 'Aucun' }}</p>
+      </div>
+      <div class="form-actions">
+        <button type="button" class="btn btn-secondary" (click)="closeViewModal()">Fermer</button>
+      </div>
+    </div>
+  </div>
 </div>
