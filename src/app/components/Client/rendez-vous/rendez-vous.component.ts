@@ -17,15 +17,8 @@ import listPlugin from '@fullcalendar/list';
 export class RendezVousComponent implements OnInit {
   rendezvousForm: FormGroup;
   rendezvous: Rdv[] = [];
-  filteredRendezvous: Rdv[] = [];
-  searchTerm: string = '';
-  itemsPerPage: number = 5;
-  currentPage: number = 1;
-  totalPages: number = 1;
-  paginatedRendezvous: Rdv[] = [];
   isNightMode: boolean = false;
   isModalOpen: boolean = false;
-  isCalendarOpen: boolean = false;
   availableSlots: string[] = [];
   clientId: number | null = null;
   errorMessage: string | null = null;
@@ -95,7 +88,6 @@ export class RendezVousComponent implements OnInit {
     this.rendezvousService.getRendezvousByClient(this.clientId).subscribe({
       next: (rendezvous) => {
         this.rendezvous = rendezvous;
-        this.filterRendezvous();
         this.loadCalendarEvents();
         this.errorMessage = null;
       },
@@ -125,27 +117,6 @@ export class RendezVousComponent implements OnInit {
     alert(`Rendez-vous: ${info.event.title}\nDate: ${new Date(info.event.start).toLocaleString('fr-FR')}\nDescription: ${info.event.extendedProps.description}\nStatut: ${info.event.extendedProps.status}`);
   }
 
-  filterRendezvous() {
-    if (this.searchTerm) {
-      const term = this.searchTerm.toLowerCase();
-      this.filteredRendezvous = this.rendezvous.filter(rdv =>
-        rdv.typeProbleme.toLowerCase().includes(term) ||
-        rdv.description.toLowerCase().includes(term) ||
-        rdv.status.toLowerCase().includes(term)
-      );
-    } else {
-      this.filteredRendezvous = [...this.rendezvous];
-    }
-    this.paginateRendezvous();
-  }
-
-  paginateRendezvous() {
-    const startIndex = (this.currentPage - 1) * this.itemsPerPage;
-    const endIndex = startIndex + this.itemsPerPage;
-    this.paginatedRendezvous = this.filteredRendezvous.slice(startIndex, endIndex);
-    this.totalPages = Math.ceil(this.filteredRendezvous.length / this.itemsPerPage);
-  }
-
   openModal(): void {
     if (!this.clientId) {
       this.errorMessage = 'Veuillez vous connecter pour créer un rendez-vous.';
@@ -167,18 +138,6 @@ export class RendezVousComponent implements OnInit {
     this.rendezvousForm.reset();
     this.availableSlots = [];
     this.errorMessage = null;
-  }
-
-  openCalendar(): void {
-    if (!this.clientId) {
-      this.errorMessage = 'Veuillez vous connecter pour voir le calendrier.';
-      return;
-    }
-    this.isCalendarOpen = true;
-  }
-
-  closeCalendar(): void {
-    this.isCalendarOpen = false;
   }
 
   addRendezvous() {
@@ -235,27 +194,6 @@ export class RendezVousComponent implements OnInit {
     } else {
       this.availableSlots = [];
     }
-  }
-
-  goToPreviousPage() {
-    if (this.currentPage > 1) {
-      this.currentPage--;
-      this.paginateRendezvous();
-    }
-  }
-
-  goToNextPage() {
-    if (this.currentPage < this.totalPages) {
-      this.currentPage++;
-      this.paginateRendezvous();
-    }
-  }
-
-  onItemsPerPageChange(event: Event) {
-    const selectElement = event.target as HTMLSelectElement;
-    this.itemsPerPage = Number(selectElement.value);
-    this.currentPage = 1;
-    this.paginateRendezvous();
   }
 
   toggleMode() {
