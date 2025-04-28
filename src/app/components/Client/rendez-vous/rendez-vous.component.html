@@ -1,5 +1,10 @@
 <app-navbar></app-navbar>
 <div class="container">
+  <!-- Error Message -->
+  <div *ngIf="errorMessage" class="alert alert-danger" role="alert">
+    {{ errorMessage }}
+  </div>
+
   <!-- Barre de recherche -->
   <div class="search-bar-container">
     <div class="search-bar">
@@ -10,12 +15,12 @@
 
   <!-- Titre + actions -->
   <header class="d-flex justify-content-between align-items-center">
-    <h2 style="margin-left: 250px;">Gestion des Rendez-vous</h2>
+    <h2>Mes Rendez-vous</h2>
     <div class="header-actions">
       <button class="mode-toggle" (click)="toggleMode()">
         <i class="fas" [ngClass]="isNightMode ? 'fa-sun' : 'fa-moon'"></i>
       </button>
-      <button class="btn btn-primary" (click)="openModal()">Créer Rendez-vous</button>
+      <button class="btn btn-primary" (click)="openModal()">Prendre un Rendez-vous</button>
     </div>
   </header>
 
@@ -24,6 +29,7 @@
     <table class="table table-hover shadow-sm rounded">
       <thead class="table-header">
         <tr>
+          <th>Date Souhaitée</th>
           <th>Date d'envoi</th>
           <th>Type de problème</th>
           <th>Description</th>
@@ -32,10 +38,11 @@
       </thead>
       <tbody>
         <tr *ngFor="let rendezvous of paginatedRendezvous">
-          <td>{{ rendezvous.dateEnvoi | date }}</td>
+          <td>{{ rendezvous.dateSouhaitee | date:'dd/MM/yyyy HH:mm' }}</td>
+          <td>{{ rendezvous.dateEnvoi | date:'dd/MM/yyyy' }}</td>
           <td>{{ rendezvous.typeProbleme }}</td>
           <td>{{ rendezvous.description }}</td>
-          <td>{{ rendezvous.etat }}</td>
+          <td>{{ rendezvous.status }}</td>
         </tr>
       </tbody>
     </table>
@@ -58,30 +65,41 @@
   <!-- Modale pour formulaire Créer Rendez-vous -->
   <div *ngIf="isModalOpen" class="modal-overlay">
     <div class="modal-content">
-      <h3>Créer Rendez-vous</h3>
-      <form (ngSubmit)="addRendezvous()">
+      <h3>Prendre un Rendez-vous</h3>
+      <form [formGroup]="rendezvousForm" (ngSubmit)="addRendezvous()">
         <div class="form-group">
-          <label for="dateEnvoi">Date d'envoi</label>
-          <input type="date" [(ngModel)]="rendezvousForm.dateEnvoi" name="dateEnvoi" required>
+          <label for="dateSouhaitee">Date souhaitée</label>
+          <input type="date" formControlName="dateSouhaitee" id="dateSouhaitee" (change)="loadAvailableSlots()" required>
+          <div *ngIf="rendezvousForm.get('dateSouhaitee')?.touched && rendezvousForm.get('dateSouhaitee')?.invalid" class="error-message">
+            La date souhaitée est requise
+          </div>
+        </div>
+        <div class="form-group" *ngIf="availableSlots.length > 0">
+          <label for="timeSlot">Créneau horaire</label>
+          <select formControlName="timeSlot" id="timeSlot" required>
+            <option value="" disabled>Sélectionner un créneau</option>
+            <option *ngFor="let slot of availableSlots" [value]="slot">{{ slot }}</option>
+          </select>
+          <div *ngIf="rendezvousForm.get('timeSlot')?.touched && rendezvousForm.get('timeSlot')?.invalid" class="error-message">
+            Le créneau horaire est requis
+          </div>
         </div>
         <div class="form-group">
           <label for="typeProbleme">Type de problème</label>
-          <input type="text" [(ngModel)]="rendezvousForm.typeProbleme" name="typeProbleme" required>
+          <input type="text" formControlName="typeProbleme" id="typeProbleme" required>
+          <div *ngIf="rendezvousForm.get('typeProbleme')?.touched && rendezvousForm.get('typeProbleme')?.invalid" class="error-message">
+            Le type de problème est requis (minimum 3 caractères)
+          </div>
         </div>
         <div class="form-group">
           <label for="description">Description</label>
-          <textarea [(ngModel)]="rendezvousForm.description" name="description" required></textarea>
-        </div>
-        <div class="form-group">
-          <label for="etat">État</label>
-          <select [(ngModel)]="rendezvousForm.etat" name="etat" required>
-            <option value="En attente">En attente</option>
-            <option value="Confirmé">Confirmé</option>
-            <option value="Annulé">Annulé</option>
-          </select>
+          <textarea formControlName="description" id="description" required></textarea>
+          <div *ngIf="rendezvousForm.get('description')?.touched && rendezvousForm.get('description')?.invalid" class="error-message">
+            La description est requise (minimum 10 caractères)
+          </div>
         </div>
         <div class="form-actions">
-          <button type="submit" class="btn btn-success">Créer</button>
+          <button type="submit" [disabled]="rendezvousForm.invalid" class="btn btn-success">Créer</button>
           <button type="button" class="btn btn-secondary" (click)="closeModal()">Annuler</button>
         </div>
       </form>

@@ -1,10 +1,18 @@
 export interface Rdv {
-  id: number;
-  dateSouhaitee: Date;
-  dateEnvoi: Date;
+  id?: number;
+  dateSouhaitee: string;
+  dateEnvoi: string;
   typeProbleme: string;
   description: string;
-  status: 'CONFIRME' | 'EN_ATTENTE' | 'REFUSE';
+  status: string;
   client: { id: number };
-  guichetier: { id: number };
+}
+
+export interface RdvCreate {
+  dateSouhaitee: string;
+  dateEnvoi: string;
+  typeProbleme: string;
+  description: string;
+  status: string;
+  client: { id: number };
 }

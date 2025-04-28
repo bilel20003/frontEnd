@@ -92,6 +92,8 @@ td:last-child {
 
 .btn-info { background-color: #17a2b8; color: white; }
 .btn-danger { background-color: #dc3545; color: white; }
+.btn-success { background-color: #28a745; color: white; }
+.btn-secondary { background-color: #6c757d; color: white; }
 .btn-primary { background-color: #007bff; color: white; }
 
 .btn i {
@@ -105,72 +107,7 @@ td:last-child {
 }
 
 .header-actions button {
-  margin-right: 20px;
-}
-
-.header-actions i {
-  cursor: pointer;
-  font-size: 1.5rem;
-  color: #007bff;
-  transition: 0.3s;
-}
-
-.header-actions i:hover {
-  color: #0056b3;
-}
-
-/* Pagination */
-.pagination-container {
-  margin-top: 20px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.pagination button {
-  padding: 8px 12px;
-  font-size: 14px;
-  margin: 5px;
-  border-radius: 5px;
-  background-color: #007bff;
-  color: white;
-  cursor: pointer;
-  transition: 0.3s;
-}
-
-.pagination button:disabled {
-  background-color: #6c757d;
-  cursor: not-allowed;
-}
-
-.pagination span {
-  font-size: 14px;
-}
-
-/* Choix du nombre de lignes par page */
-.page-options select {
-  padding: 5px;
-  font-size: 14px;
-  border-radius: 5px;
-  border: 1px solid #aa2727;
-}
-
-/* Mode nuit */
-body.night-mode {
-  background-color: #121212;
-  color: white;
-}
-
-.night-mode .navbar {
-  background-color: #333;
-}
-
-.night-mode .table {
-  background-color: #1f1f1f;
-}
-
-.night-mode .table th, .night-mode .table td {
-  color: white;
+  margin-left: 10px;
 }
 
 .mode-toggle {
@@ -186,7 +123,88 @@ body.night-mode {
   color: #0056b3;
 }
 
+/* Pagination */
+.pagination-container {
+  margin-top: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
 
+.pagination button {
+  padding: 8px 12px;
+  font-size: 14px;
+  margin: 0 5px;
+  border-radius: 5px;
+  background-color: #007bff;
+  color: white;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.pagination button:disabled {
+  background-color: #6c757d;
+  cursor: not-allowed;
+}
+
+.pagination button.active {
+  background-color: #0056b3;
+}
+
+.page-options select {
+  padding: 5px;
+  font-size: 14px;
+  border-radius: 5px;
+  border: 1px solid #aa2727;
+}
+
+/* Mode nuit */
+body.night-mode {
+  background-color: #121212;
+  color: white;
+}
+
+.night-mode .table {
+  background-color: #1f1f1f;
+}
+
+.night-mode .table th, .night-mode .table td {
+  color: white;
+}
+
+.night-mode .modal-content {
+  background-color: #1f1f1f;
+  color: white;
+}
+
+.night-mode .modal-content input,
+.night-mode .modal-content select {
+  background-color: #333;
+  color: white;
+  border-color: #555;
+}
+
+.night-mode .search-bar-container {
+  background-color: #1f1f1f;
+}
+
+.night-mode .search-bar {
+  background-color: #333;
+  box-shadow: 0 2px 4px rgba(255, 255, 255, 0.1);
+}
+
+.night-mode .search-bar input {
+  background-color: #333;
+  color: white;
+}
+
+.night-mode .slider {
+  background-color: #666;
+}
+
+.night-mode input:checked + .slider {
+  background-color: #2ecc71;
+}
 
 /* Modale */
 .modal-overlay {
@@ -215,17 +233,9 @@ body.night-mode {
   font-size: 20px;
 }
 
-.form-group {
-  margin-bottom: 15px;
-}
-
-.form-group label {
-  font-size: 14px;
-  margin-bottom: 5px;
-  display: block;
-}
-
-.form-group input, .form-group textarea {
+.modal-content input,
+.modal-content select,
+.modal-content textarea {
   width: 100%;
   padding: 8px;
   border: 1px solid #ddd;
@@ -233,36 +243,37 @@ body.night-mode {
   font-size: 14px;
 }
 
-.form-group textarea {
+.modal-content textarea {
+  height: 100px;
   resize: vertical;
-  min-height: 80px;
 }
 
-.form-actions {
-  display: flex;
-  justify-content: space-between;
-}
-
-.form-actions .btn {
-  font-size: 14px;
+.modal-content button {
+  margin-top: 10px;
   padding: 8px 15px;
   border-radius: 4px;
+  font-size: 14px;
 }
 
-.form-actions .btn-success {
-  background-color: #28a745;
-  color: white;
-}
-
-.form-actions .btn-secondary {
-  background-color: #6c757d;
-  color: white;
-}
-
-.form-actions .btn-success:hover {
+.btn-success:hover {
   background-color: #218838;
 }
 
-.form-actions .btn-secondary:hover {
+.btn-secondary:hover {
   background-color: #5a6268;
+}
+
+.error-message {
+  color: #dc3545;
+  font-size: 0.85rem;
+  margin-top: 5px;
+}
+
+header h2 {
+  color: #1e3c72;
+  font-size: 2rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  margin-left: 250px;
+  padding: 20px 0;
 }

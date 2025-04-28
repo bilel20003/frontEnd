@@ -1,0 +1,186 @@
+<app-navbar-admin></app-navbar-admin>
+
+<div class="container">
+  <!-- Header -->
+  <header class="d-flex justify-content-between align-items-center">
+    <h2 style="margin-left: 250px;">Gestion des Horaires</h2>
+    <div class="header-actions">
+      <button class="mode-toggle" (click)="toggleNightMode()">
+        <i class="fas" [ngClass]="isNightMode ? 'fa-sun' : 'fa-moon'"></i>
+      </button>
+    </div>
+  </header>
+
+  <!-- Search Bar -->
+  <div class="search-bar-container">
+    <div class="search-bar">
+      <input type="text" placeholder="Rechercher par jour..." [(ngModel)]="searchTerm" (input)="filterSchedules()">
+      <button><i class="fas fa-search"></i></button>
+    </div>
+  </div>
+
+  <!-- Error Message -->
+  <div *ngIf="errorMessage" class="alert alert-danger" role="alert">
+    {{ errorMessage }}
+  </div>
+
+  <!-- Form Card -->
+  <div class="form-card">
+    <h3>{{ editingSchedule ? 'Modifier Horaire' : 'Ajouter Horaire' }}</h3>
+    <form [formGroup]="scheduleForm" (ngSubmit)="onSubmit()">
+      <!-- Weekly Schema -->
+      <div class="week-schema mb-3">
+        <button type="button"
+                *ngFor="let day of daysOfWeek"
+                class="day-button"
+                [ngClass]="{'selected': selectedDay === day}"
+                (click)="selectDay(day)">
+          {{ day | slice:0:3 }}
+        </button>
+      </div>
+      <div *ngIf="scheduleForm.get('dayOfWeek')?.touched && scheduleForm.get('dayOfWeek')?.invalid" class="error-message">
+        Le jour est requis
+      </div>
+      <div class="row g-3">
+        <div class="col-md-3 col-12 form-group">
+          <div class="input-group">
+            <label for="startTime">Début</label>
+            <div class="input-wrapper">
+              <i class="fas fa-clock"></i>
+              <input type="text" formControlName="startTime" id="startTime" class="modern-input" placeholder="HH:mm" (click)="toggleTimePicker('startTime')" required readonly>
+              <div class="time-picker" *ngIf="showTimePicker['startTime']">
+                <div class="time-option" *ngFor="let time of timeOptions" (click)="selectTime('startTime', time)">
+                  {{ time }}
+                </div>
+              </div>
+            </div>
+          </div>
+          <div *ngIf="scheduleForm.get('startTime')?.touched && scheduleForm.get('startTime')?.invalid" class="error-message">
+            L'heure de début est requise ou invalide (HH:mm)
+          </div>
+        </div>
+        <div class="col-md-3 col-12 form-group">
+          <div class="input-group">
+            <label for="endTime">Fin</label>
+            <div class="input-wrapper">
+              <i class="fas fa-clock"></i>
+              <input type="text" formControlName="endTime" id="endTime" class="modern-input" placeholder="HH:mm" (click)="toggleTimePicker('endTime')" required readonly>
+              <div class="time-picker" *ngIf="showTimePicker['endTime']">
+                <div class="time-option" *ngFor="let time of timeOptions" (click)="selectTime('endTime', time)">
+                  {{ time }}
+                </div>
+              </div>
+            </div>
+          </div>
+          <div *ngIf="scheduleForm.get('endTime')?.touched && scheduleForm.get('endTime')?.invalid" class="error-message">
+            L'heure de fin est requise ou invalide (HH:mm)
+          </div>
+        </div>
+        <div class="col-md-3 col-12 form-group">
+          <div class="input-group">
+            <label for="breakStart">Pause Début</label>
+            <div class="input-wrapper">
+              <i class="fas fa-clock"></i>
+              <input type="text" formControlName="breakStart" id="breakStart" class="modern-input" placeholder="HH:mm" (click)="toggleTimePicker('breakStart')" readonly>
+              <div class="time-picker" *ngIf="showTimePicker['breakStart']">
+                <div class="time-option" *ngFor="let time of timeOptions" (click)="selectTime('breakStart', time)">
+                  {{ time }}
+                </div>
+              </div>
+            </div>
+          </div>
+          <div *ngIf="scheduleForm.get('breakStart')?.touched && scheduleForm.get('breakStart')?.invalid" class="error-message">
+            L'heure de début de pause est invalide (HH:mm)
+          </div>
+        </div>
+        <div class="col-md-3 col-12 form-group">
+          <div class="input-group">
+            <label for="breakEnd">Pause Fin</label>
+            <div class="input-wrapper">
+              <i class="fas fa-clock"></i>
+              <input type="text" formControlName="breakEnd" id="breakEnd" class="modern-input" placeholder="HH:mm" (click)="toggleTimePicker('breakEnd')" readonly>
+              <div class="time-picker" *ngIf="showTimePicker['breakEnd']">
+                <div class="time-option" *ngFor="let time of timeOptions" (click)="selectTime('breakEnd', time)">
+                  {{ time }}
+                </div>
+              </div>
+            </div>
+          </div>
+          <div *ngIf="scheduleForm.get('breakEnd')?.touched && scheduleForm.get('breakEnd')?.invalid" class="error-message">
+            L'heure de fin de pause est invalide (HH:mm)
+          </div>
+        </div>
+        <div class="col-12 form-actions">
+          <button type="button" (click)="resetForm()" class="btn btn-modern btn-cancel">Annuler</button>
+          <button type="submit" [disabled]="scheduleForm.invalid" class="btn btn-modern btn-submit">
+            {{ editingSchedule ? 'Modifier' : 'Ajouter' }}
+          </button>
+        </div>
+      </div>
+      <div *ngIf="scheduleForm.errors && scheduleForm.errors['invalidTimeRange']" class="error-message">
+        {{ scheduleForm.errors['invalidTimeRange'] }}
+      </div>
+      <div *ngIf="scheduleForm.errors && scheduleForm.errors['invalidBreakRange']" class="error-message">
+        {{ scheduleForm.errors['invalidBreakRange'] }}
+      </div>
+      <div *ngIf="scheduleForm.errors && scheduleForm.errors['invalidBreakStart']" class="error-message">
+        {{ scheduleForm.errors['invalidBreakStart'] }}
+      </div>
+      <div *ngIf="scheduleForm.errors && scheduleForm.errors['invalidBreakEnd']" class="error-message">
+        {{ scheduleForm.errors['invalidBreakEnd'] }}
+      </div>
+    </form>
+  </div>
+
+  <!-- Table -->
+  <div class="table-responsive">
+    <table class="table table-hover shadow-sm rounded">
+      <thead class="table-header">
+        <tr>
+          <th>Jour</th>
+          <th>Horaires</th>
+          <th>Pause</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let schedule of paginatedSchedules">
+          <td>{{ schedule.dayOfWeek }}</td>
+          <td>{{ schedule.startTime.slice(0, 5) }} - {{ schedule.endTime.slice(0, 5) }}</td>
+          <td>{{ schedule.breakStart && schedule.breakEnd ? schedule.breakStart.slice(0, 5) + ' - ' + schedule.breakEnd.slice(0, 5) : 'Aucune' }}</td>
+          <td>
+            <button class="btn btn-info btn-sm me-2" (click)="editSchedule(schedule)">
+              <i class="fas fa-edit"></i> Modifier
+            </button>
+            <button class="btn btn-danger btn-sm" (click)="deleteSchedule(schedule.id)">
+              <i class="fas fa-trash"></i> Supprimer
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Pagination -->
+  <div class="pagination-container d-flex justify-content-between align-items-center">
+    <div class="page-options">
+      <select [(ngModel)]="itemsPerPage" (change)="onItemsPerPageChange($event)">
+        <option *ngFor="let option of [5, 10, 20]" [value]="option">{{ option }} lignes par page</option>
+      </select>
+    </div>
+    <div class="pagination">
+      <button class="btn btn-pagination" (click)="goToPreviousPage()" [disabled]="currentPage === 1">
+        <i class="fas fa-chevron-left"></i>
+      </button>
+      <button *ngFor="let page of getPageNumbers()"
+              class="btn btn-pagination"
+              [ngClass]="{'active': page === currentPage}"
+              (click)="goToPage(page)">
+        {{ page }}
+      </button>
+      <button class="btn btn-pagination" (click)="goToNextPage()" [disabled]="currentPage === totalPages">
+        <i class="fas fa-chevron-right"></i>
+      </button>
+    </div>
+  </div>
+</div>

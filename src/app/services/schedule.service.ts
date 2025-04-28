@@ -2,13 +2,13 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpErrorResponse } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
-import { Rdv, RdvCreate } from '../models/rendez-vous.model';
+import { Schedule } from '../models/schedule.model';
 
 @Injectable({
   providedIn: 'root'
 })
-export class RendezvousService {
-  private apiUrl = 'http://localhost:8082/api/rdvs';
+export class ScheduleService {
+  private apiUrl = 'http://localhost:8082/api/schedules';
 
   constructor(private http: HttpClient) {}
 
@@ -17,44 +17,40 @@ export class RendezvousService {
     if (!token) {
       console.warn('No JWT token found in localStorage');
     }
-    const headers = new HttpHeaders({
-      'Content-Type': 'application/json',
-      'Authorization': token ? `Bearer ${token.trim()}` : ''
-    });
-    console.log('HTTP Headers:', {
-      'Content-Type': headers.get('Content-Type'),
-      'Authorization': headers.get('Authorization')
-    });
-    return { headers };
+    return {
+      headers: new HttpHeaders({
+        'Content-Type': 'application/json',
+        'Authorization': token ? `Bearer ${token}` : ''
+      })
+    };
   }
 
-  getRendezvous(): Observable<Rdv[]> {
-    return this.http.get<Rdv[]>(this.apiUrl, this.getHttpOptions()).pipe(
+  getSchedulesByDay(dayOfWeek: string): Observable<Schedule[]> {
+    return this.http.get<Schedule[]>(`${this.apiUrl}/${dayOfWeek}`, this.getHttpOptions()).pipe(
       catchError(this.handleError)
     );
   }
 
-  getRendezvousByClient(clientId: number): Observable<Rdv[]> {
-    const url = `${this.apiUrl}?clientId=${clientId}`;
-    return this.http.get<Rdv[]>(url, this.getHttpOptions()).pipe(
+  getAvailableSlots(date: string): Observable<string[]> {
+    return this.http.get<string[]>(`${this.apiUrl}/available-slots?date=${date}`, this.getHttpOptions()).pipe(
       catchError(this.handleError)
     );
   }
 
-  addRendezvous(rdv: RdvCreate): Observable<Rdv> {
-    console.log('Sending POST request to:', this.apiUrl);
-    console.log('Request body:', JSON.stringify(rdv, null, 2));
-    return this.http.post<Rdv>(this.apiUrl, rdv, this.getHttpOptions()).pipe(
+  addSchedule(schedule: Schedule): Observable<Schedule> {
+    return this.http.post<Schedule>(this.apiUrl, schedule, this.getHttpOptions()).pipe(
       catchError(this.handleError)
     );
   }
 
-  refuseRdv(id: number, guichetierId: number): Observable<void> {
-    return this.http.put<void>(
-      `${this.apiUrl}/${id}/refuse?guichetierId=${guichetierId}`,
-      {},
-      this.getHttpOptions()
-    ).pipe(
+  updateSchedule(id: number, schedule: Schedule): Observable<Schedule> {
+    return this.http.put<Schedule>(`${this.apiUrl}/${id}`, schedule, this.getHttpOptions()).pipe(
+      catchError(this.handleError)
+    );
+  }
+
+  deleteSchedule(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/${id}`, this.getHttpOptions()).pipe(
       catchError(this.handleError)
     );
   }
@@ -66,7 +62,7 @@ export class RendezvousService {
     } else if (error.status === 400) {
       errorMessage = error.error?.message || 'Données invalides. Vérifiez les champs saisis.';
     } else if (error.status === 403) {
-      errorMessage = 'Accès interdit. Vérifiez vos permissions ou reconnectez-vous.';
+      errorMessage = 'Accès interdit. Vérifiez vos permissions.';
     } else if (error.status === 404) {
       errorMessage = error.error?.message || 'Ressource non trouvée.';
     }

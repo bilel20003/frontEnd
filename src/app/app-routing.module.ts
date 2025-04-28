@@ -31,8 +31,8 @@ import { ObjetReclamationComponent } from './components/Admin/objet-reclamation/
 import { GererRoleComponent } from './components/Admin/role/role.component';
 import { MinistryManagementComponent } from './components/Admin/ministere/ministere.component';
 
-import { HoraireComponent } from './components/Admin/horaire/horaire.component';
 import { ServiceComponent } from './components/Admin/service/service.component';
+import { ScheduleComponent } from './components/Admin/schedule/schedule.component';
 
 
 const routes: Routes = [
@@ -48,8 +48,7 @@ const routes: Routes = [
   { path: 'role', component: GererRoleComponent, canActivate: [AuthGuard], data: { role: 'ADMIN' } },
   { path: 'ministere', component: MinistryManagementComponent, canActivate: [AuthGuard], data: { role: 'ADMIN' } },
   { path: 'service', component: ServiceComponent, canActivate: [AuthGuard], data: { role: 'ADMIN' } },
-  
-  { path: 'horaire', component: HoraireComponent, canActivate: [AuthGuard], data: { role: 'ADMIN' } },
+  { path: 'schedule', component: ScheduleComponent, canActivate: [AuthGuard], data: { role: 'ADMIN' } },
 
   // Client routes (protected by AuthGuard)
   { path: 'home', component: HomeComponent, canActivate: [AuthGuard], data: { role: 'CLIENT' }  },

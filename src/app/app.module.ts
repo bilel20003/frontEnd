@@ -54,9 +54,10 @@ import { GererRoleComponent } from './components/Admin/role/role.component';
 import { MinistryManagementComponent } from './components/Admin/ministere/ministere.component';
 
 
-import { HoraireComponent } from './components/Admin/horaire/horaire.component';
 import { ServiceComponent } from './components/Admin/service/service.component';
 import { ServiceService } from './services/service.service';
+import { ScheduleComponent } from './components/Admin/schedule/schedule.component';
+import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 
 
 
@@ -103,8 +104,8 @@ import { ServiceService } from './services/service.service';
     MinistryManagementComponent,
    
   
-    HoraireComponent,
     ServiceComponent,
+    ScheduleComponent,
         
    
     
@@ -117,6 +118,7 @@ import { ServiceService } from './services/service.service';
     NgxPaginationModule,
     BrowserAnimationsModule,
     HttpClientModule,
+    NgbModule,
    
   ],
   providers: [
