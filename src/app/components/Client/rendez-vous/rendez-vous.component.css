@@ -178,7 +178,8 @@ body.night-mode {
 }
 
 .night-mode .modal-content input,
-.night-mode .modal-content select {
+.night-mode .modal-content select,
+.night-mode .modal-content textarea {
   background-color: #333;
   color: white;
   border-color: #555;
@@ -276,4 +277,55 @@ header h2 {
   text-transform: uppercase;
   margin-left: 250px;
   padding: 20px 0;
+}
+
+/* Calendrier */
+.calendar-modal {
+  max-width: 1000px;
+  width: 90%;
+  padding: 20px;
+}
+
+.fc {
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.fc .fc-toolbar {
+  background: linear-gradient(135deg, #1e3c72, #2a5298);
+  color: white;
+  padding: 10px;
+  border-radius: 8px 8px 0 0;
+}
+
+.fc .fc-button {
+  background-color: #007bff;
+  border: none;
+  color: white;
+}
+
+.fc .fc-button:hover {
+  background-color: #0056b3;
+}
+
+.fc .fc-event {
+  background-color: #28a745;
+  border-color: #218838;
+  color: white;
+  cursor: pointer;
+}
+
+.night-mode .fc {
+  background-color: #1f1f1f;
+  color: white;
+}
+
+.night-mode .fc .fc-toolbar {
+  background: linear-gradient(135deg, #333, #555);
+}
+
+.night-mode .fc .fc-event {
+  background-color: #2ecc71;
+  border-color: #27ae60;
 }

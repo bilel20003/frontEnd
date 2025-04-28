@@ -4,6 +4,10 @@ import { RendezvousService } from 'src/app/services/rendez-vous.service';
 import { ScheduleService } from '../../../services/schedule.service';
 import { Rdv, RdvCreate } from '../../../models/rendez-vous.model';
 import { jwtDecode } from 'jwt-decode';
+import { CalendarOptions, EventInput } from '@fullcalendar/core';
+import dayGridPlugin from '@fullcalendar/daygrid';
+import timeGridPlugin from '@fullcalendar/timegrid';
+import listPlugin from '@fullcalendar/list';
 
 @Component({
   selector: 'app-rendez-vous',
@@ -21,9 +25,23 @@ export class RendezVousComponent implements OnInit {
   paginatedRendezvous: Rdv[] = [];
   isNightMode: boolean = false;
   isModalOpen: boolean = false;
+  isCalendarOpen: boolean = false;
   availableSlots: string[] = [];
   clientId: number | null = null;
   errorMessage: string | null = null;
+  calendarOptions: CalendarOptions = {
+    initialView: 'dayGridMonth',
+    plugins: [dayGridPlugin, timeGridPlugin, listPlugin],
+    headerToolbar: {
+      left: 'prev,next today',
+      center: 'title',
+      right: 'dayGridMonth,timeGridWeek,timeGridDay,listWeek'
+    },
+    events: [],
+    eventClick: this.handleEventClick.bind(this),
+    height: 'auto',
+    locale: 'fr'
+  };
 
   constructor(
     private fb: FormBuilder,
@@ -54,7 +72,6 @@ export class RendezVousComponent implements OnInit {
       try {
         const decoded: any = jwtDecode(token);
         console.log('Decoded JWT:', decoded);
-        // Prioritize numeric clientId
         this.clientId = Number(decoded.clientId) || Number(decoded.id) || null;
         if (!this.clientId) {
           console.error('No numeric clientId found in token. Found:', decoded);
@@ -79,6 +96,7 @@ export class RendezVousComponent implements OnInit {
       next: (rendezvous) => {
         this.rendezvous = rendezvous;
         this.filterRendezvous();
+        this.loadCalendarEvents();
         this.errorMessage = null;
       },
       error: (err) => {
@@ -86,6 +104,25 @@ export class RendezVousComponent implements OnInit {
         this.errorMessage = err.message;
       }
     });
+  }
+
+  loadCalendarEvents() {
+    const events: EventInput[] = this.rendezvous.map(rdv => ({
+      title: `${rdv.typeProbleme} (${rdv.status})`,
+      start: rdv.dateSouhaitee,
+      extendedProps: {
+        description: rdv.description,
+        status: rdv.status
+      }
+    }));
+    this.calendarOptions = {
+      ...this.calendarOptions,
+      events
+    };
+  }
+
+  handleEventClick(info: any) {
+    alert(`Rendez-vous: ${info.event.title}\nDate: ${new Date(info.event.start).toLocaleString('fr-FR')}\nDescription: ${info.event.extendedProps.description}\nStatut: ${info.event.extendedProps.status}`);
   }
 
   filterRendezvous() {
@@ -132,6 +169,18 @@ export class RendezVousComponent implements OnInit {
     this.errorMessage = null;
   }
 
+  openCalendar(): void {
+    if (!this.clientId) {
+      this.errorMessage = 'Veuillez vous connecter pour voir le calendrier.';
+      return;
+    }
+    this.isCalendarOpen = true;
+  }
+
+  closeCalendar(): void {
+    this.isCalendarOpen = false;
+  }
+
   addRendezvous() {
     if (this.rendezvousForm.valid && this.clientId) {
       const formValue = this.rendezvousForm.value;
@@ -139,7 +188,6 @@ export class RendezVousComponent implements OnInit {
       const [hours, minutes] = formValue.timeSlot.split(':').map(Number);
       date.setHours(hours, minutes, 0, 0);
 
-      // Format dateSouhaitee as YYYY-MM-DDTHH:mm:ss
       const formattedDate = date.toISOString().slice(0, 19);
 
       const rdv: RdvCreate = {

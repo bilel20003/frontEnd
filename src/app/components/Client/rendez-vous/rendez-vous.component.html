@@ -20,6 +20,7 @@
       <button class="mode-toggle" (click)="toggleMode()">
         <i class="fas" [ngClass]="isNightMode ? 'fa-sun' : 'fa-moon'"></i>
       </button>
+      <button class="btn btn-primary" (click)="openCalendar()">Voir Calendrier</button>
       <button class="btn btn-primary" (click)="openModal()">Prendre un Rendez-vous</button>
     </div>
   </header>
@@ -103,6 +104,17 @@
           <button type="button" class="btn btn-secondary" (click)="closeModal()">Annuler</button>
         </div>
       </form>
+    </div>
+  </div>
+
+  <!-- Modale pour le Calendrier -->
+  <div *ngIf="isCalendarOpen" class="modal-overlay">
+    <div class="modal-content calendar-modal">
+      <h3>Calendrier des Rendez-vous</h3>
+      <full-calendar [options]="calendarOptions"></full-calendar>
+      <div class="form-actions">
+        <button type="button" class="btn btn-secondary" (click)="closeCalendar()">Fermer</button>
+      </div>
     </div>
   </div>
 </div>
