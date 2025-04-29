@@ -8,6 +8,10 @@ import { CalendarOptions, EventInput } from '@fullcalendar/core';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
 import listPlugin from '@fullcalendar/list';
+import '@fullcalendar/core'; // Import JS with bundled styles
+import '@fullcalendar/daygrid';
+import '@fullcalendar/timegrid';
+import '@fullcalendar/list';
 
 @Component({
   selector: 'app-rendez-vous',

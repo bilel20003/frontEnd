@@ -18,10 +18,12 @@ body {
     display: flex;
     justify-content: flex-end;
     margin-bottom: 15px;
-    
     top: 60px; /* Fixe la barre de recherche sous la top-bar */
     background-color: white; 
     padding: 10px 0;
 }
 
-/* 🔥 Copie tout le reste de `home.component.css` ici */
+/* Other Global Styles */
+@import '@angular/material/prebuilt-themes/indigo-pink.css';
+@import 'bootstrap/dist/css/bootstrap.min.css';
+@import 'font-awesome/css/font-awesome.min.css';
