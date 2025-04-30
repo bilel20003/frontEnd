@@ -40,6 +40,9 @@
           <td>{{ product.prix }}</td>
           <td>{{ product.topologie }}</td>
           <td>
+            <button class="btn btn-success btn-sm me-2" (click)="openViewModal(product)">
+              <i class="fas fa-eye"></i> Voir
+            </button>
             <button class="btn btn-info btn-sm me-2" (click)="openModal(product)">
               <i class="fas fa-edit"></i> Modifier
             </button>
@@ -79,7 +82,6 @@
           <label for="description">Description</label>
           <textarea [(ngModel)]="productForm.description" name="description" required></textarea>
         </div>
-       
         <div class="form-group">
           <label for="topologie">Topologie</label>
           <select [(ngModel)]="productForm.topologie" name="topologie" required>
@@ -93,11 +95,41 @@
           <label for="price">Prix</label>
           <input type="number" [(ngModel)]="productForm.prix" name="price" required>
         </div>
+        <div class="form-group">
+          <label *ngIf="editingProduct">Affecter produit</label>
+          <label *ngIf="!editingProduct">Sélectionner les objets</label>
+          <div *ngFor="let objet of allObjets" class="checkbox">
+            <input type="checkbox" [checked]="selectedObjets.includes(objet.id)" (change)="toggleObjetSelection(objet.id)">
+            {{ objet.name }}
+          </div>
+        </div>
         <div class="form-actions">
           <button type="submit" class="btn btn-success">{{ editingProduct ? 'Mettre à jour' : 'Ajouter' }}</button>
           <button type="button" class="btn btn-secondary" (click)="closeModal()">Annuler</button>
         </div>
       </form>
+    </div>
+  </div>
+
+  <!-- Modale pour voir les détails du produit -->
+  <div *ngIf="isViewModalOpen" class="modal-overlay">
+    <div class="modal-content">
+      <h3>Détails du Produit</h3>
+      <div *ngIf="selectedProduct">
+        <p><strong>ID :</strong> {{ selectedProduct.id }}</p>
+        <p><strong>Nom :</strong> {{ selectedProduct.nom }}</p>
+        <p><strong>Description :</strong> {{ selectedProduct.description }}</p>
+        <p><strong>Prix :</strong> {{ selectedProduct.prix }} DT</p>
+        <p><strong>Topologie :</strong> {{ selectedProduct.topologie }}</p>
+        <p><strong>Objets associés :</strong></p>
+        <ul>
+          <li *ngFor="let objet of selectedProduct.objets">{{ objet.name }}</li>
+          <li *ngIf="selectedProduct.objets.length === 0">Aucun objet associé</li>
+        </ul>
+      </div>
+      <div class="form-actions">
+        <button type="button" class="btn btn-secondary" (click)="closeViewModal()">Fermer</button>
+      </div>
     </div>
   </div>
 </div>

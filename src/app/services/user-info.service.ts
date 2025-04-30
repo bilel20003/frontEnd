@@ -38,7 +38,20 @@ export class UserInfoService {
     private ministereService: MinistereService,
     private serviceService: ServiceService
   ) {}
+  
+  getUserById(id: number): Observable<UserInfo> {
+    console.log('getUserById called with id:', id);
+    return this.http.get<UserInfo>(`${this.apiUrl}/appuser/${id}`, this.getHttpOptions()).pipe(
+      catchError(this.handleError)
+    );
+  }
 
+  changePassword(userId: number, newPassword: string): Observable<any> {
+    const payload = { password: newPassword };
+    return this.http.put(`${this.apiUrl}/changePassword/${userId}`, payload, this.getHttpOptions()).pipe(
+      catchError(this.handleError)
+    );
+  }
   private getHttpOptions(): { headers: HttpHeaders } {
     const token = localStorage.getItem('token');
     if (!token) {

@@ -58,6 +58,11 @@ import { HoraireComponent } from './components/Admin/horaire/horaire.component';
 import { ServiceComponent } from './components/Admin/service/service.component';
 import { ServiceService } from './services/service.service';
 
+import { ProfileAdminComponent } from './components/Admin/profile-admin/profile-admin.component';
+import { ProfileClientComponent } from './components/Client/profile-client/profile-client.component';
+import { ProfileGuichetierComponent } from './components/Guichetier/profile-guichetier/profile-guichetier.component';
+import { ProfileTechnicienComponent } from './components/Technicien/profile-technicien/profile-technicien.component';
+
 
 
 
@@ -105,6 +110,11 @@ import { ServiceService } from './services/service.service';
   
     HoraireComponent,
     ServiceComponent,
+    
+    ProfileAdminComponent,
+    ProfileClientComponent,
+    ProfileGuichetierComponent,
+    ProfileTechnicienComponent,
         
    
     

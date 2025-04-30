@@ -1,0 +1,172 @@
+/* Styles de base */
+body {
+    font-family: 'Segoe UI', Arial, sans-serif;
+    color: #333;
+    background-color: #fff;
+  }
+  
+  /* Container principal */
+  .profile-container {
+    max-width: 800px;
+   
+   
+    margin-left: 470px; /* adapte à la largeur de ta sidebar */
+    padding: 100px;
+  }
+  
+  /* Titre avec icône */
+  h2 {
+    font-size: 22px;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 30px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  
+  /* Grille de profil */
+  .profile-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 25px;
+    margin-bottom: 30px;
+  }
+  
+  /* Groupes de formulaire */
+  .form-group {
+    margin-bottom: 15px;
+  }
+  
+  /* Labels */
+  .form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 500;
+    color: #555;
+    font-size: 14px;
+  }
+  
+  /* AMÉLIORATION DES ZONES DE TEXTE */
+  .form-group input {
+    width: 100%;
+    padding: 10px 12px;
+    font-size: 15px;
+    border: 2px solid #ccc;
+    border-radius: 6px;
+    background-color: #fff;
+    transition: all 0.2s ease;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  }
+  
+  /* Style pour les champs en lecture seule */
+  .form-group input[readonly] {
+    background-color: #f8f9fa;
+    border-color: #dee2e6;
+    color: #495057;
+    font-weight: 500;
+  }
+  
+  /* Style pour les champs éditables */
+  .form-group input:not([readonly]) {
+    border-color: #4361ee;
+    background-color: #f0f4ff;
+  }
+  
+  /* Focus sur les champs */
+  .form-group input:focus {
+    outline: none;
+    border-color: #4361ee;
+    box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.25);
+  }
+  
+  /* Ligne de boutons */
+  .button-row {
+    margin-top: 30px;
+    display: flex;
+    justify-content: flex-end;
+    gap: 15px;
+  }
+  
+  /* Style du bouton Retour */
+  button {
+    background-color: #e9ecef;
+    color: #495057;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.2s;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+  
+  button:hover {
+    background-color: #dee2e6;
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.15);
+  }
+  
+  /* Popup styling */
+  .popup-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+  }
+  
+  .popup-content {
+    background: white;
+    padding: 30px;
+    border-radius: 10px;
+    width: 400px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+  }
+  
+  /* Styles spécifiques pour les valeurs des champs */
+  .form-group input {
+    font-weight: 500;
+  }
+  
+  /* Styles pour différencier visuellement les types de données */
+  .form-group input[value="true"] {
+    color: #2e7d32;
+    font-weight: 600;
+  }
+  
+  /* Styles pour les champs en majuscules */
+  .form-group input[value="GUICHETIER"] {
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  
+  /* Amélioration visuelle pour les champs email */
+  .form-group input[type="email"] {
+    font-family: monospace;
+    letter-spacing: 0.5px;
+  }
+  
+  /* Variation de style pour les différents types d'information */
+  .form-group:nth-child(1) input, .form-group:nth-child(2) input {
+    border-left: 4px solid #4361ee;  /* Bleu pour nom/email */
+  }
+  
+  .form-group:nth-child(3) input, .form-group:nth-child(4) input {
+    border-left: 4px solid #7209b7;  /* Violet pour rôle/statut */
+  }
+  
+  .form-group:nth-child(5) input, .form-group:nth-child(6) input {
+    border-left: 4px solid #f72585;  /* Rose pour service/ministère */
+  }
+  
+  .form-group:nth-child(7) input {
+    border-left: 4px solid #4cc9f0;  /* Bleu clair pour produit */
+  }

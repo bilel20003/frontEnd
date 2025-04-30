@@ -1,39 +1,42 @@
 <app-navbar-admin></app-navbar-admin>
+
 <div class="dashboard-container">
-    <!-- Sidebar -->
-  
-  
-    <!-- Contenu principal du Dashboard -->
-    <div class="main-content">
-      <div class="top-bar">
-        <!-- Barre de navigation supérieure (notifications, profil utilisateur, etc.) -->
-        <button class="icon-btn">
-          <i class="fa fa-bell"></i>
-        </button>
-        <button class="icon-btn">
-          <i class="fa fa-user"></i>
-        </button>
-      </div>
-  
-      <div class="content">
-       
-        
-        <!-- Ajouter des cartes ou des graphiques -->
-        <div class="cards-container">
-          <div class="card">
-            <h2>Total Clients</h2>
-            <p>120</p>
-          </div>
-          <div class="card">
-            <h2>Réclamations en cours</h2>
-            <p>35</p>
-          </div>
-          <div class="card">
-            <h2>Réclamations traitées</h2>
-            <p>150</p>
-          </div>
-        </div>
-      </div>
-    </div>
+  <h2>📊 Tableau de bord</h2>
+
+  <!-- Cartes statistiques -->
+  <div class="cards-container">
+    <div class="card">👥 Utilisateurs : {{ stats.totalUtilisateurs }}</div>
+    <div class="card">🛠️ Techniciens : {{ stats.totalTechniciens }}</div>
+    <div class="card">📨 Réclamations en cours : {{ stats.totalReclamationsEnCours }}</div>
+    <div class="card">✅ Réclamations traitées : {{ stats.totalReclamationsTraitees }}</div>
+    <div class="card">🏛️ Ministères : {{ stats.totalMinisteres }}</div>
+    <div class="card">🧩 Produits : {{ stats.totalProduits }}</div>
   </div>
-  
+
+  <!-- Tableau des dernières réclamations -->
+  <div class="table-section">
+    <h3>🕒 Dernières réclamations</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Ministère</th>
+          <th>Service</th>
+          <th>Type</th>
+          <th>Date</th>
+          <th>Statut</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let rec of dernieresReclamations">
+          <td>{{ rec.id }}</td>
+          <td>{{ rec.service?.ministere?.nomMinistere }}</td>
+          <td>{{ rec.service?.nomService }}</td>
+          <td>{{ rec.typeProbleme }}</td>
+          <td>{{ rec.dateEnvoi | date:'shortDate' }}</td>
+          <td>{{ rec.status }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
