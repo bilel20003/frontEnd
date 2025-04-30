@@ -9,7 +9,6 @@ import { FormsModule } from '@angular/forms';
 import { RenseignerAvancementComponent } from './components/Technicien/renseigner-avancement/renseigner-avancement.component';
 import { TechNavComponent } from './components/Technicien/tech-nav/tech-nav.component';
 import { GuiNavComponent } from './components/Guichetier/gui-nav/gui-nav.component';
-import { GererRdvComponent } from './components/Guichetier/gerer-rdv/gerer-rdv.component';
 import { MinistereService } from './services/ministere.service';
 import { ProduitService } from './services/produit.service';
 import { ObjetService } from './services/objet.service';
@@ -47,7 +46,6 @@ import { FullCalendarModule } from '@fullcalendar/angular';
     RenseignerAvancementComponent,
     TechNavComponent,
     GuiNavComponent,
-    GererRdvComponent,
     TechHomeComponent,
     GuiHomeComponent,
     DetailDemandeComponent,

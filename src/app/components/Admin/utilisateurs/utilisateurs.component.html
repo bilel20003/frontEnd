@@ -30,17 +30,19 @@
     <table class="table table-hover shadow-sm rounded">
       <thead class="table-header">
         <tr>
-          <th>Nom</th>
-          <th>Email</th>
-          <th>Rôle</th>
-          <th>Ministère</th>
-          <th>Service</th>
-          <th>Statut</th> <!-- Nouvelle colonne -->
+          <th (click)="sort('id')" class="sortable" [ngClass]="{'sorted': sortDirection['id'] !== undefined}">ID</th>
+          <th (click)="sort('nom')" class="sortable" [ngClass]="{'sorted': sortDirection['nom'] !== undefined}">Nom</th>
+          <th (click)="sort('email')" class="sortable" [ngClass]="{'sorted': sortDirection['email'] !== undefined}">Email</th>
+          <th (click)="sort('role')" class="sortable" [ngClass]="{'sorted': sortDirection['role'] !== undefined}">Rôle</th>
+          <th (click)="sort('ministere')" class="sortable" [ngClass]="{'sorted': sortDirection['ministere'] !== undefined}">Ministère</th>
+          <th (click)="sort('service')" class="sortable" [ngClass]="{'sorted': sortDirection['service'] !== undefined}">Service</th>
+          <th (click)="sort('status')" class="sortable" [ngClass]="{'sorted': sortDirection['status'] !== undefined}">Statut</th>
           <th>Actions</th>
         </tr>
       </thead>
       <tbody>
         <tr *ngFor="let utilisateur of paginatedUtilisateurs">
+          <td>{{ utilisateur.id }}</td>
           <td>{{ utilisateur.nom }}</td>
           <td>{{ utilisateur.email }}</td>
           <td>{{ utilisateur.role }}</td>
@@ -56,8 +58,8 @@
             <button class="btn btn-info btn-sm me-2" (click)="openModal(utilisateur)">
               <i class="fas fa-edit"></i> Modifier
             </button>
-            <button class="btn btn-danger btn-sm" (click)="supprimerUtilisateur(utilisateur)">
-              <i class="fas fa-trash"></i> Supprimer
+            <button class="btn btn-warning btn-sm" (click)="archiverUtilisateur(utilisateur)">
+              <i class="fas fa-archive"></i> Archiver
             </button>
           </td>
         </tr>

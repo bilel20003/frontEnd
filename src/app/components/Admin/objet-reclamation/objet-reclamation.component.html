@@ -25,8 +25,8 @@
     <table class="table table-hover shadow-sm rounded">
       <thead class="table-header">
         <tr>
-          <th>ID</th>
-          <th>Nom de l'objet</th>
+          <th (click)="sort('id')" class="sortable" [ngClass]="{'sorted': sortDirection['id'] !== undefined}">ID</th>
+          <th (click)="sort('name')" class="sortable" [ngClass]="{'sorted': sortDirection['name'] !== undefined}">Nom de l'objet</th>
           <th>Actions</th>
         </tr>
       </thead>
@@ -38,8 +38,8 @@
             <button class="btn btn-info btn-sm me-2" (click)="editObject(objet)">
               <i class="fas fa-edit"></i> Modifier
             </button>
-            <button class="btn btn-danger btn-sm me-2" (click)="deleteObject(objet.id)">
-              <i class="fas fa-trash"></i> Supprimer
+            <button class="btn btn-warning btn-sm me-2" (click)="archiveObject(objet.id)">
+              <i class="fas fa-archive"></i> Archiver
             </button>
             <button class="btn btn-primary btn-sm" (click)="viewObject(objet)">
               <i class="fas fa-eye"></i> Voir
@@ -84,6 +84,7 @@
       </form>
     </div>
   </div>
+
   <!-- Modal Consultation -->
   <div class="modal-overlay" *ngIf="showViewModal">
     <div class="modal-content">

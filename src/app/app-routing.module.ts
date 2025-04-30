@@ -16,7 +16,6 @@ import { ReclamationComponent } from './components/Client/reclamation/reclamatio
 import { RendezVousComponent } from './components/Client/rendez-vous/rendez-vous.component';
 
 
-import { GererRdvComponent } from './components/Guichetier/gerer-rdv/gerer-rdv.component';
 import { TechHomeComponent } from './components/Technicien/tech-home/tech-home.component';
 
 import { GuiHomeComponent } from './components/Guichetier/gui-home/gui-home.component';
@@ -65,7 +64,6 @@ const routes: Routes = [
   { path: 'tech-home', component: TechHomeComponent, canActivate: [AuthGuard] , data: { role: 'TECHNICIEN' }},
 
   // Guichetier routes
-  { path: 'gerer-rdv', component: GererRdvComponent, canActivate: [AuthGuard] , data: { role: 'GUICHETIER' }},
   { path: 'gui-home', component: GuiHomeComponent, canActivate: [AuthGuard], data: { role: 'GUICHETIER' } },
 
   // Redirection des routes inconnues

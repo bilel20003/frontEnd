@@ -23,53 +23,42 @@ export class ObjetService {
   }
 
   getAllObjets(): Observable<Objet[]> {
-    return this.http.get<Objet[]>(`${this.apiUrl}/getallobjets`, this.getHttpOptions())
-      .pipe(catchError(this.handleError));
+    return this.http.get<Objet[]>(`${this.apiUrl}/getallobjets`, this.getHttpOptions()).pipe(
+      catchError(this.handleError)
+    );
   }
 
+  addObjet(objet: Omit<Objet, 'id'>): Observable<Objet> {
+    console.log('Payload envoyée:', JSON.stringify(objet, null, 2));
+    return this.http.post<Objet>(`${this.apiUrl}/addobjet`, objet, this.getHttpOptions()).pipe(
+      catchError(this.handleError)
+    );
+  }
 
+  updateObjet(id: number, objet: Objet): Observable<Objet> {
+    return this.http.put<Objet>(`${this.apiUrl}/updateobjet/${id}`, objet, this.getHttpOptions()).pipe(
+      catchError(this.handleError)
+    );
+  }
 
+  archiveObjet(id: number): Observable<void> {
+    console.log('archiveObjet called with id:', id);
+    return this.http.put<void>(`${this.apiUrl}/archiveobjet/${id}`, {}, this.getHttpOptions()).pipe(
+      catchError(this.handleError)
+    );
+  }
 
-// Ajouter un nouvel objet
-addObjet(objet: Omit<Objet, 'id'>): Observable<Objet> {
-console.log('Payload envoyée:', JSON.stringify(objet, null, 2));
-return this.http.post<Objet>(`${this.apiUrl}/addobjet`, objet, this.getHttpOptions())
-  .pipe(
-    catchError(this.handleError)
-  );
-}
-// Mettre à jour un objet existant
-updateObjet(id: number, objet: Objet): Observable<Objet> {
-return this.http.put<Objet>(`${this.apiUrl}/updateobjet/${id}`, objet, this.getHttpOptions())
-  .pipe(catchError(this.handleError));
-}
-
-// Supprimer un objet
-deleteObjet(id: number): Observable<void> {
-return this.http.delete<void>(`${this.apiUrl}/deleteobjet/${id}`, this.getHttpOptions())
-  .pipe(catchError(this.handleError));
-}
-
-
-// Gérer les erreurs
-
-private handleError(error: any): Observable<never> {
-  console.error('Erreur HTTP:', error); // Log détaillé pour le débogage
-  let errorMessage = 'Une erreur est survenue, veuillez réessayer.';
-  if (error.error instanceof ErrorEvent) {
-    // Erreur côté client
-    errorMessage = `Erreur: ${error.error.message}`;
-  } else {
-    // Erreur côté serveur
-    errorMessage = `Code: ${error.status}, Message: ${error.message}`;
-    if (error.error && error.error.message) {
-      errorMessage += `, Détails: ${error.error.message}`;
+  private handleError(error: any): Observable<never> {
+    console.error('Erreur HTTP:', error);
+    let errorMessage = 'Une erreur est survenue, veuillez réessayer.';
+    if (error.error instanceof ErrorEvent) {
+      errorMessage = `Erreur: ${error.error.message}`;
+    } else {
+      errorMessage = `Code: ${error.status}, Message: ${error.message}`;
+      if (error.error && error.error.message) {
+        errorMessage += `, Détails: ${error.error.message}`;
+      }
     }
+    return throwError(() => new Error(errorMessage));
   }
-  return throwError(() => new Error(errorMessage));
-}
-
-
-
-
 }

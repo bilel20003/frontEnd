@@ -26,7 +26,7 @@ export class HomeComponent implements OnInit {
   produitMap: { [key: number]: Produit } = {};
 
   searchTerm: string = '';
-  sortDirection: { [key: string]: boolean } = {};
+  sortDirection: { [key: string]: boolean } = { id: false }; // Default to descending for id
   currentPage: number = 1;
   itemsPerPage: number = 5;
   totalPages: number = 1;
@@ -149,6 +149,9 @@ export class HomeComponent implements OnInit {
         console.log('Requetes received:', data);
         this.requetes = data;
         this.filteredRequetes = [...this.requetes];
+        // Explicitly sort by id in descending order
+        this.filteredRequetes.sort((a, b) => b.id - a.id);
+        console.log('Sorted requetes (descending by id):', this.filteredRequetes);
         this.updatePagination();
       },
       error: (err: HttpErrorResponse) => {
@@ -196,14 +199,23 @@ export class HomeComponent implements OnInit {
   }
 
   sort(column: keyof Requete | 'objetName' | 'produitName'): void {
-    this.sortDirection[column] = !this.sortDirection[column];
+    // Initialize sort direction if not set
+    if (this.sortDirection[column] === undefined) {
+      this.sortDirection[column] = column === 'id' ? false : true; // Descending for id, ascending for others
+    } else {
+      this.sortDirection[column] = !this.sortDirection[column]; // Toggle direction
+    }
     const dir = this.sortDirection[column] ? 1 : -1;
 
     this.filteredRequetes.sort((a, b) => {
       let valA: any;
       let valB: any;
 
-      if (column === 'objetName') {
+      if (column === 'id') {
+        valA = Number(a.id) || 0;
+        valB = Number(b.id) || 0;
+        return dir * (valA - valB);
+      } else if (column === 'objetName') {
         valA = this.objetMap[a.objet.id]?.name ?? 'N/A';
         valB = this.objetMap[b.objet.id]?.name ?? 'N/A';
         const strA = valA.toString();
@@ -230,6 +242,7 @@ export class HomeComponent implements OnInit {
       }
     });
 
+    console.log(`Sorted by ${column}, direction: ${this.sortDirection[column] ? 'ascending' : 'descending'}`, this.filteredRequetes);
     this.updatePagination();
   }
 

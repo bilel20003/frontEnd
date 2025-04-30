@@ -38,9 +38,10 @@ export class UtilisateursComponent implements OnInit {
     serviceId: undefined,
     produitId: undefined,
     password: '',
-    status: 'false' // Ajout du status
+    status: 'false'
   };
   generatedPassword: string | null = null;
+  sortDirection: { [key: string]: boolean } = { id: false }; // Default to descending for id
 
   constructor(
     private userInfoService: UserInfoService,
@@ -60,8 +61,11 @@ export class UtilisateursComponent implements OnInit {
     }).subscribe({
       next: ({ utilisateurs, services, produits }) => {
         console.log('Initial data loaded:', { utilisateurs, services, produits });
-        this.utilisateurs = utilisateurs;
-        this.filteredUtilisateurs = [...utilisateurs];
+        this.utilisateurs = utilisateurs.filter(u => u.status !== 'archived'); // Exclude archived users
+        this.filteredUtilisateurs = [...this.utilisateurs];
+        // Sort by id in descending order
+        this.filteredUtilisateurs.sort((a, b) => b.id - a.id);
+        console.log('Sorted utilisateurs (descending by id):', this.filteredUtilisateurs);
         this.services = services;
         this.produits = produits;
         this.updatePagination();
@@ -99,10 +103,35 @@ export class UtilisateursComponent implements OnInit {
       utilisateur.role.toLowerCase().includes(term) ||
       utilisateur.ministere.toLowerCase().includes(term) ||
       utilisateur.service.toLowerCase().includes(term) ||
-      utilisateur.status.toLowerCase().includes(term) // Inclure status dans la recherche
+      utilisateur.status.toLowerCase().includes(term)
     );
     console.log('filteredUtilisateurs:', this.filteredUtilisateurs);
     this.currentPage = 1;
+    this.updatePagination();
+  }
+
+  sort(column: keyof UserDisplay): void {
+    if (this.sortDirection[column] === undefined) {
+      this.sortDirection[column] = column === 'id' ? false : true;
+    } else {
+      this.sortDirection[column] = !this.sortDirection[column];
+    }
+    const dir = this.sortDirection[column] ? 1 : -1;
+
+    this.filteredUtilisateurs.sort((a, b) => {
+      let valA: any = a[column] ?? '';
+      let valB: any = b[column] ?? '';
+      if (column === 'id') {
+        valA = Number(a.id) || 0;
+        valB = Number(b.id) || 0;
+        return dir * (valA - valB);
+      }
+      const strA = valA.toString();
+      const strB = valB.toString();
+      return dir * strA.localeCompare(strB, 'fr', { numeric: true });
+    });
+
+    console.log(`Sorted by ${column}, direction: ${this.sortDirection[column] ? 'ascending' : 'descending'}`, this.filteredUtilisateurs);
     this.updatePagination();
   }
 
@@ -181,7 +210,7 @@ export class UtilisateursComponent implements OnInit {
         serviceId: service ? service.id : utilisateur.serviceId,
         produitId: produit ? produit.id : utilisateur.produitId,
         password: '',
-        status: utilisateur.status // Conserver le status
+        status: utilisateur.status
       };
       console.log('Opening modal for edit, utilisateurForm:', this.utilisateurForm);
       this.updateServiceName();
@@ -197,7 +226,7 @@ export class UtilisateursComponent implements OnInit {
         serviceId: undefined,
         produitId: undefined,
         password: '',
-        status: 'false' // Status par défaut pour un nouvel utilisateur
+        status: 'false'
       };
       console.log('Opening modal for add, utilisateurForm:', this.utilisateurForm);
     }
@@ -229,7 +258,7 @@ export class UtilisateursComponent implements OnInit {
       serviceId: undefined,
       produitId: undefined,
       password: '',
-      status: 'false' // Réinitialiser avec status par défaut
+      status: 'false'
     };
     console.log('Modal closed, utilisateurForm reset:', this.utilisateurForm);
     this.updatePagination();
@@ -248,12 +277,6 @@ export class UtilisateursComponent implements OnInit {
     if (!this.utilisateurForm.nom || !this.utilisateurForm.email || !this.utilisateurForm.role || !this.utilisateurForm.serviceId || !this.utilisateurForm.produitId) {
       this.errorMessage = 'Veuillez remplir tous les champs obligatoires (Nom, Email, Rôle, Service, Produit).';
       console.error('Form validation failed:', this.utilisateurForm);
-      console.error('Role validation failed: role=', this.utilisateurForm.role);
-      return;
-    }
-    if (this.services.length === 0) {
-      this.errorMessage = 'Aucun service disponible. Veuillez vérifier la connexion au serveur.';
-      console.error('No services available:', this.services);
       return;
     }
     const serviceId = Number(this.utilisateurForm.serviceId);
@@ -276,7 +299,6 @@ export class UtilisateursComponent implements OnInit {
       console.error('Invalid role:', this.utilisateurForm.role);
       return;
     }
-    console.log('Validated role for add:', this.utilisateurForm.role);
     const userDisplay: UserDisplay = {
       id: this.utilisateurForm.id,
       nom: this.utilisateurForm.nom,
@@ -286,9 +308,8 @@ export class UtilisateursComponent implements OnInit {
       service: service.nomService || 'N/A',
       produitId: produitId,
       serviceId: serviceId,
-      status: this.utilisateurForm.status // Inclure le status
+      status: this.utilisateurForm.status
     };
-    console.log('Submitting userDisplay for add:', userDisplay);
     this.userInfoService.addUser(userDisplay).subscribe({
       next: () => {
         console.log('Utilisateur ajouté avec succès');
@@ -296,11 +317,9 @@ export class UtilisateursComponent implements OnInit {
         this.closeModal();
         this.errorMessage = null;
       },
-      error: (error: HttpErrorResponse | Error) => {
+      error: (error: HttpErrorResponse) => {
         console.error('Erreur lors de l\'ajout de l\'utilisateur:', error);
-        this.errorMessage = error instanceof HttpErrorResponse
-          ? `Erreur serveur (statut ${error.status}): ${error.message || 'Impossible d\'ajouter l\'utilisateur. Vérifiez les logs du serveur, assurez-vous que l\'email est unique et que les IDs sont valides.'}`
-          : `Erreur client: ${error.message}`;
+        this.errorMessage = `Erreur serveur (statut ${error.status}): ${error.message || 'Impossible d\'ajouter l\'utilisateur.'}`;
       }
     });
   }
@@ -310,12 +329,6 @@ export class UtilisateursComponent implements OnInit {
     if (!this.utilisateurForm.id || !this.utilisateurForm.nom || !this.utilisateurForm.email || !this.utilisateurForm.role || !this.utilisateurForm.serviceId || !this.utilisateurForm.produitId) {
       this.errorMessage = 'Veuillez remplir tous les champs obligatoires (ID, Nom, Email, Rôle, Service, Produit).';
       console.error('Form validation failed:', this.utilisateurForm);
-      console.error('Role validation failed: role=', this.utilisateurForm.role);
-      return;
-    }
-    if (this.services.length === 0) {
-      this.errorMessage = 'Aucun service disponible. Veuillez vérifier la connexion au serveur.';
-      console.error('No services available:', this.services);
       return;
     }
     const serviceId = Number(this.utilisateurForm.serviceId);
@@ -338,7 +351,6 @@ export class UtilisateursComponent implements OnInit {
       console.error('Invalid role:', this.utilisateurForm.role);
       return;
     }
-    console.log('Validated role for update:', this.utilisateurForm.role);
     const userDisplay: UserDisplay & { password?: string } = {
       id: this.utilisateurForm.id,
       nom: this.utilisateurForm.nom,
@@ -349,9 +361,8 @@ export class UtilisateursComponent implements OnInit {
       produitId: produitId,
       serviceId: serviceId,
       password: this.utilisateurForm.password,
-      status: this.utilisateurForm.status // Inclure le status
+      status: this.utilisateurForm.status
     };
-    console.log('Submitting userDisplay for update:', userDisplay);
     this.userInfoService.updateUser(this.utilisateurForm.id, userDisplay).subscribe({
       next: () => {
         console.log('Utilisateur mis à jour avec succès');
@@ -361,22 +372,22 @@ export class UtilisateursComponent implements OnInit {
       },
       error: (error: HttpErrorResponse) => {
         console.error('Erreur lors de la mise à jour de l\'utilisateur:', error);
-        this.errorMessage = `Erreur serveur (statut ${error.status}): ${error.message || 'Impossible de mettre à jour l\'utilisateur. Vérifiez les logs du serveur.'}`;
+        this.errorMessage = `Erreur serveur (statut ${error.status}): ${error.message || 'Impossible de mettre à jour l\'utilisateur.'}`;
       }
     });
   }
 
-  supprimerUtilisateur(utilisateur: UserDisplay) {
-    if (confirm('Voulez-vous vraiment supprimer cet utilisateur ?')) {
-      this.userInfoService.deleteUser(utilisateur.id).subscribe({
+  archiverUtilisateur(utilisateur: UserDisplay) {
+    if (confirm('Voulez-vous vraiment archiver cet utilisateur ? Il ne sera plus visible dans la liste active.')) {
+      this.userInfoService.archiveUser(utilisateur.id).subscribe({
         next: () => {
-          console.log('Utilisateur supprimé avec succès');
+          console.log('Utilisateur archivé avec succès');
           this.loadInitialData();
           this.errorMessage = null;
         },
         error: (error: HttpErrorResponse) => {
-          console.error('Erreur lors de la suppression de l\'utilisateur:', error);
-          this.errorMessage = `Erreur serveur (statut ${error.status}): Impossible de supprimer l\'utilisateur. Cet utilisateur peut ne pas être supprimable.`;
+          console.error('Erreur lors de l\'archivage de l\'utilisateur:', error);
+          this.errorMessage = `Erreur serveur (statut ${error.status}): Impossible d\'archiver l\'utilisateur.`;
         }
       });
     }
@@ -388,7 +399,7 @@ export class UtilisateursComponent implements OnInit {
       next: () => {
         utilisateur.status = utilisateur.status === 'true' ? 'false' : 'true';
         console.log(`Statut de l'utilisateur ${utilisateur.id} basculé à ${utilisateur.status}`);
-        this.updatePagination(); // Rafraîchir l'affichage
+        this.updatePagination();
         this.errorMessage = null;
       },
       error: (error: HttpErrorResponse) => {
