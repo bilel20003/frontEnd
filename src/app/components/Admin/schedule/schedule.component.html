@@ -27,7 +27,7 @@
   <!-- Form Card -->
   <div class="form-card">
     <h3>{{ editingSchedule ? 'Modifier Horaire' : 'Ajouter Horaire' }}</h3>
-    <form [formGroup]="scheduleForm" (ngSubmit)="onSubmit()">
+    <form [formGroup]="scheduleForm" (ngSubmit)="onSubmit()" class="schedule-form-container">
       <!-- Weekly Schema -->
       <div class="week-schema mb-3">
         <button type="button"

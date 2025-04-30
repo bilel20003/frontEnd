@@ -8,7 +8,7 @@ import { CalendarOptions, EventInput } from '@fullcalendar/core';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
 import listPlugin from '@fullcalendar/list';
-import '@fullcalendar/core'; // Import JS with bundled styles
+import '@fullcalendar/core';
 import '@fullcalendar/daygrid';
 import '@fullcalendar/timegrid';
 import '@fullcalendar/list';
@@ -26,6 +26,7 @@ export class RendezVousComponent implements OnInit {
   availableSlots: string[] = [];
   clientId: number | null = null;
   errorMessage: string | null = null;
+  minDate: string; // Minimum date for picker (tomorrow)
   calendarOptions: CalendarOptions = {
     initialView: 'dayGridMonth',
     plugins: [dayGridPlugin, timeGridPlugin, listPlugin],
@@ -45,6 +46,11 @@ export class RendezVousComponent implements OnInit {
     private rendezvousService: RendezvousService,
     private scheduleService: ScheduleService
   ) {
+    // Set minDate to tomorrow
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    this.minDate = tomorrow.toISOString().split('T')[0];
+
     this.rendezvousForm = this.fb.group({
       dateSouhaitee: ['', Validators.required],
       timeSlot: ['', Validators.required],
@@ -89,8 +95,10 @@ export class RendezVousComponent implements OnInit {
       this.errorMessage = 'Client ID manquant. Veuillez vous reconnecter.';
       return;
     }
+    console.log('Fetching RDVs for client ID:', this.clientId);
     this.rendezvousService.getRendezvousByClient(this.clientId).subscribe({
       next: (rendezvous) => {
+        console.log('Received RDVs:', rendezvous);
         this.rendezvous = rendezvous;
         this.loadCalendarEvents();
         this.errorMessage = null;
@@ -158,7 +166,7 @@ export class RendezVousComponent implements OnInit {
         dateEnvoi: new Date().toISOString(),
         typeProbleme: formValue.typeProbleme,
         description: formValue.description,
-        status: 'PENDING',
+        status: 'EN_ATTENTE',
         client: { id: this.clientId }
       };
 
@@ -173,7 +181,12 @@ export class RendezVousComponent implements OnInit {
         },
         error: (err) => {
           console.error('Erreur lors de l\'ajout du rendez-vous:', err);
-          this.errorMessage = err.message;
+          try {
+            const errorBody = JSON.parse(err.error);
+            this.errorMessage = errorBody.message || 'Erreur lors de l\'ajout du rendez-vous.';
+          } catch (e) {
+            this.errorMessage = err.message || 'Erreur lors de l\'ajout du rendez-vous.';
+          }
         }
       });
     } else {

@@ -35,7 +35,7 @@ export class RendezvousService {
   }
 
   getRendezvousByClient(clientId: number): Observable<Rdv[]> {
-    const url = `${this.apiUrl}?clientId=${clientId}`;
+    const url = `${this.apiUrl}/client/${clientId}`;
     return this.http.get<Rdv[]>(url, this.getHttpOptions()).pipe(
       catchError(this.handleError)
     );
