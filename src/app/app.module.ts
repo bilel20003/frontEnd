@@ -6,7 +6,6 @@ import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { LoginComponent } from './components/login/login.component';
 import { FormsModule } from '@angular/forms';
-import { RenseignerAvancementComponent } from './components/Technicien/renseigner-avancement/renseigner-avancement.component';
 import { TechNavComponent } from './components/Technicien/tech-nav/tech-nav.component';
 import { GuiNavComponent } from './components/Guichetier/gui-nav/gui-nav.component';
 import { MinistereService } from './services/ministere.service';
@@ -18,11 +17,8 @@ import { TechHomeComponent } from './components/Technicien/tech-home/tech-home.c
 import { GuiHomeComponent } from './components/Guichetier/gui-home/gui-home.component';
 import { NgxPaginationModule } from 'ngx-pagination';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { DetailDemandeComponent } from './components/Client/detail-demande/detail-demande.component';
 import { DocumentsComponent } from './components/Client/document/document.component';
 import { HomeComponent } from './components/Client/home/home.component';
-import { PageRechercheComponent } from './components/Client/recherche/recherche.component';
-import { PageRechercheAvanceeComponent } from './components/Client/recherche-avancee/recherche-avancee.component';
 import { ReclamationComponent } from './components/Client/reclamation/reclamation.component';
 import { RendezVousComponent } from './components/Client/rendez-vous/rendez-vous.component';
 import { NavbarComponent } from './components/Client/navbar/navbar.component';
@@ -38,21 +34,22 @@ import { ServiceService } from './services/service.service';
 import { ScheduleComponent } from './components/Admin/schedule/schedule.component';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { FullCalendarModule } from '@fullcalendar/angular';
+import { ProfileTechnicienComponent } from './components/Technicien/profile-technicien/profile-technicien.component';
+import { ProfileGuichetierComponent } from './components/Guichetier/profile-guichetier/profile-guichetier.component';
+import { ProfileClientComponent } from './components/Client/profile-client/profile-client.component';
+import { ProfileAdminComponent } from './components/Admin/profile-admin/profile-admin.component';
+import { TechRendezVousComponent } from './components/Technicien/tech-rendez-vous/tech-rendez-vous.component';
 
 @NgModule({
   declarations: [
     AppComponent,
     LoginComponent,
-    RenseignerAvancementComponent,
     TechNavComponent,
     GuiNavComponent,
     TechHomeComponent,
     GuiHomeComponent,
-    DetailDemandeComponent,
     DocumentsComponent,
     HomeComponent,
-    PageRechercheComponent,
-    PageRechercheAvanceeComponent,
     ReclamationComponent,
     RendezVousComponent,
     NavbarComponent,
@@ -64,7 +61,12 @@ import { FullCalendarModule } from '@fullcalendar/angular';
     GererRoleComponent,
     MinistryManagementComponent,
     ServiceComponent,
-    ScheduleComponent
+    ScheduleComponent,
+    ProfileTechnicienComponent,
+    ProfileGuichetierComponent,
+    ProfileClientComponent,
+    ProfileAdminComponent,
+    TechRendezVousComponent
   ],
   imports: [
     BrowserModule,

@@ -1,12 +1,10 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Observable } from 'rxjs';
-import { Ministere } from '../models/ministere.model';
+import { HttpClient, HttpHeaders, HttpErrorResponse } from '@angular/common/http';
+import { Observable, throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
-import { HttpErrorResponse } from '@angular/common/http';
-import { throwError } from 'rxjs';
+import { Ministere } from '../models/ministere.model';
+
 @Injectable({
-  
   providedIn: 'root'
 })
 export class MinistereService {
@@ -32,14 +30,13 @@ export class MinistereService {
     return this.http.get<Ministere[]>(`${this.apiUrl}/getAllMinisteres`, this.getHttpOptions());
   }
 
- deleteMinistere(id: number): Observable<void> {
-  return this.http.delete<void>(`${this.apiUrl}/deleteMinistere/${id}`, this.getHttpOptions())
-    .pipe(catchError(this.handleError));
-}
-
-
   updateMinistere(id: number, ministere: any): Observable<any> {
     return this.http.put<any>(`${this.apiUrl}/updateMinistere/${id}`, ministere, this.getHttpOptions())
+      .pipe(catchError(this.handleError));
+  }
+
+  archiveMinistere(id: number): Observable<void> {
+    return this.http.put<void>(`${this.apiUrl}/archiveMinistere/${id}`, null, this.getHttpOptions())
       .pipe(catchError(this.handleError));
   }
 

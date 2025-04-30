@@ -3,7 +3,7 @@
   max-width: 1700px;
   margin: auto;
   padding: 20px;
-  padding-top: 80px; /* Ajuste l'espace sous la top-bar */
+  padding-top: 80px;
 }
 
 /* Barre de recherche */
@@ -11,7 +11,7 @@
   display: flex;
   justify-content: flex-end;
   margin-bottom: 15px;
-  background-color: white; 
+  background-color: white;
   padding: 10px 0;
 }
 
@@ -313,6 +313,23 @@ body.night-mode {
   flex-direction: column;
 }
 
+.modal-content .form-group.ai-prompt-group {
+  margin-top: 10px;
+  padding: 15px;
+  background-color: #f9f9f9;
+  border-radius: 6px;
+}
+
+.modal-content .form-group.ai-prompt-group textarea {
+  min-height: 80px;
+}
+
+.modal-content .ai-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 10px;
+}
+
 .modal-content .form-group label {
   margin-bottom: 8px;
   color: #333;
@@ -372,6 +389,10 @@ body.night-mode {
   color: #ddd;
 }
 
+.night-mode .modal-content .form-group.ai-prompt-group {
+  background-color: #333;
+}
+
 .night-mode .modal-content .form-group input,
 .night-mode .modal-content .form-group textarea,
 .night-mode .modal-content .form-group select {
@@ -424,7 +445,7 @@ body.night-mode {
   margin-top: 5px;
 }
 
-/* Override .btn-primary and .btn-secondary to prevent interference */
+/* Override .btn-primary and .btn-secondary */
 .modal-content .btn-primary,
 .modal-content .btn-secondary {
   background-color: #1e3c72;

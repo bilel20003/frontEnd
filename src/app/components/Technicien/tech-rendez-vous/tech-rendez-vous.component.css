@@ -1,0 +1,470 @@
+/* Conteneur principal */
+.container {
+    width: 100%;
+    max-width: 1700px;
+    margin: auto;
+    padding: 20px;
+    padding-top: calc(70px + 20px); /* Adjust for navbar height */
+    min-height: calc(100vh - 70px); /* Ensure content fills viewport minus navbar */
+    box-sizing: border-box;
+  }
+  
+  /* Boutons */
+  .btn {
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-size: 14px;
+    transition: all 0.3s ease;
+    margin-right: 10px;
+  }
+  
+  .btn-primary {
+    background: linear-gradient(135deg, #1e3c72, #2a5298);
+    color: white;
+    border: none;
+  }
+  
+  .btn-primary:hover {
+    background: linear-gradient(135deg, #2a5298, #1e3c72);
+    transform: translateY(-2px);
+  }
+  
+  .btn-primary:disabled {
+    background: #6c757d;
+    cursor: not-allowed;
+  }
+  
+  .btn-secondary {
+    background-color: #6c757d;
+    color: white;
+    border: none;
+  }
+  
+  .btn-secondary:hover {
+    background-color: #5a6268;
+    transform: translateY(-2px);
+  }
+  
+  /* Navbar */
+  .header-actions {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  
+  .header-actions button {
+    margin-left: 0;
+  }
+  
+  /* Mode nuit */
+  body.night-mode {
+    background-color: #121212;
+    color: white;
+  }
+  
+  .night-mode .calendar-container {
+    background-color: #1f1f1f;
+  }
+  
+  .night-mode .fc {
+    background-color: #1f1f1f;
+    color: white;
+  }
+  
+  .night-mode .fc .fc-toolbar {
+    background: linear-gradient(135deg, #333, #555);
+  }
+  
+  .night-mode .fc .fc-event {
+    background-color: #2ecc71;
+    border-color: #27ae60;
+  }
+  
+  /* Search Bar */
+  .search-bar-container {
+    display: flex;
+    justify-content: flex-end;
+    margin: 20px 0;
+  }
+  
+  .search-bar {
+    display: flex;
+    align-items: center;
+    background-color: #fff;
+    border-radius: 25px;
+    padding: 8px 15px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+    width: 350px;
+  }
+  
+  .search-bar input {
+    flex: 1;
+    border: none;
+    outline: none;
+    padding: 8px 12px;
+    font-size: 14px;
+  }
+  
+  .search-bar button {
+    background: linear-gradient(135deg, #1e3c72, #2a5298);
+    border: none;
+    border-radius: 50%;
+    padding: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+  }
+  
+  .search-bar button:hover {
+    background: linear-gradient(135deg, #2a5298, #1e3c72);
+  }
+  
+  .search-bar button i {
+    color: white;
+  }
+  
+  .night-mode .search-bar {
+    background-color: #333;
+  }
+  
+  .night-mode .search-bar input {
+    background-color: #333;
+    color: white;
+  }
+  
+  .night-mode .search-bar button {
+    background: linear-gradient(135deg, #333, #555);
+  }
+  
+  .night-mode .search-bar button:hover {
+    background: linear-gradient(135deg, #555, #333);
+  }
+  
+  /* Modal */
+  .modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.6);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    overflow-y: auto;
+    padding: 20px;
+    animation: fadeIn 0.3s ease-in;
+  }
+  
+  .modal-content {
+    background-color: #fff;
+    border-radius: 12px;
+    max-width: 600px;
+    width: 100%;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+    animation: slideIn 0.3s ease-out;
+  }
+  
+  .modal-header {
+    background: linear-gradient(135deg, #1e3c72, #2a5298);
+    color: white;
+    padding: 15px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-radius: 12px 12px 0 0;
+  }
+  
+  .modal-header h3 {
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 600;
+  }
+  
+  .close-btn {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 1.2rem;
+    cursor: pointer;
+    transition: color 0.3s;
+  }
+  
+  .close-btn:hover {
+    color: #ffcc00;
+  }
+  
+  .modal-body {
+    padding: 20px;
+  }
+  
+  .modal-body p {
+    margin: 10px 0;
+    font-size: 14px;
+  }
+  
+  .modal-body p strong {
+    color: #1e3c72;
+    margin-right: 5px;
+  }
+  
+  .form-actions {
+    display: flex;
+    justify-content: flex-end;
+    padding: 20px;
+    background-color: #f9f9f9;
+    border-radius: 0 0 12px 12px;
+  }
+  
+  .night-mode .modal-content {
+    background-color: #1f1f1f;
+    color: white;
+  }
+  
+  .night-mode .modal-header {
+    background: linear-gradient(135deg, #333, #555);
+  }
+  
+  .night-mode .modal-body p strong {
+    color: #2ecc71;
+  }
+  
+  .night-mode .form-actions {
+    background-color: #2a2a2a;
+  }
+  
+  /* Animations */
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+  
+  @keyframes slideIn {
+    from { transform: translateY(-20px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+  }
+  
+  /* Calendrier */
+  .calendar-container {
+    margin-top: 20px;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    padding: 15px;
+    padding-left: 250px; /* Match h2 offset */
+    width: 100%;
+    box-sizing: border-box;
+  }
+  
+  .fc {
+    background-color: #fff;
+    border-radius: 8px;
+    width: 100%;
+  }
+  
+  .fc .fc-toolbar {
+    background: linear-gradient(135deg, #1e3c72, #2a5298);
+    color: white;
+    padding: 10px;
+    border-radius: 8px 8px 0 0;
+    flex-wrap: wrap;
+  }
+  
+  .fc .fc-button {
+    background: linear-gradient(135deg, #1e3c72, #2a5298);
+    border: none;
+    color: white;
+    font-size: 14px;
+    padding: 6px 12px;
+  }
+  
+  .fc .fc-button:hover {
+    background: linear-gradient(135deg, #2a5298, #1e3c72);
+  }
+  
+  .fc .fc-event {
+    background-color: #28a745;
+    border-color: #218838;
+    color: white;
+    cursor: pointer;
+    font-size: 0.9rem;
+  }
+  
+  .night-mode .fc .fc-button {
+    background: linear-gradient(135deg, #333, #555);
+  }
+  
+  .night-mode .fc .fc-button:hover {
+    background: linear-gradient(135deg, #555, #333);
+  }
+  
+  /* Alert */
+  .alert-danger {
+    background-color: #f8d7da;
+    color: #721c24;
+    padding: 15px;
+    border-radius: 6px;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+  }
+  
+  .alert-danger::before {
+    content: '\f071';
+    font-family: 'Font Awesome 5 Free';
+    font-weight: 900;
+    margin-right: 8px;
+    color: #721c24;
+  }
+  
+  .night-mode .alert-danger {
+    background-color: #5c2d2d;
+    color: #ff6b6b;
+  }
+  
+  .night-mode .alert-danger::before {
+    color: #ff6b6b;
+  }
+  
+  /* Header */
+  header h2 {
+    color: #1e3c72;
+    font-size: 2rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    margin-left: 250px; /* Décale vers la droite pour éviter de passer sous la navbar */
+    padding: 20px 0;
+  }
+  
+  .mode-toggle {
+    background: none;
+    border: none;
+    color: #1e3c72;
+    font-size: 1.5rem;
+    cursor: pointer;
+    transition: color 0.3s;
+  }
+  
+  .mode-toggle:hover {
+    color: #2a5298;
+  }
+  
+  .night-mode header h2 {
+    color: #2ecc71;
+  }
+  
+  .night-mode .mode-toggle {
+    color: #2ecc71;
+  }
+  
+  .night-mode .mode-toggle:hover {
+    color: #27ae60;
+  }
+  
+  /* Responsive Design */
+  @media (max-width: 576px) {
+    .container {
+      padding: 15px;
+      padding-top: calc(60px + 15px); /* Smaller navbar on mobile */
+    }
+  
+    header h2 {
+      font-size: 1.5rem;
+      padding: 10px 0;
+      margin-left: 0; /* Remove offset if navbar collapses */
+    }
+  
+    .header-actions {
+      justify-content: flex-start;
+      margin-top: 10px;
+    }
+  
+    .search-bar-container {
+      justify-content: flex-start;
+    }
+  
+    .search-bar {
+      width: 100%;
+    }
+  
+    .calendar-container {
+      padding: 10px;
+      padding-left: 0; /* Remove offset if navbar collapses */
+    }
+  
+    .fc .fc-toolbar {
+      padding: 8px;
+      font-size: 0.9rem;
+    }
+  
+    .fc .fc-button {
+      font-size: 12px;
+      padding: 5px 10px;
+    }
+  
+    .fc .fc-event {
+      font-size: 0.8rem;
+    }
+  
+    .modal-content {
+      max-width: 90%;
+      margin: 10px;
+      max-height: 80vh;
+    }
+  
+    .modal-header {
+      padding: 12px 15px;
+    }
+  
+    .modal-header h3 {
+      font-size: 1.2rem;
+    }
+  
+    .modal-body {
+      padding: 15px;
+    }
+  
+    .form-actions {
+      padding: 15px;
+    }
+  }
+  
+  @media (min-width: 576px) and (max-width: 768px) {
+    .container {
+      padding: 15px;
+      padding-top: calc(70px + 15px);
+    }
+  
+    header h2 {
+      font-size: 1.6rem;
+      margin-left: 200px; /* Smaller offset for tablet */
+    }
+  
+    .search-bar {
+      width: 300px;
+    }
+  
+    .calendar-container {
+      padding: 12px;
+      padding-left: 200px; /* Smaller offset for tablet */
+    }
+  
+    .fc .fc-toolbar {
+      font-size: 0.95rem;
+    }
+  
+    .fc .fc-button {
+      font-size: 13px;
+    }
+  
+    .modal-content {
+      max-width: 80%;
+    }
+  
+    .modal-header h3 {
+      font-size: 1.3rem;
+    }
+  }

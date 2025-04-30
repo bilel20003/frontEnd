@@ -41,6 +41,11 @@ export class RendezvousService {
     );
   }
 
+  getRendezvousByTechnicien(technicienId: number): Observable<Rdv[]> {
+    return this.http.get<Rdv[]>(`${this.apiUrl}/technicien/${technicienId}`, this.getHttpOptions())
+      .pipe(catchError(this.handleError));
+  }
+
   addRendezvous(rdv: RdvCreate): Observable<Rdv> {
     console.log('Sending POST request to:', this.apiUrl);
     console.log('Request body:', JSON.stringify(rdv, null, 2));

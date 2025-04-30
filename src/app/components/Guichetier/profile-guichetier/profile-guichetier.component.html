@@ -1,0 +1,80 @@
+<app-gui-nav></app-gui-nav>
+
+<div class="profile-container" *ngIf="userInfo">
+  <h2>👤 Profil utilisateur</h2>
+
+  <div class="profile-grid">
+    <div class="form-group">
+      <label>👨 Nom :</label>
+      <input type="text" [(ngModel)]="userInfo.name" [readonly]="!editionActive">
+    </div>
+
+    <div class="form-group">
+      <label>📧 Email :</label>
+      <input type="email" [(ngModel)]="userInfo.email" [readonly]="!editionActive">
+    </div>
+
+    <div class="form-group">
+      <label>🛡️ Rôle :</label>
+      <input type="text" [value]="userInfo.role?.name" readonly>
+    </div>
+
+    <div class="form-group">
+      <label>✅ Status :</label>
+      <input type="text" [value]="userInfo.status" readonly>
+    </div>
+
+    <div class="form-group">
+      <label>🏢 Service :</label>
+      <input type="text" [value]="userInfo.service?.nomService" readonly>
+    </div>
+
+    <div class="form-group">
+      <label>🏛️ Ministère :</label>
+      <input type="text" [value]="userInfo.service?.ministere?.nomMinistere" readonly>
+    </div>
+
+    <div class="form-group">
+      <label>🧩 Produit :</label>
+      <input type="text" [value]="userInfo.produit?.nom" readonly>
+    </div>
+  </div>
+
+  <div class="button-row">
+    <button (click)="editionActive = !editionActive">
+      {{ editionActive ? '❌ Annuler' : '✏️ Modifier Nom & Email' }}
+    </button>
+    <button *ngIf="editionActive" (click)="enregistrerModifications()">💾 Enregistrer</button>
+    <button (click)="ouvrirPopupMotDePasse()">🔒 Changer mot de passe</button>
+    <button (click)="retour()">🔙 Retour</button>
+  </div>
+
+  <!-- POPUP mot de passe -->
+  <div class="popup-overlay" *ngIf="popupVisible">
+    <div class="popup-content">
+      <h3>🔑 Changer mot de passe</h3>
+
+      <form (ngSubmit)="changerMotDePasse()">
+        <div class="form-group">
+          <label>🔓 Ancien mot de passe :</label>
+          <input type="password" [(ngModel)]="ancienMotDePasse" name="ancienMotDePasse" required>
+        </div>
+
+        <div class="form-group">
+          <label>🆕 Nouveau mot de passe :</label>
+          <input type="password" [(ngModel)]="nouveauMotDePasse" name="nouveauMotDePasse" required>
+        </div>
+
+        <div class="form-group">
+          <label>✅ Confirmer mot de passe :</label>
+          <input type="password" [(ngModel)]="confirmationMotDePasse" name="confirmationMotDePasse" required>
+        </div>
+
+        <div class="button-row">
+          <button type="submit">✅ Valider</button>
+          <button type="button" (click)="popupVisible = false">❌ Fermer</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

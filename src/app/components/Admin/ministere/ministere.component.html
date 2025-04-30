@@ -25,8 +25,18 @@
     <table class="table table-hover shadow-sm rounded">
       <thead class="table-header">
         <tr>
-          <th>ID ministère</th>
-          <th>Nom du Ministère</th>
+          <th (click)="sort('id')" class="sortable">
+            ID ministère
+            <span *ngIf="sortDirection['id'] !== undefined">
+              {{ sortDirection['id'] ? '▲' : '▼' }}
+            </span>
+          </th>
+          <th (click)="sort('nomMinistere')" class="sortable">
+            Nom du Ministère
+            <span *ngIf="sortDirection['nomMinistere'] !== undefined">
+              {{ sortDirection['nomMinistere'] ? '▲' : '▼' }}
+            </span>
+          </th>
           <th>Actions</th>
         </tr>
       </thead>
@@ -38,8 +48,8 @@
             <button class="btn btn-info btn-sm me-2" (click)="openModal('edit', ministry)">
               <i class="fas fa-edit"></i> Modifier
             </button>
-            <button class="btn btn-danger btn-sm" (click)="ministry.id !== undefined && deleteMinistere(ministry.id)">
-              <i class="fas fa-trash"></i> Supprimer
+            <button class="btn btn-warning btn-sm me-2" (click)="archiveMinistere(ministry.id)">
+              <i class="fas fa-archive"></i> Archiver
             </button>
           </td>
         </tr>
@@ -47,7 +57,7 @@
     </table>
 
     <!-- Pagination -->
-    <div class="pagination-container">
+    <div class="pagination-container d-flex justify-content-between">
       <div class="page-options">
         <select [(ngModel)]="itemsPerPage" (change)="onItemsPerPageChange()">
           <option *ngFor="let option of [5, 10, 20]" [value]="option">{{ option }} ministères par page</option>
@@ -66,12 +76,25 @@
 <div class="modal" [ngClass]="{'modal-open': showModal}">
   <div class="modal-content">
     <h4>{{ modalTitle }}</h4>
-    <form (ngSubmit)="saveMinistere()">
+    <form #ministereForm="ngForm" (ngSubmit)="saveMinistere()">
       <div class="form-group">
         <label for="ministryName">Nom du Ministère</label>
-        <input type="text" id="ministryName" [(ngModel)]="ministereName" name="ministryName" required class="form-control">
+        <input
+          type="text"
+          id="ministryName"
+          name="ministryName"
+          [(ngModel)]="ministereName"
+          required
+          minlength="3"
+          class="form-control"
+          #ministryNameInput="ngModel"
+        >
+        <div *ngIf="ministryNameInput.invalid && (ministryNameInput.dirty || ministryNameInput.touched)" class="error-message">
+          <div *ngIf="ministryNameInput.errors?.['required']">Le nom du ministère est requis.</div>
+          <div *ngIf="ministryNameInput.errors?.['minlength']">Le nom doit contenir au moins 3 caractères.</div>
+        </div>
       </div>
-      <button type="submit" class="btn btn-success">{{ modalButtonText }}</button>
+      <button type="submit" class="btn btn-success" [disabled]="ministereForm.invalid">{{ modalButtonText }}</button>
       <button type="button" class="btn btn-secondary" (click)="closeModal()">Annuler</button>
     </form>
   </div>

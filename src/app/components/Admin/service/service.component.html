@@ -25,9 +25,24 @@
     <table class="table table-hover shadow-sm rounded">
       <thead class="table-header">
         <tr>
-          <th (click)="sort('id')" class="sortable">ID Service</th>
-          <th (click)="sort('nomService')" class="sortable">Nom du Service</th>
-          <th (click)="sort('ministere')" class="sortable">Ministère</th>
+          <th (click)="sort('id')" class="sortable">
+            ID Service
+            <span *ngIf="sortDirection['id'] !== undefined">
+              {{ sortDirection['id'] ? '▲' : '▼' }}
+            </span>
+          </th>
+          <th (click)="sort('nomService')" class="sortable">
+            Nom du Service
+            <span *ngIf="sortDirection['nomService'] !== undefined">
+              {{ sortDirection['nomService'] ? '▲' : '▼' }}
+            </span>
+          </th>
+          <th (click)="sort('ministere')" class="sortable">
+            Ministère
+            <span *ngIf="sortDirection['ministere'] !== undefined">
+              {{ sortDirection['ministere'] ? '▲' : '▼' }}
+            </span>
+          </th>
           <th>Actions</th>
         </tr>
       </thead>
@@ -40,8 +55,8 @@
             <button class="btn btn-info btn-sm me-2" (click)="editService(service)">
               <i class="fas fa-edit"></i> Modifier
             </button>
-            <button class="btn btn-danger btn-sm" (click)="deleteService(service.id)">
-              <i class="fas fa-trash"></i> Supprimer
+            <button class="btn btn-warning btn-sm" (click)="archiveService(service.id)">
+              <i class="fas fa-archive"></i> Archiver
             </button>
           </td>
         </tr>

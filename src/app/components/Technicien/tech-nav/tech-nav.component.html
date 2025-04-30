@@ -1,48 +1,44 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
-<!-- Bande en haut -->
+<!-- Top Bar -->
 <div class="top-bar">
-    <button class="icon-btn" (click)="toggleDropdown($event)">
-      <i class="fas fa-bars"></i>
-    </button>
-    <ul class="dropdown-menu" [ngClass]="{ 'show': dropdownVisible }">
-      <li>
-        <a routerLink="/admin/profil">
-          <i class="fas fa-user"></i> <span>Profil</span>
-        </a>
-      </li>
-      <li>
-        <a routerLink="/admin/parametres">
-          <i class="fas fa-cog"></i> <span>Paramètres</span>
-        </a>
-      </li>
-      <li class="logout">
-        <a href="#" (click)="logout()">
-          <i class="fas fa-sign-out-alt"></i> <span>Déconnexion</span>
-        </a>
-      </li>
-    </ul>
+  <button class="icon-btn" (click)="toggleDropdown($event)">
+    <i class="fas fa-bars"></i>
+  </button>
+  <ul class="dropdown-menu" [ngClass]="{ 'show': dropdownVisible }">
+    <li>
+      <a routerLink="/profile-technicien">
+        <i class="fas fa-user"></i> <span>Profil</span>
+      </a>
+    </li>
+    <li>
+      <a routerLink="/admin/parametres">
+        <i class="fas fa-cog"></i> <span>Paramètres</span>
+      </a>
+    </li>
+    <li class="logout">
+      <a href="#" (click)="logout()">
+        <i class="fas fa-sign-out-alt"></i> <span>Déconnexion</span>
+      </a>
+    </li>
+  </ul>
+</div>
+
+<!-- Sidebar -->
+<nav class="sidebar">
+  <div class="logo-container">
+    <img src="assets/img/logo.png" alt="Logo CNI" />
   </div>
-  
-  <!-- Sidebar Admin -->
-  <nav class="sidebar">
-    <div class="logo-container">
-      <img src="assets/img/logo.png" alt="Logo CNI" />
-    </div>
-    <ul class="nav-links">
-        <li>
-            <a routerLink="/tech_home" routerLinkActive="active">
-              <i class="fas fa-home"></i> <span>home</span>
-            </a>
-          </li>
-      <li>
-        <a routerLink="/settings" routerLinkActive="active">
-          <i class="fas fa-cog"></i> <span>paramètre</span>
-        </a>
-      </li>
-      
-      
-      
-    </ul>
-  </nav>
-  
+  <ul class="nav-links">
+    <li>
+      <a routerLink="/tech-home" routerLinkActive="active">
+        <i class="fas fa-home"></i> <span>Accueil</span>
+      </a>
+    </li>
+    <li>
+      <a routerLink="/tech_rendezvous" routerLinkActive="active">
+        <i class="fas fa-calendar-alt"></i> <span>Rendez-vous</span>
+      </a>
+    </li>
+  </ul>
+</nav>

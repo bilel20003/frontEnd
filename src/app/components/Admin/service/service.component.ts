@@ -25,7 +25,7 @@ export class ServiceComponent implements OnInit {
   currentPage = 1;
   itemsPerPage = 5;
   isNightMode = false;
-  sortDirection: { [key: string]: boolean } = {};
+  sortDirection: { [key: string]: boolean } = { id: false }; // Default to descending for id
 
   constructor(
     private serviceService: ServiceService,
@@ -55,14 +55,11 @@ export class ServiceComponent implements OnInit {
     this.serviceService.getAllServices().subscribe({
       next: (services: Servicee[]) => {
         console.log('Services chargés:', services);
-        services.forEach((service: Servicee) => {
-          console.log(`Service ${service.id}:`, {
-            nomService: service.nomService,
-            ministere: service.ministere ? service.ministere : 'null/undefined'
-          });
-        });
         this.services = services;
-        this.filterServices();
+        this.filteredServices = [...this.services];
+        this.filteredServices.sort((a, b) => b.id - a.id); // Sort by id descending
+        console.log('Sorted services (descending by id):', this.filteredServices);
+        this.updatePaginatedServices();
       },
       error: (err: Error) => {
         console.error('Erreur lors du chargement des services:', err);
@@ -86,24 +83,15 @@ export class ServiceComponent implements OnInit {
   }
 
   getMinistereName(ministereId: number | undefined): string {
-    console.log('getMinistereName appelé avec ministereId:', ministereId);
-    console.log('Liste des ministères disponibles:', this.ministeres);
     if (!ministereId || ministereId <= 0) {
-      console.log('Retour "Inconnu" car ministereId est invalide:', ministereId);
       return 'Inconnu';
     }
     const ministere = this.ministeres.find(min => min.id === ministereId);
-    if (!ministere) {
-      console.log('Aucun ministère trouvé pour ministereId:', ministereId);
-      return 'Inconnu';
-    }
-    console.log('Ministère trouvé:', ministere.nomMinistere);
-    return ministere.nomMinistere;
+    return ministere ? ministere.nomMinistere : 'Inconnu';
   }
 
   filterServices(): void {
     const term = this.searchTerm.toLowerCase();
-    console.log('Filtrage avec searchTerm:', term);
     this.filteredServices = this.services.filter(service => {
       const ministereName = service.ministere ? this.getMinistereName(service.ministere.id) : 'Inconnu';
       return (
@@ -111,36 +99,39 @@ export class ServiceComponent implements OnInit {
         ministereName.toLowerCase().includes(term)
       );
     });
-    console.log('filteredServices:', this.filteredServices);
+    this.filteredServices.sort((a, b) => b.id - a.id); // Reapply descending id sort
     this.currentPage = 1;
     this.updatePaginatedServices();
   }
 
-  sort(column: string): void {
-    this.sortDirection[column] = !this.sortDirection[column];
+  sort(column: 'id' | 'nomService' | 'ministere'): void {
+    if (this.sortDirection[column] === undefined) {
+      this.sortDirection[column] = column === 'id' ? false : true; // id defaults to descending, others to ascending
+    } else {
+      this.sortDirection[column] = !this.sortDirection[column];
+    }
     const direction = this.sortDirection[column] ? 1 : -1;
 
     this.filteredServices.sort((a, b) => {
       if (column === 'ministere') {
         const nameA = a.ministere ? this.getMinistereName(a.ministere.id) : 'Inconnu';
         const nameB = b.ministere ? this.getMinistereName(b.ministere.id) : 'Inconnu';
-        return direction * nameA.toLowerCase().localeCompare(nameB.toLowerCase(), 'fr', { numeric: true });
+        return direction * nameA.localeCompare(nameB, 'fr', { numeric: true });
       }
-      const valA = a[column as keyof Servicee];
-      const valB = b[column as keyof Servicee];
-      if (typeof valA === 'number' && typeof valB === 'number') {
-        return direction * (valA - valB);
+      if (column === 'id') {
+        return direction * (a.id - b.id);
       }
-      return direction * valA.toString().localeCompare(valB.toString(), 'fr', { numeric: true });
+      return direction * a.nomService.localeCompare(b.nomService, 'fr', { numeric: true });
     });
 
+    console.log(`Sorted by ${column}, direction: ${this.sortDirection[column] ? 'ascending' : 'descending'}`, this.filteredServices);
     this.updatePaginatedServices();
   }
 
   updatePaginatedServices(): void {
     const start = (this.currentPage - 1) * this.itemsPerPage;
     this.paginatedServices = this.filteredServices.slice(start, start + this.itemsPerPage);
-    console.log('paginatedServices:', this.paginatedServices);
+    console.log('Paginated Services:', this.paginatedServices);
   }
 
   goToPreviousPage(): void {
@@ -176,7 +167,6 @@ export class ServiceComponent implements OnInit {
       const half = Math.floor(maxPagesToShow / 2);
       startPage = Math.max(1, this.currentPage - half);
       endPage = Math.min(this.totalPages, startPage + maxPagesToShow - 1);
-
       if (endPage - startPage + 1 < maxPagesToShow) {
         startPage = endPage - maxPagesToShow + 1;
       }
@@ -211,7 +201,6 @@ export class ServiceComponent implements OnInit {
   }
 
   editService(service: Servicee): void {
-    console.log('Service à modifier:', service);
     this.isEditMode = true;
     this.currentService = {
       ...service,
@@ -240,32 +229,36 @@ export class ServiceComponent implements OnInit {
 
   saveService(): void {
     const { nomService, ministere } = this.currentService;
-    console.log('Données avant transformation:', this.currentService);
-
     if (!nomService.trim()) {
       alert('Le nom du service est requis.');
       return;
     }
-
     if (!ministere.id || ministere.id <= 0) {
       alert('Veuillez sélectionner un ministère valide.');
       return;
     }
-
     const serviceData: Omit<Servicee, 'id'> = {
       nomService: this.currentService.nomService,
       ministere: { id: this.currentService.ministere.id }
     };
-
-    console.log('Données envoyées:', serviceData);
-
     const operation = this.isEditMode
       ? this.serviceService.updateService(this.currentService.id, serviceData)
       : this.serviceService.addNewService(serviceData);
 
     operation.subscribe({
-      next: () => {
-        this.loadServices();
+      next: (updatedService: Servicee) => {
+        this.services = this.isEditMode
+          ? this.services.map(s => s.id === updatedService.id ? updatedService : s)
+          : [updatedService, ...this.services];
+        this.filteredServices = this.services.filter(service => {
+          const ministereName = service.ministere ? this.getMinistereName(service.ministere.id) : 'Inconnu';
+          return (
+            service.nomService.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
+            ministereName.toLowerCase().includes(this.searchTerm.toLowerCase())
+          );
+        });
+        this.filteredServices.sort((a, b) => b.id - a.id); // Reapply descending id sort
+        this.updatePaginatedServices();
         this.closeModal();
         alert(`Service ${this.isEditMode ? 'mis à jour' : 'ajouté'} avec succès.`);
       },
@@ -276,15 +269,17 @@ export class ServiceComponent implements OnInit {
     });
   }
 
-  deleteService(id: number): void {
-    if (confirm('Voulez-vous vraiment supprimer ce service ?')) {
-      this.serviceService.deleteService(id).subscribe({
+  archiveService(id: number): void {
+    if (confirm('Voulez-vous vraiment archiver ce service ?')) {
+      this.serviceService.archiveService(id).subscribe({
         next: () => {
-          this.loadServices();
-          alert('Service supprimé avec succès.');
+          this.services = this.services.filter(s => s.id !== id);
+          this.filteredServices = this.filteredServices.filter(s => s.id !== id);
+          this.updatePaginatedServices();
+          alert('Service archivé avec succès.');
         },
         error: (err: Error) => {
-          console.error('Erreur lors de la suppression du service:', err);
+          console.error('Erreur lors de l\'archivage du service:', err);
           alert(`Erreur: ${err.message}`);
         }
       });

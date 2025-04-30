@@ -56,7 +56,7 @@
 }
 
 .table {
-    width: 100%;
+    width: 100;
     border-radius: 10px;
     border-collapse: separate;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
@@ -78,6 +78,18 @@
     background-color: #f9f9f9;
 }
 
+.sortable {
+    cursor: pointer;
+}
+
+.sortable:hover {
+    background: #e9ecef;
+}
+
+.sortable span {
+    margin-left: 5px;
+}
+
 /* Boutons */
 td:last-child {
     white-space: nowrap;
@@ -91,7 +103,8 @@ td:last-child {
 }
 
 .btn-info { background-color: #17a2b8; color: white; }
-.btn-danger { background-color: #dc3545; color: white; }
+.btn-warning { background-color: #ffc107; color: black; }
+.btn-success { background-color: #28a745; color: white; }
 .btn-primary { background-color: #007bff; color: white; }
 
 .btn i {
@@ -173,6 +186,15 @@ body.night-mode {
     color: white;
 }
 
+.night-mode .search-bar {
+    background-color: #333;
+}
+
+.night-mode .modal-content {
+    background-color: #1f1f1f;
+    color: white;
+}
+
 .mode-toggle {
     background: none;
     border: none;
@@ -199,21 +221,36 @@ body.night-mode {
     background-color: rgba(0, 0, 0, 0.4);
     justify-content: center;
     align-items: center;
-  }
-  
-  .modal-open {
+}
+
+.modal-open {
     display: flex;
-  }
-  
-  .modal-content {
+}
+
+.modal-content {
     background-color: white;
     padding: 20px;
     border-radius: 5px;
     width: 300px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  }
-  
-  button {
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+.form-control {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+.error-message {
+    color: red;
+    font-size: 12px;
+}
+
+button {
     margin-top: 10px;
-  }
-  
+}

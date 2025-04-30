@@ -3,7 +3,7 @@
   position: fixed; /* Fixe la navbar */
   top: 50px; /* Décale la navbar sous la bande en haut */
   left: 0;
-  width: 255px; /* Augmente la largeur de la sidebar pour afficher plus d'éléments */
+  width: 240px; /* Réduit la largeur de la sidebar */
   height: calc(100vh - 50px); /* Hauteur ajustée pour prendre toute la fenêtre en dessous de la bande en haut */
   background: linear-gradient(135deg, #1e3c72, #2a5298); /* Dégradé bleu foncé et bleu clair */
   padding: 10px 20px; /* Réduit le padding pour un look plus compact */
@@ -13,7 +13,6 @@
   align-items: flex-start;
   transition: background 0.5s ease;
   z-index: 999;
-  overflow-y: auto; /* Permet de faire défiler la navbar si nécessaire */
 }
 
 /* Logo */
@@ -56,15 +55,15 @@
 }
 
 .nav-links li {
-  padding: 6px 0; /* Réduit l'espacement entre les éléments */
+  padding: 8px 0; /* Ajuste l'espacement entre les éléments */
 }
 
 /* Liens de la navbar */
 .nav-links a {
   display: block;
-  padding: 8px 15px; /* Réduit le padding */
+  padding: 10px 15px; /* Réduit le padding */
   margin: 6px 0;
-  font-size: 14px; /* Réduit la taille de la police */
+  font-size: 14px;
   font-weight: 500;
   color: #ffffff;
   text-decoration: none;
@@ -82,24 +81,16 @@
   border-radius: 12px; /* Bordure arrondie */
 }
 
-/* Icônes dans la sidebar */
-.sidebar .nav-links i {
-  font-size: 18px; /* Réduit la taille des icônes */
-  color: #ffcc00; /* Couleur jaune doré pour les icônes */
-  transition: color 0.3s ease-in-out; /* Transition de couleur au survol */
-}
-
-/* Changer la couleur des icônes lors du survol */
-.sidebar .nav-links a:hover i,
-.sidebar .nav-links a.active i {
-  color: #2a5298; /* Couleur bleue au survol ou quand l'élément est actif */
-}
-
 /* Ajustement du contenu principal */
 body {
-  margin-left: 300px; /* Ajuste le contenu à la nouvelle largeur de la sidebar */
+  margin-left: 240px; /* Ajuste le contenu à la nouvelle largeur de la sidebar */
   margin-top: 50px; /* Ajuste sous la bande en haut */
   font-family: Arial, sans-serif;
+}
+
+
+.sidebar .nav-links i {
+  font-size: 20px; /* Taille des icônes */
 }
 
 /* Bande en haut */
@@ -132,7 +123,6 @@ body {
   border: 1px solid #ccc;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
 }
-
 /* Bouton de l'icône */
 .icon-btn {
   background-color: #fff;
@@ -196,16 +186,4 @@ body {
   font-weight: bold;
 }
 
-/* Icônes dans le menu déroulant */
-.dropdown-menu li a i {
-  margin-right: 8px; /* Espace entre l'icône et le texte */
-  color: #2a5298; /* Couleur des icônes (bleu foncé) */
-  font-size: 16px; /* Taille de l'icône ajustée */
-  width: 20px; /* Largeur de l'icône */
-  text-align: center;
-}
 
-/* Ajouter un effet hover pour les icônes dans le menu déroulant */
-.dropdown-menu li a:hover i {
-  color: #ffcc00; /* Couleur jaune au survol de l'icône */
-}

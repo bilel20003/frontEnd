@@ -7,6 +7,7 @@ import { UserInfo } from 'src/app/models/user-info.model';
 import { RequeteService } from 'src/app/services/requete.service';
 import { ObjetService } from 'src/app/services/objet.service';
 import { ProduitService } from 'src/app/services/produit.service';
+import { AiService } from 'src/app/services/ai.service';
 import { jwtDecode } from 'jwt-decode';
 import { Observable } from 'rxjs';
 import { HttpErrorResponse } from '@angular/common/http';
@@ -26,7 +27,7 @@ export class HomeComponent implements OnInit {
   produitMap: { [key: number]: Produit } = {};
 
   searchTerm: string = '';
-  sortDirection: { [key: string]: boolean } = { id: false }; // Default to descending for id
+  sortDirection: { [key: string]: boolean } = { id: false };
   currentPage: number = 1;
   itemsPerPage: number = 5;
   totalPages: number = 1;
@@ -41,11 +42,17 @@ export class HomeComponent implements OnInit {
   isObjetsLoaded: boolean = false;
   isProduitsLoaded: boolean = false;
 
+  // AI-related properties
+  isAIPromptVisible: boolean = false;
+  aiPrompt: string = '';
+  isAILoading: boolean = false;
+
   constructor(
     private router: Router,
     private requeteService: RequeteService,
     private objetService: ObjetService,
-    private produitService: ProduitService
+    private produitService: ProduitService,
+    private aiService: AiService
   ) {}
 
   ngOnInit(): void {
@@ -149,7 +156,6 @@ export class HomeComponent implements OnInit {
         console.log('Requetes received:', data);
         this.requetes = data;
         this.filteredRequetes = [...this.requetes];
-        // Explicitly sort by id in descending order
         this.filteredRequetes.sort((a, b) => b.id - a.id);
         console.log('Sorted requetes (descending by id):', this.filteredRequetes);
         this.updatePagination();
@@ -199,11 +205,10 @@ export class HomeComponent implements OnInit {
   }
 
   sort(column: keyof Requete | 'objetName' | 'produitName'): void {
-    // Initialize sort direction if not set
     if (this.sortDirection[column] === undefined) {
-      this.sortDirection[column] = column === 'id' ? false : true; // Descending for id, ascending for others
+      this.sortDirection[column] = column === 'id' ? false : true;
     } else {
-      this.sortDirection[column] = !this.sortDirection[column]; // Toggle direction
+      this.sortDirection[column] = !this.sortDirection[column];
     }
     const dir = this.sortDirection[column] ? 1 : -1;
 
@@ -295,6 +300,8 @@ export class HomeComponent implements OnInit {
     this.newRequete = this.getEmptyRequete();
     this.newRequete.objet = { id: 0 };
     this.newRequete.type = '';
+    this.isAIPromptVisible = false; // Reset AI prompt visibility
+    this.aiPrompt = ''; // Reset AI prompt
     console.log('Opening create popup, newRequete.objet.id:', this.newRequete.objet.id);
     console.log('Opening create popup, newRequete.type:', this.newRequete.type);
     this.isCreatePopupOpen = true;
@@ -302,7 +309,34 @@ export class HomeComponent implements OnInit {
 
   closeCreatePopup(): void {
     this.isCreatePopupOpen = false;
+    this.isAIPromptVisible = false;
+    this.aiPrompt = '';
     this.newRequete = this.getEmptyRequete();
+  }
+
+  toggleAIPrompt(): void {
+    this.isAIPromptVisible = !this.isAIPromptVisible;
+    this.aiPrompt = ''; // Reset prompt when toggling
+  }
+
+  generateAIDescription(): void {
+    if (!this.aiPrompt.trim()) {
+      alert('Veuillez entrer une description pour l’IA.');
+      return;
+    }
+    this.isAILoading = true;
+    this.aiService.generateDescription(this.aiPrompt).subscribe({
+      next: (description) => {
+        this.newRequete.description = description;
+        this.isAILoading = false;
+        this.isAIPromptVisible = false; // Hide prompt after generation
+        this.aiPrompt = '';
+      },
+      error: (err: HttpErrorResponse) => {
+        this.isAILoading = false;
+        alert(err.message);
+      }
+    });
   }
 
   submitNewRequete(): void {

@@ -33,14 +33,14 @@ export class ServiceService {
       .pipe(catchError(this.handleError));
   }
 
-  deleteService(id: number): Observable<void> {
-    return this.http.delete<void>(`${this.apiUrl}/deleteService/${id}`, this.getHttpOptions())
-      .pipe(catchError(this.handleError));
-  }
-
   updateService(id: number, service: Omit<Servicee, 'id'>): Observable<Servicee> {
     console.log('Données envoyées au backend (PUT):', service);
     return this.http.put<Servicee>(`${this.apiUrl}/updateService/${id}`, service, this.getHttpOptions())
+      .pipe(catchError(this.handleError));
+  }
+
+  archiveService(id: number): Observable<void> {
+    return this.http.put<void>(`${this.apiUrl}/archiveService/${id}`, null, this.getHttpOptions())
       .pipe(catchError(this.handleError));
   }
 

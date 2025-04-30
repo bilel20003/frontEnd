@@ -1,4 +1,3 @@
-Navbar
 <app-navbar></app-navbar>
 
 <!-- Main Content -->
@@ -130,9 +129,27 @@ Navbar
               <div *ngIf="description.errors?.['minlength']">La description doit contenir au moins 10 caractères.</div>
             </div>
           </div>
-          <button type="submit" class="btn btn-primary" [disabled]="newRequeteForm.invalid">Créer</button>
-          <button type="button" class="btn btn-secondary" (click)="closeCreatePopup()">Annuler</button>
-       </form>
+          <div class="form-group">
+            <button type="button" class="btn btn-primary" (click)="toggleAIPrompt()">
+              Générer une description avec l’IA
+            </button>
+          </div>
+          <div *ngIf="isAIPromptVisible" class="form-group ai-prompt-group">
+            <label for="aiPrompt">Décrivez ce que vous voulez générer</label>
+            <textarea id="aiPrompt" name="aiPrompt" [(ngModel)]="aiPrompt" placeholder="Ex: Décrivez un problème avec un ordinateur portable qui ne s'allume pas"></textarea>
+            <div class="ai-actions">
+              <button type="button" class="btn btn-primary" (click)="generateAIDescription()" [disabled]="isAILoading">
+                <i *ngIf="isAILoading" class="fas fa-spinner fa-spin"></i>
+                Générer
+              </button>
+              <button type="button" class="btn btn-secondary" (click)="toggleAIPrompt()">Annuler</button>
+            </div>
+          </div>
+          <div class="form-actions">
+            <button type="submit" class="btn btn-primary" [disabled]="newRequeteForm.invalid || isAILoading">Créer</button>
+            <button type="button" class="btn btn-secondary" (click)="closeCreatePopup()">Annuler</button>
+          </div>
+        </form>
       </div>
     </div>
   </div>

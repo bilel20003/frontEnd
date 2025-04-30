@@ -162,33 +162,45 @@ export class UserInfoService {
     console.log('updateUser called with id:', id, 'user:', user);
     return this.serviceService.getAllServices().pipe(
       mergeMap(services => {
-        if (!user.serviceId) {
-          return throwError(() => new Error('Service ID is required'));
+        // Rendre serviceId et produitId optionnels
+        let serviceId: number | undefined = user.serviceId;
+        let produitId: number | undefined = user.produitId;
+
+        // Si serviceId est fourni, vérifier qu’il existe
+        if (serviceId) {
+          const service = services.find(s => s.id === serviceId);
+          if (!service) {
+            return throwError(() => new Error(`Service with ID '${serviceId}' not found`));
+          }
+        } else {
+          console.warn('No serviceId provided, proceeding without service update');
+          serviceId = undefined;
         }
-        const serviceId = Number(user.serviceId);
-        const service = services.find(s => s.id === serviceId);
-        if (!service) {
-          return throwError(() => new Error(`Service with ID '${serviceId}' not found`));
+
+        // Si produitId n’est pas fourni, ne pas inclure produit
+        if (!produitId) {
+          console.warn('No produitId provided, proceeding without produit update');
+          produitId = undefined;
         }
-        if (!user.produitId) {
-          return throwError(() => new Error('Produit ID is required'));
-        }
-        const produitId = Number(user.produitId);
+
         const roleId = this.getRoleId(user.role);
         if (!roleId) {
           return throwError(() => new Error(`Invalid role '${user.role}'`));
         }
+
         const userInfo: Partial<UserInfo> = {
           id: user.id,
           name: user.nom,
           email: user.email,
           password: user.password || undefined,
           role: { id: roleId },
-          service: { id: serviceId },
-          produit: { id: produitId },
+          service: serviceId ? { id: serviceId } : undefined,
+          produit: produitId ? { id: produitId } : undefined,
           isDeletable: 'true',
           status: user.status || 'true'
         };
+
+        console.log('Sending update user payload:', userInfo);
         return this.http.put(`${this.apiUrl}/updateAppuser/${id}`, userInfo, this.getHttpOptions());
       }),
       catchError(this.handleError)
@@ -234,5 +246,20 @@ export class UserInfoService {
       errorMessage = 'Accès interdit. Vérifiez vos permissions ou le token JWT.';
     }
     return throwError(() => new Error(errorMessage));
+  }
+
+  getUserById(id: number): Observable<UserInfo> {
+    console.log('getUserById called with id:', id);
+    return this.http.get<UserInfo>(`${this.apiUrl}/appuser/${id}`, this.getHttpOptions()).pipe(
+      catchError(this.handleError)
+    );
+  }
+
+  changePassword(userId: number, newPassword: string): Observable<any> {
+    const payload = { password: newPassword };
+    console.log('changePassword called with userId:', userId, 'payload:', payload);
+    return this.http.put(`${this.apiUrl}/changePassword/${userId}`, payload, this.getHttpOptions()).pipe(
+      catchError(this.handleError)
+    );
   }
 }
