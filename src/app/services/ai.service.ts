@@ -1,0 +1,87 @@
+import { Injectable } from '@angular/core';
+import { HttpClient, HttpHeaders, HttpErrorResponse } from '@angular/common/http';
+import { Observable, throwError } from 'rxjs';
+import { catchError, map, retry } from 'rxjs/operators';
+
+// Interface pour la réponse de l'API Ollama
+interface OllamaResponse {
+  response: string;
+}
+
+@Injectable({
+  providedIn: 'root'
+})
+export class AiService {
+  // Endpoint local d'Ollama
+  private apiUrl = 'http://localhost:11434/api/generate';
+
+  constructor(private http: HttpClient) {}
+
+  generateDescription(prompt: string): Observable<string> {
+    const headers = new HttpHeaders({
+      'Content-Type': 'application/json'
+    });
+
+    // Prompt système pour des réponses concises en français
+    const systemPrompt = 'Fournis uniquement une description concise en français basée sur l’entrée suivante, sans répéter ni reformuler la demande :';
+    const body = {
+      model: 'mistral',
+      prompt: `${systemPrompt}\n${prompt}`,
+      stream: false,
+      options: {
+        temperature: 0.7,
+        top_p: 0.9,
+        max_tokens: 200
+      }
+    };
+
+    console.log('Sending POST request to:', this.apiUrl, 'with body:', body);
+
+    return this.http.post<OllamaResponse>(this.apiUrl, body, { headers }).pipe(
+      retry({ count: 2, delay: 1000 }), // Retry pour erreurs transitoires
+      map((response: OllamaResponse) => {
+        console.log('Raw AI response:', response);
+        let text = response.response?.trim() || 'Erreur: aucune description générée.';
+        text = this.cleanResponse(text, prompt);
+        console.log('Cleaned AI response:', text);
+        return text;
+      }),
+      catchError(this.handleError)
+    );
+  }
+
+  // Fonction pour nettoyer les réponses indésirables
+  private cleanResponse(text: string, prompt: string): string {
+    // Expressions régulières pour supprimer les reformulations du prompt
+    const unwantedPatterns = [
+      /^Vous souhaitez[^.]*\./i,
+      /^L'utilisateur a demandé[^.]*\./i,
+      /^Voici une description[^.]*\./i,
+      new RegExp(`^${prompt}[. ]*`, 'i')
+    ];
+
+    let cleanedText = text;
+    for (const pattern of unwantedPatterns) {
+      cleanedText = cleanedText.replace(pattern, '').trim();
+    }
+
+    // Supprimer les espaces multiples et retours à la ligne
+    cleanedText = cleanedText.replace(/\s+/g, ' ').trim();
+    return cleanedText;
+  }
+
+  private handleError(error: HttpErrorResponse): Observable<never> {
+    let errorMessage = 'Erreur lors de la génération de la description.';
+    if (error.status === 400) {
+      errorMessage = 'Requête invalide. Vérifiez le prompt ou le modèle.';
+    } else if (error.status === 404) {
+      errorMessage = 'Serveur Ollama ou modèle non trouvé. Assurez-vous que Ollama est en cours d’exécution.';
+    } else if (error.status === 500) {
+      errorMessage = 'Erreur interne du serveur Ollama. Réessayez plus tard.';
+    } else if (error.status === 0) {
+      errorMessage = 'Impossible de se connecter au serveur Ollama. Vérifiez que "ollama serve" est en cours d’exécution.';
+    }
+    console.error('Erreur Ollama API:', error);
+    return throwError(() => new Error(errorMessage));
+  }
+}
