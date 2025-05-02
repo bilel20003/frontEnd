@@ -6,6 +6,8 @@ export interface Rdv {
   description: string;
   status: string;
   client: { id: number };
+  technicien?: { id: number };
+  meetLink?: string; // Ajout du champ meetLink (optionnel)
 }
 
 export interface RdvCreate {
@@ -15,4 +17,5 @@ export interface RdvCreate {
   description: string;
   status: string;
   client: { id: number };
+  technicien?: { id: number };
 }

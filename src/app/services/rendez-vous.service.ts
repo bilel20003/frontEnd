@@ -54,6 +54,15 @@ export class RendezvousService {
     );
   }
 
+  updateRdv(id: number, rdv: Partial<Rdv>): Observable<Rdv> {
+    const url = `${this.apiUrl}/${id}`;
+    console.log('Sending PUT request to:', url);
+    console.log('Request body:', JSON.stringify(rdv, null, 2));
+    return this.http.put<Rdv>(url, rdv, this.getHttpOptions()).pipe(
+      catchError(this.handleError)
+    );
+  }
+
   refuseRdv(id: number, guichetierId: number): Observable<void> {
     return this.http.put<void>(
       `${this.apiUrl}/${id}/refuse?guichetierId=${guichetierId}`,

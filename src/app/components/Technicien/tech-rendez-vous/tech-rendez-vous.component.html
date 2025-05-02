@@ -18,7 +18,7 @@
   <!-- Search Bar -->
   <div class="search-bar-container">
     <div class="search-bar">
-      <input type="text" placeholder="Rechercher par client ID, type ou statut..." [(ngModel)]="searchTerm" (input)="filterRendezvous()">
+      <input type="text" placeholder="Rechercher par client ID, type, statut ou lien Meet..." [(ngModel)]="searchTerm" (input)="filterRendezvous()">
       <button><i class="fas fa-search"></i></button>
     </div>
   </div>
@@ -44,9 +44,20 @@
         <p><strong>Date:</strong> {{ selectedRdv.dateSouhaitee | date:'medium':'fr-FR' }}</p>
         <p><strong>Description:</strong> {{ selectedRdv.description }}</p>
         <p><strong>Statut:</strong> {{ selectedRdv.status }}</p>
+        <p *ngIf="selectedRdv.meetLink"><strong>Lien Google Meet:</strong> 
+          <a [href]="selectedRdv.meetLink" target="_blank" class="meet-link">{{ selectedRdv.meetLink }}</a>
+        </p>
+        <p *ngIf="!selectedRdv.meetLink"><strong>Lien Google Meet:</strong> Aucun lien généré</p>
       </div>
       <div class="form-actions">
-        <button class="btn btn-primary" (click)="refuseRendezvous()" [disabled]="selectedRdv?.status === 'ANNULE' || selectedRdv?.status === 'TERMINE'">Refuser</button>
+        <button class="btn btn-primary" (click)="generateMeetLink()" 
+                [disabled]="selectedRdv?.meetLink || selectedRdv?.status === 'REFUSE' || selectedRdv?.status === 'ANNULE' || selectedRdv?.status === 'TERMINE'">
+          Générer Lien Meet
+        </button>
+        <button class="btn btn-primary" (click)="refuseRendezvous()" 
+                [disabled]="selectedRdv?.status === 'ANNULE' || selectedRdv?.status === 'TERMINE'">
+          Refuser
+        </button>
         <button class="btn btn-secondary" (click)="closeModal()">Fermer</button>
       </div>
     </div>
