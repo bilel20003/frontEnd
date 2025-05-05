@@ -9,8 +9,17 @@ export interface Requete {
   description: string;
   etat: string;
   date: Date;
+  dateTraitement?: Date | null;
   noteRetour: string;
-  client: { id: number };
-  guichetier: { id: number };
-  technicien: { id: number } | null;
+  client: {
+    id: number;
+    name: string;
+    service?: {
+      id: number;
+      nomService: string;
+      ministere: { id: number; nomMinistere: string };
+    };
+  };
+  guichetier: { id: number; name?: string };
+  technicien: { id: number; name: string } | null;
 }

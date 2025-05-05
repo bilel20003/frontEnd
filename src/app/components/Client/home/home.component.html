@@ -12,14 +12,14 @@
 
   <!-- Header with Title and Actions -->
   <header class="d-flex justify-content-between align-items-center">
-    <h2 class="text-center" style="color: #070708; font-weight: 600; font-size: 2rem; margin-bottom: 40px; margin-left: 250px;">
-      Liste de Requêtes
-    </h2>
+    <h2>Mes Requêtes</h2>  
     <div class="header-actions">
       <button class="mode-toggle" (click)="toggleMode()">
         <i class="fas" [ngClass]="isNightMode ? 'fa-sun' : 'fa-moon'"></i>
       </button>
-      <button *ngIf="userInfo?.role === 'CLIENT'" class="btn btn-primary" (click)="openCreateRequetePopup()">+ Nouvelle Requête</button>
+      <button *ngIf="userInfo?.role === 'CLIENT'" class="btn btn-primary" (click)="openCreateRequetePopup()">
+        <i class="fas fa-plus"></i> Nouvelle Requête
+      </button>
     </div>
   </header>
 
@@ -32,7 +32,8 @@
           <th (click)="sort('objetName')" class="sortable">Objet</th>
           <th (click)="sort('type')" class="sortable">Type de requête</th>
           <th *ngIf="userInfo?.role === 'CLIENT' || userInfo?.role === 'ADMIN'" (click)="sort('produitName')" class="sortable">Produit</th>
-          <th (click)="sort('date')" class="sortable">Date</th>
+          <th (click)="sort('date')" class="sortable">Date d'envoi</th>
+          <th (click)="sort('dateTraitement')" class="sortable">Date de traitement</th>
           <th (click)="sort('etat')" class="sortable">État</th>
           <th>Actions</th>
         </tr>
@@ -48,6 +49,7 @@
             </ng-container>
           </td>
           <td>{{ requete.date | date:'dd/MM/yyyy' }}</td>
+          <td>{{ requete.dateTraitement ? (requete.dateTraitement | date:'dd/MM/yyyy') : 'Non traité' }}</td>
           <td>
             <span class="badge" [ngClass]="getBadgeClass(requete.etat)">
               {{ requete.etat }}
@@ -63,40 +65,59 @@
     </table>
 
     <!-- Pagination and Items Per Page -->
-    <div class="pagination-container d-flex justify-content-between">
+    <div class="pagination-container d-flex justify-content-between align-items-center">
       <div class="page-options">
         <select [(ngModel)]="itemsPerPage" (change)="onItemsPerPageChange($event)">
           <option *ngFor="let option of [5, 10, 20]" [value]="option">{{ option }} lignes par page</option>
         </select>
       </div>
       <div class="pagination">
-        <button (click)="goToPreviousPage()" [disabled]="currentPage === 1">Précédent</button>
-        <span>Page {{ currentPage }} sur {{ totalPages }}</span>
-        <button (click)="goToNextPage()" [disabled]="currentPage === totalPages">Suivant</button>
+        <button class="btn btn-primary" (click)="goToPreviousPage()" [disabled]="currentPage === 1">
+          <i class="fas fa-chevron-left"></i>
+        </button>
+        <button *ngFor="let page of getPageNumbers()" class="btn btn-primary" [class.active]="page === currentPage" (click)="goToPage(page)">
+          {{ page }}
+        </button>
+        <button class="btn btn-primary" (click)="goToNextPage()" [disabled]="currentPage === totalPages">
+          <i class="fas fa-chevron-right"></i>
+        </button>
       </div>
     </div>
 
     <!-- Popup for Request Details -->
     <div *ngIf="isPopupOpen && selectedRequete" class="modal-overlay" (click)="closePopup()">
       <div class="modal-content" (click)="$event.stopPropagation()">
-        <h3>Détails de la Requête</h3>
-        <p><strong>Réf:</strong> {{ selectedRequete.id }}</p>
-        <p><strong>Objet:</strong> {{ objetMap[selectedRequete.objet.id].name || 'N/A' }}</p>
-        <p><strong>Type de requête:</strong> {{ selectedRequete.type }}</p>
-        <p><strong>Description:</strong> {{ selectedRequete.description }}</p>
-        <p><strong>Date:</strong> {{ selectedRequete.date | date:'dd/MM/yyyy' }}</p>
-        <p><strong>État:</strong> <span class="badge" [ngClass]="getBadgeClass(selectedRequete.etat)">{{ selectedRequete.etat }}</span></p>
-        <p><strong>Client:</strong> {{ selectedRequete.client.id }}</p>
-        <p><strong>Guichetier:</strong> {{ selectedRequete.guichetier.id || 'Non assigné' }}</p>
-        <p><strong>Technicien:</strong> {{ selectedRequete.technicien?.id || 'Non assigné' }}</p>
-        <button class="btn btn-secondary" (click)="closePopup()">Fermer</button>
+        <div class="modal-header">
+          <h3>Détails de la Requête</h3>
+          <button class="close-btn" (click)="closePopup()">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+        <div class="modal-body">
+          <p><strong>ID:</strong> {{ selectedRequete.id }}</p>
+          <p><strong>Objet:</strong> {{ objetMap[selectedRequete.objet.id].name || 'N/A' }}</p>
+          <p><strong>Description:</strong> {{ selectedRequete.description }}</p>
+          <p><strong>Date d'envoi:</strong> {{ selectedRequete.date | date:'dd/MM/yyyy' }}</p>
+          <p><strong>Date de traitement:</strong> {{ selectedRequete.dateTraitement ? (selectedRequete.dateTraitement | date:'dd/MM/yyyy') : 'Non traité' }}</p>
+          <p><strong>État:</strong> <span class="badge" [ngClass]="getBadgeClass(selectedRequete.etat)">{{ selectedRequete.etat }}</span></p>
+          <p><strong>Guichetier:</strong> {{ selectedRequete.guichetier.name || 'Non assigné' }}</p>
+          <p><strong>Note de retour:</strong> {{ selectedRequete.noteRetour || 'Aucune note' }}</p>
+        </div>
+        <div class="form-actions">
+          <button class="btn btn-secondary" (click)="closePopup()">Fermer</button>
+        </div>
       </div>
     </div>
 
     <!-- Popup for Creating New Request -->
     <div *ngIf="isCreatePopupOpen" class="modal-overlay" (click)="closeCreatePopup()">
       <div class="modal-content" (click)="$event.stopPropagation()">
-        <h3>Nouvelle Requête</h3>
+        <div class="modal-header">
+          <h3>Nouvelle Requête</h3>
+          <button class="close-btn" (click)="closeCreatePopup()">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
         <form #newRequeteForm="ngForm" (ngSubmit)="submitNewRequete()">
           <div class="form-group">
             <label for="objet">Objet</label>
@@ -128,6 +149,10 @@
               <div *ngIf="description.errors?.['required']">La description est requise.</div>
               <div *ngIf="description.errors?.['minlength']">La description doit contenir au moins 10 caractères.</div>
             </div>
+          </div>
+          <div class="form-group">
+            <label for="noteRetour">Note de retour</label>
+            <textarea id="noteRetour" name="noteRetour" [(ngModel)]="newRequete.noteRetour" #noteRetour="ngModel"></textarea>
           </div>
           <div class="form-group">
             <button type="button" class="btn btn-primary" (click)="toggleAIPrompt()">

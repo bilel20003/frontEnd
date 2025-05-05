@@ -18,7 +18,7 @@
   <!-- Search Bar -->
   <div class="search-bar-container">
     <div class="search-bar">
-      <input type="text" placeholder="Rechercher par client ID, type, statut ou lien Meet..." [(ngModel)]="searchTerm" (input)="filterRendezvous()">
+      <input type="text" placeholder="Rechercher par client ID, type, statut, lien Meet ou note..." [(ngModel)]="searchTerm" (input)="filterRendezvous()">
       <button><i class="fas fa-search"></i></button>
     </div>
   </div>
@@ -43,20 +43,35 @@
         <p><strong>Type de Problème:</strong> {{ selectedRdv.typeProbleme }}</p>
         <p><strong>Date:</strong> {{ selectedRdv.dateSouhaitee | date:'medium':'fr-FR' }}</p>
         <p><strong>Description:</strong> {{ selectedRdv.description }}</p>
-        <p><strong>Statut:</strong> {{ selectedRdv.status }}</p>
+        <p><strong>Statut:</strong> 
+          <span class="badge" [ngClass]="{
+            'badge-warning': selectedRdv.status === 'EN_ATTENTE',
+            'badge-success': selectedRdv.status === 'TERMINE',
+            'badge-danger': selectedRdv.status === 'REFUSE'
+          }">{{ selectedRdv.status }}</span>
+        </p>
         <p *ngIf="selectedRdv.meetLink"><strong>Lien Google Meet:</strong> 
           <a [href]="selectedRdv.meetLink" target="_blank" class="meet-link">{{ selectedRdv.meetLink }}</a>
         </p>
         <p *ngIf="!selectedRdv.meetLink"><strong>Lien Google Meet:</strong> Aucun lien généré</p>
+        <p><strong>Note de retour:</strong> {{ selectedRdv.noteRetour || 'Aucune' }}</p>
+        <div class="form-group" *ngIf="selectedRdv.status === 'EN_ATTENTE'">
+          <label for="noteRetour">Note de retour (requis pour refuser)</label>
+          <textarea id="noteRetour" [(ngModel)]="noteRetour" placeholder="Entrez une note de retour si vous refusez..." rows="4"></textarea>
+        </div>
       </div>
       <div class="form-actions">
         <button class="btn btn-primary" (click)="generateMeetLink()" 
-                [disabled]="selectedRdv?.meetLink || selectedRdv?.status === 'REFUSE' || selectedRdv?.status === 'ANNULE' || selectedRdv?.status === 'TERMINE'">
+                [disabled]="selectedRdv?.meetLink || selectedRdv?.status !== 'EN_ATTENTE'">
           Générer Lien Meet
         </button>
-        <button class="btn btn-primary" (click)="refuseRendezvous()" 
-                [disabled]="selectedRdv?.status === 'ANNULE' || selectedRdv?.status === 'TERMINE'">
+        <button class="btn btn-danger" (click)="refuseRendezvous()" 
+                [disabled]="selectedRdv?.status !== 'EN_ATTENTE'">
           Refuser
+        </button>
+        <button class="btn btn-success" (click)="completeRendezvous()" 
+                [disabled]="selectedRdv?.status !== 'EN_ATTENTE'">
+          Terminer
         </button>
         <button class="btn btn-secondary" (click)="closeModal()">Fermer</button>
       </div>

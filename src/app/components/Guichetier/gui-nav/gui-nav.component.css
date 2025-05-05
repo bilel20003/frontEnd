@@ -28,17 +28,17 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  width: 150px; /* Réduit la largeur du logo */
-  height: 150px; /* Ajuste la hauteur */
-  background: rgba(255, 255, 255, 0.7); /* Fond semi-transparent */
-  border-radius: 15px; /* Coins arrondis */
+  width: 200px; /* Réduit la largeur du logo */
+  height: 200px; /* Ajuste la hauteur */
+  background: rgba(181, 203, 207, 0.7); /* Fond semi-transparent */
+  border-radius: 100px; /* Coins arrondis */
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); /* Ombre */
-  margin: 10px auto 20px; /* Espace ajusté sous le logo */
+  margin: 0px auto 50px; /* Espace ajusté sous le logo */
   padding: 10px;
 }
 
 .logo-container img {
-  width: 100%; /* Ajuste l'image à la largeur du conteneur */
+  width: 150%; /* Ajuste l'image à la largeur du conteneur */
   height: auto;
   transition: transform 0.3s ease-in-out;
 }
@@ -55,7 +55,7 @@
 }
 
 .nav-links li {
-  padding: 8px 0; /* Ajuste l'espacement entre les éléments */
+  padding: 10px 0; /* Ajuste l'espacement entre les éléments */
 }
 
 /* Liens de la navbar */
@@ -63,12 +63,12 @@
   display: block;
   padding: 10px 15px; /* Réduit le padding */
   margin: 6px 0;
-  font-size: 14px;
+  font-size: 17px;
   font-weight: 500;
   color: #ffffff;
   text-decoration: none;
-  border-radius: 8px;
-  transition: 0.3s;
+  border-radius: 28px;
+  transition: .3s;
   background: transparent;
 }
 
@@ -78,6 +78,7 @@
   background: #ffcc00; /* Jaune doré pour l'élément actif et hover */
   color: #000;
   font-weight: bold;
+  width: 180px;
   border-radius: 12px; /* Bordure arrondie */
 }
 
@@ -185,3 +186,5 @@ body {
   color: red;
   font-weight: bold;
 }
+
+

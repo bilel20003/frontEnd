@@ -3,8 +3,12 @@ import { Router } from '@angular/router';
 import { HttpErrorResponse } from '@angular/common/http';
 import { RequeteService } from 'src/app/services/requete.service';
 import { ObjetService } from 'src/app/services/objet.service';
+import { ServiceService } from 'src/app/services/service.service';
+import { MinistereService } from 'src/app/services/ministere.service';
 import { Requete } from 'src/app/models/requete.model';
 import { Objet } from 'src/app/models/objet.model';
+import { Servicee } from 'src/app/models/service.model';
+import { Ministere } from 'src/app/models/ministere.model';
 import { jwtDecode } from 'jwt-decode';
 
 @Component({
@@ -18,6 +22,8 @@ export class TechHomeComponent implements OnInit {
   paginatedReclamations: Requete[] = [];
   objets: Objet[] = [];
   objetMap: { [key: number]: Objet } = {};
+  serviceMap: { [key: number]: Servicee } = {};
+  ministereMap: { [key: number]: string } = {};
   searchTerm: string = '';
   sortDirection: { [key: string]: boolean } = {};
   currentPage: number = 1;
@@ -32,13 +38,16 @@ export class TechHomeComponent implements OnInit {
   constructor(
     private router: Router,
     private requeteService: RequeteService,
-    private objetService: ObjetService
+    private objetService: ObjetService,
+    private serviceService: ServiceService,
+    private ministereService: MinistereService
   ) {}
 
   ngOnInit(): void {
     const technicienId = this.getTechnicienIdFromToken();
     console.log('Technician ID from token:', technicienId);
     if (technicienId) {
+      this.loadServicesAndMinisteres();
       this.loadObjets();
       this.loadReclamations(technicienId);
     } else {
@@ -63,6 +72,33 @@ export class TechHomeComponent implements OnInit {
       console.error('Erreur de décodage du token:', e);
       return null;
     }
+  }
+
+  private loadServicesAndMinisteres(): void {
+    this.serviceService.getAllServices().subscribe({
+      next: (services) => {
+        this.serviceMap = services.reduce((map, service) => {
+          map[service.id] = service;
+          return map;
+        }, {} as { [key: number]: Servicee });
+        this.ministereService.getAllMinisteres().subscribe({
+          next: (ministeres) => {
+            this.ministereMap = ministeres.reduce((map, ministere) => {
+              map[ministere.id] = ministere.nomMinistere;
+              return map;
+            }, {} as { [key: number]: string });
+          },
+          error: (err: HttpErrorResponse) => {
+            console.error('Error loading ministeres:', err);
+            alert('Impossible de charger les ministères.');
+          }
+        });
+      },
+      error: (err: HttpErrorResponse) => {
+        console.error('Error loading services:', err);
+        alert('Impossible de charger les services.');
+      }
+    });
   }
 
   private loadObjets(): void {
@@ -110,7 +146,8 @@ export class TechHomeComponent implements OnInit {
           val.toString().toLowerCase().includes(term)
         ) ||
         (objet?.name?.toLowerCase()?.includes(term) ?? false) ||
-        (reclamation.client?.id?.toString().includes(term) ?? false)
+        (reclamation.client?.name?.toLowerCase()?.includes(term) ?? false) ||
+        (reclamation.objet?.produit?.nom?.toLowerCase()?.includes(term) ?? false)
       );
     });
     this.currentPage = 1;
@@ -126,14 +163,17 @@ export class TechHomeComponent implements OnInit {
       let valB: any = b[column as keyof Requete];
 
       if (column === 'client') {
-        valA = a.client?.id ?? 0;
-        valB = b.client?.id ?? 0;
+        valA = a.client?.name ?? 'N/A';
+        valB = b.client?.name ?? 'N/A';
       } else if (column === 'objet') {
         valA = this.objetMap[a.objet.id]?.name ?? 'N/A';
         valB = this.objetMap[b.objet.id]?.name ?? 'N/A';
       } else if (column === 'date') {
         valA = a.date ? new Date(a.date).getTime() : 0;
         valB = b.date ? new Date(b.date).getTime() : 0;
+      } else if (column === 'produit') {
+        valA = a.objet?.produit?.nom ?? 'N/A';
+        valB = b.objet?.produit?.nom ?? 'N/A';
       }
 
       if (typeof valA === 'number' && typeof valB === 'number') {
@@ -229,6 +269,12 @@ export class TechHomeComponent implements OnInit {
     this.noteRetour = '';
   }
 
+  onOverlayClick(event: MouseEvent): void {
+    if ((event.target as HTMLElement).classList.contains('modal-overlay')) {
+      this.closePopup();
+    }
+  }
+
   confirmerTraitement(): void {
     if (!this.noteRetour) {
       alert('Veuillez remplir la note de retour.');
@@ -238,6 +284,7 @@ export class TechHomeComponent implements OnInit {
     if (this.selectedReclamation) {
       this.selectedReclamation.etat = 'TRAITEE';
       this.selectedReclamation.noteRetour = this.noteRetour;
+      this.selectedReclamation.dateTraitement = new Date();
       this.requeteService.updateRequete(this.selectedReclamation.id, this.selectedReclamation).subscribe({
         next: () => {
           console.log('Requête traitée');
@@ -256,6 +303,7 @@ export class TechHomeComponent implements OnInit {
     const reclamation = this.reclamations.find(r => r.id === id);
     if (reclamation) {
       reclamation.etat = 'REFUSEE';
+      reclamation.dateTraitement = new Date();
       this.requeteService.updateRequete(id, reclamation).subscribe({
         next: () => {
           console.log('Réclamation refusée');

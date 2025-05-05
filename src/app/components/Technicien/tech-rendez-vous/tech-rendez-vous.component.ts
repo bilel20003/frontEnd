@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { RendezvousService } from 'src/app/services/rendez-vous.service';
 import { Rdv } from 'src/app/models/rendez-vous.model';
 import { jwtDecode } from 'jwt-decode';
@@ -29,6 +29,7 @@ export class TechRendezVousComponent implements OnInit {
   isModalOpen: boolean = false;
   selectedRdv: Rdv | null = null;
   accessToken: string | null = null;
+  noteRetour: string = '';
   calendarOptions: CalendarOptions = {
     initialView: 'dayGridMonth',
     plugins: [dayGridPlugin, timeGridPlugin, listPlugin],
@@ -43,7 +44,10 @@ export class TechRendezVousComponent implements OnInit {
     locale: 'fr'
   };
 
-  constructor(private rendezvousService: RendezvousService) {}
+  constructor(
+    private rendezvousService: RendezvousService,
+    private cdr: ChangeDetectorRef
+  ) {}
 
   ngOnInit(): void {
     this.getTechnicienIdFromToken();
@@ -173,13 +177,29 @@ export class TechRendezVousComponent implements OnInit {
         clientId: rdv.client.id,
         description: rdv.description,
         status: rdv.status,
-        meetLink: rdv.meetLink
-      }
+        meetLink: rdv.meetLink,
+        noteRetour: rdv.noteRetour
+      },
+      backgroundColor: this.getEventColor(rdv.status),
+      borderColor: this.getEventColor(rdv.status)
     }));
     this.calendarOptions = {
       ...this.calendarOptions,
       events
     };
+  }
+
+  getEventColor(status: string): string {
+    switch (status) {
+      case 'EN_ATTENTE':
+        return '#ffc107';
+      case 'TERMINE':
+        return '#28a745';
+      case 'REFUSE':
+        return '#dc3545';
+      default:
+        return '#6c757d';
+    }
   }
 
   handleEventClick(info: any): void {
@@ -192,17 +212,23 @@ export class TechRendezVousComponent implements OnInit {
 
   openModal(rdv: Rdv): void {
     this.selectedRdv = rdv;
+    this.noteRetour = rdv.noteRetour || '';
     this.isModalOpen = true;
   }
 
   closeModal(): void {
     this.isModalOpen = false;
     this.selectedRdv = null;
+    this.noteRetour = '';
   }
 
   refuseRendezvous(): void {
     if (this.selectedRdv && this.selectedRdv.id && this.technicienId) {
-      this.rendezvousService.refuseRdv(this.selectedRdv.id, this.technicienId).subscribe({
+      if (!this.noteRetour.trim()) {
+        alert('Veuillez fournir une note de retour pour refuser le rendez-vous.');
+        return;
+      }
+      this.rendezvousService.refuseRdv(this.selectedRdv.id, this.technicienId, this.noteRetour).subscribe({
         next: () => {
           this.getRendezvous();
           this.closeModal();
@@ -210,6 +236,24 @@ export class TechRendezVousComponent implements OnInit {
         },
         error: (err: HttpErrorResponse) => {
           console.error('Erreur lors du refus du rendez-vous:', err);
+          this.errorMessage = err.message;
+        }
+      });
+    }
+  }
+
+  completeRendezvous(): void {
+    if (this.selectedRdv && this.selectedRdv.id && this.technicienId) {
+      console.log('JWT Token:', localStorage.getItem('token')); // Log pour déboguer le token
+      this.rendezvousService.updateRdv(this.selectedRdv.id, { status: 'TERMINE' }).subscribe({
+        next: (updatedRdv) => {
+          console.log('Rendez-vous terminé:', updatedRdv);
+          this.getRendezvous();
+          this.closeModal();
+          this.errorMessage = null;
+        },
+        error: (err: HttpErrorResponse) => {
+          console.error('Erreur lors de la complétion du rendez-vous:', err);
           this.errorMessage = err.message;
         }
       });
@@ -314,6 +358,7 @@ export class TechRendezVousComponent implements OnInit {
           this.filteredRendezvous[index] = updatedRdv;
         }
         this.loadCalendarEvents();
+        this.cdr.detectChanges();
         this.errorMessage = null;
       },
       error: (err: HttpErrorResponse) => {
@@ -330,7 +375,8 @@ export class TechRendezVousComponent implements OnInit {
         rdv.client.id.toString().includes(term) ||
         rdv.typeProbleme.toLowerCase().includes(term) ||
         rdv.status.toLowerCase().includes(term) ||
-        (rdv.meetLink && rdv.meetLink.toLowerCase().includes(term))
+        (rdv.meetLink && rdv.meetLink.toLowerCase().includes(term)) ||
+        (rdv.noteRetour && rdv.noteRetour.toLowerCase().includes(term))
       );
     });
     this.loadCalendarEvents();

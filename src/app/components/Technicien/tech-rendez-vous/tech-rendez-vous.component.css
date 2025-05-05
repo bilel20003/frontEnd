@@ -45,6 +45,38 @@
   transform: translateY(-2px);
 }
 
+.btn-success {
+  background: linear-gradient(135deg, #28a745, #218838);
+  color: white;
+  border: none;
+}
+
+.btn-success:hover {
+  background: linear-gradient(135deg, #218838, #28a745);
+  transform: translateY(-2px);
+}
+
+.btn-success:disabled {
+  background: #6c757d;
+  cursor: not-allowed;
+}
+
+.btn-danger {
+  background: linear-gradient(135deg, #dc3545, #c82333);
+  color: white;
+  border: none;
+}
+
+.btn-danger:hover {
+  background: linear-gradient(135deg, #c82333, #dc3545);
+  transform: translateY(-2px);
+}
+
+.btn-danger:disabled {
+  background: #6c757d;
+  cursor: not-allowed;
+}
+
 /* Style pour le lien Google Meet */
 .meet-link {
   color: #1e3c72;
@@ -94,11 +126,6 @@ body.night-mode {
 
 .night-mode .fc .fc-toolbar {
   background: linear-gradient(135deg, #333, #555);
-}
-
-.night-mode .fc .fc-event {
-  background-color: #2ecc71;
-  border-color: #27ae60;
 }
 
 /* Search Bar */
@@ -237,7 +264,7 @@ body.night-mode {
   padding: 20px;
   background-color: #f9f9f9;
   border-radius: 0 0 12px 12px;
-  gap: 10px; /* Ajout d'un espacement entre les boutons */
+  gap: 10px;
 }
 
 .night-mode .modal-content {
@@ -255,6 +282,87 @@ body.night-mode {
 
 .night-mode .form-actions {
   background-color: #2a2a2a;
+}
+
+/* Form group for noteRetour */
+.form-group {
+  margin-bottom: 15px;
+}
+
+.form-group label {
+  margin-bottom: 8px;
+  color: #333;
+  font-weight: 500;
+  font-size: 0.95rem;
+}
+
+.form-group textarea {
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 0.95rem;
+  width: 100%;
+  resize: vertical;
+  min-height: 100px;
+}
+
+.form-group textarea:focus {
+  border-color: #1e3c72;
+  outline: none;
+}
+
+.night-mode .form-group label {
+  color: #ddd;
+}
+
+.night-mode .form-group textarea {
+  background: #333;
+  color: white;
+  border-color: #555;
+}
+
+.night-mode .form-group textarea:focus {
+  border-color: #2ecc71;
+}
+
+/* Badges pour les statuts */
+.badge {
+  display: inline-block;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+  text-transform: uppercase;
+}
+
+.badge-warning {
+  background-color: #ffc107;
+  color: #212529;
+}
+
+.badge-success {
+  background-color: #28a745;
+  color: white;
+}
+
+.badge-danger {
+  background-color: #dc3545;
+  color: white;
+}
+
+.night-mode .badge-warning {
+  background-color: #ffca2c;
+  color: #212529;
+}
+
+.night-mode .badge-success {
+  background-color: #2ecc71;
+  color: white;
+}
+
+.night-mode .badge-danger {
+  background-color: #ff6b6b;
+  color: white;
 }
 
 /* Animations */
@@ -306,9 +414,8 @@ body.night-mode {
   background: linear-gradient(135deg, #2a5298, #1e3c72);
 }
 
+/* Styles des événements du calendrier */
 .fc .fc-event {
-  background-color: #28a745;
-  border-color: #218838;
   color: white;
   cursor: pointer;
   font-size: 0.9rem;

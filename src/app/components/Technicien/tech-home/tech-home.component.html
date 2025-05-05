@@ -10,7 +10,7 @@
 
   <!-- Titre + actions -->
   <header class="d-flex justify-content-between align-items-center">
-    <h2 style="margin-left: 250px;">Gestion des Réclamations</h2>
+    <h2>Gestion des Réclamations</h2>
     <div class="header-actions">
       <button class="mode-toggle" (click)="toggleMode()">
         <i class="fas" [ngClass]="isNightMode ? 'fa-sun' : 'fa-moon'"></i>
@@ -20,13 +20,14 @@
 
   <!-- Tableau -->
   <div class="table-responsive">
-    <table class="table table-hover shadow-sm rounded">
+    <table class="table table-hover">
       <thead class="table-header">
         <tr>
           <th (click)="sort('id')" class="sortable">ID</th>
           <th (click)="sort('type')" class="sortable">Type</th>
-          <th (click)="sort('date')" class="sortable">Date</th>
+          <th (click)="sort('date')" class="sortable">Date d'envoi</th>
           <th (click)="sort('client')" class="sortable">Émetteur</th>
+          <th (click)="sort('produit')" class="sortable">Produit</th>
           <th (click)="sort('objet')" class="sortable">Objet</th>
           <th (click)="sort('etat')" class="sortable">État</th>
           <th>Actions</th>
@@ -37,7 +38,8 @@
           <td>{{ reclamation.id }}</td>
           <td>{{ reclamation.type }}</td>
           <td>{{ reclamation.date | date: 'dd/MM/yyyy' }}</td>
-          <td>{{ reclamation.client.id || 'N/A' }}</td>
+          <td>{{ reclamation.client.name || 'N/A' }}</td>
+          <td>{{ reclamation.objet.produit?.nom || 'N/A' }}</td>
           <td>{{ objetMap[reclamation.objet.id].name || 'N/A' }}</td>
           <td>
             <span class="badge" [ngClass]="getBadgeClass(reclamation.etat)">
@@ -81,43 +83,82 @@
   </div>
 
   <!-- Popup pour consulter la réclamation -->
-  <div *ngIf="popupOpen && selectedReclamation" class="modal-overlay">
+  <div *ngIf="popupOpen && selectedReclamation" class="modal-overlay" (click)="onOverlayClick($event)">
     <div class="modal-content">
-      <h3>📌 Détails de la requête</h3>
-      <div class="info-grid">
-        <div class="info-item">
-          <span class="label">📄 Type:</span>
-          <span class="value">{{ selectedReclamation.type || 'Non spécifié' }}</span>
-        </div>
-        <div class="info-item">
-          <span class="label">👤 Émetteur:</span>
-          <span class="value">{{ selectedReclamation.client.id || 'ID client non disponible' }}</span>
-        </div>
-        <div class="info-item">
-          <span class="label">📌 Objet:</span>
-          <span class="value">{{ objetMap[selectedReclamation.objet.id].name || 'Non spécifié' }}</span>
-        </div>
-        <div class="info-item">
-          <span class="label">⚡ État:</span>
-          <span class="badge" [ngClass]="getBadgeClass(selectedReclamation.etat || '')">
-            {{ selectedReclamation.etat || 'Non spécifié' }}
-          </span>
-        </div>
-        <div class="info-item">
-          <span class="label">📅 Date:</span>
-          <span class="value">{{ (selectedReclamation.date | date: 'dd/MM/yyyy') || 'Non spécifié' }}</span>
-        </div>
-        <div class="info-item full-width">
-          <span class="label">📝 Description:</span>
-          <p class="value description">{{ selectedReclamation.description || 'Aucune description' }}</p>
-        </div>
-        <div>
-          <label for="noteRetour">📋 Note de Retour:</label>
-          <textarea id="noteRetour" [(ngModel)]="noteRetour" placeholder="Ajouter une note de retour"></textarea>
+      <div class="modal-header">
+        <h3>📌 Détails de la requête</h3>
+        <button class="close-btn" (click)="closePopup()">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="info-grid">
+          <div class="info-item">
+            <span class="label">📄 Type de la requête:</span>
+            <span class="value">{{ selectedReclamation.type || 'Non spécifié' }}</span>
+          </div>
+          <div class="info-item">
+            <span class="label">👤 Émetteur:</span>
+            <span class="value">{{ selectedReclamation.client.name || 'Non spécifié' }}</span>
+          </div>
+          <div class="info-item">
+            <span class="label">📌 Objet:</span>
+            <span class="value">{{ objetMap[selectedReclamation.objet.id].name || 'Non spécifié' }}</span>
+          </div>
+          <div class="info-item">
+            <span class="label">🛠 Produit:</span>
+            <span class="value">{{ selectedReclamation.objet.produit?.nom || 'Non spécifié' }}</span>
+          </div>
+          <div class="info-item">
+            <span class="label">🏛 Ministère:</span>
+            <span class="value">
+              <ng-container *ngIf="selectedReclamation.client.service?.ministere?.id as ministereId">
+                {{ ministereMap[ministereId] || 'Non spécifié' }}
+              </ng-container>
+              <ng-container *ngIf="!selectedReclamation.client.service?.ministere?.id">
+                Non spécifié
+              </ng-container>
+            </span>
+          </div>
+          <div class="info-item">
+            <span class="label">🔧 Service:</span>
+            <span class="value">
+              <ng-container *ngIf="selectedReclamation.client.service?.nomService as nomService">
+                {{ nomService || 'Non spécifié' }}
+              </ng-container>
+              <ng-container *ngIf="!selectedReclamation.client.service?.nomService">
+                Non spécifié
+              </ng-container>
+            </span>
+          </div>
+          <div class="info-item">
+            <span class="label">⚡ État:</span>
+            <span class="badge" [ngClass]="getBadgeClass(selectedReclamation.etat || '')">
+              {{ selectedReclamation.etat || 'Non spécifié' }}
+            </span>
+          </div>
+          <div class="info-item">
+            <span class="label">📅 Date d'envoi:</span>
+            <span class="value">{{ (selectedReclamation.date | date: 'dd/MM/yyyy') || 'Non spécifié' }}</span>
+          </div>
+          <div class="info-item">
+            <span class="label">📅 Date de traitement:</span>
+            <span class="value">{{ (selectedReclamation.dateTraitement | date: 'dd/MM/yyyy') || 'Non traité' }}</span>
+          </div>
+          <div class="info-item full-width">
+            <span class="label">📝 Description:</span>
+            <p class="value description">{{ selectedReclamation.description || 'Aucune description' }}</p>
+          </div>
+          <div class="info-item full-width">
+            <label for="noteRetour" class="label">📋 Note de Retour:</label>
+            <textarea id="noteRetour" [(ngModel)]="noteRetour" placeholder="Ajouter une note de retour"></textarea>
+          </div>
         </div>
       </div>
-      <button class="btn btn-success" (click)="confirmerTraitement()">Confirmer</button>
-      <button class="btn btn-secondary" (click)="closePopup()">Annuler</button>
+      <div class="form-actions">
+        <button class="btn btn-success" (click)="confirmerTraitement()">Confirmer</button>
+        <button class="btn btn-secondary" (click)="closePopup()">Annuler</button>
+      </div>
     </div>
   </div>
 </div>

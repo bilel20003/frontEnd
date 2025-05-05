@@ -125,12 +125,27 @@ export class RendezVousComponent implements OnInit {
         status: rdv.status,
         meetLink: rdv.meetLink,
         technicienId: rdv.technicien?.id
-      }
+      },
+      backgroundColor: this.getEventColor(rdv.status),
+      borderColor: this.getEventColor(rdv.status)
     }));
     this.calendarOptions = {
       ...this.calendarOptions,
       events
     };
+  }
+
+  getEventColor(status: string): string {
+    switch (status) {
+      case 'EN_ATTENTE':
+        return '#ffc107'; // Jaune
+      case 'TERMINE':
+        return '#28a745'; // Vert
+      case 'REFUSE':
+        return '#dc3545'; // Rouge
+      default:
+        return '#6c757d'; // Gris par défaut
+    }
   }
 
   handleEventClick(info: any) {

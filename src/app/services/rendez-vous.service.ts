@@ -63,12 +63,11 @@ export class RendezvousService {
     );
   }
 
-  refuseRdv(id: number, guichetierId: number): Observable<void> {
-    return this.http.put<void>(
-      `${this.apiUrl}/${id}/refuse?guichetierId=${guichetierId}`,
-      {},
-      this.getHttpOptions()
-    ).pipe(
+  refuseRdv(id: number, technicienId: number, noteRetour?: string): Observable<void> {
+    const encodedNoteRetour = noteRetour ? encodeURIComponent(noteRetour.trim()) : '';
+    const url = `${this.apiUrl}/${id}/refuse?technicienId=${technicienId}&noteRetour=${encodedNoteRetour}`;
+    console.log('Sending PUT request to:', url);
+    return this.http.put<void>(url, null, this.getHttpOptions()).pipe(
       catchError(this.handleError)
     );
   }
@@ -80,7 +79,7 @@ export class RendezvousService {
     } else if (error.status === 400) {
       errorMessage = error.error?.message || 'Données invalides. Vérifiez les champs saisis.';
     } else if (error.status === 403) {
-      errorMessage = 'Accès interdit. Vérifiez vos permissions ou reconnectez-vous.';
+      errorMessage = error.error?.message || 'Accès interdit. Vérifiez vos permissions ou reconnectez-vous.';
     } else if (error.status === 404) {
       errorMessage = error.error?.message || 'Ressource non trouvée.';
     }

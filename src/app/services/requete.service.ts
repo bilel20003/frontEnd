@@ -3,6 +3,7 @@ import { HttpClient, HttpHeaders, HttpErrorResponse } from '@angular/common/http
 import { Observable, throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { Requete } from '../models/requete.model';
+import { UserInfo } from '../models/user-info.model';
 
 @Injectable({
   providedIn: 'root'
@@ -62,4 +63,5 @@ export class RequeteService {
     console.error('Erreur lors de la requête:', error);
     return throwError(() => new Error('Une erreur est survenue, veuillez réessayer.'));
   }
+  
 }

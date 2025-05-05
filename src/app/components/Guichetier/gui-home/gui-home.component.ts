@@ -32,6 +32,7 @@ export class GuiHomeComponent implements OnInit {
   selectedTechnicienId: number | null = null;
   noteRetour: string = '';
   isObjetsLoaded: boolean = false;
+  isNightMode: boolean = false;
 
   constructor(
     private router: Router,
@@ -45,10 +46,16 @@ export class GuiHomeComponent implements OnInit {
     if (guichetierId) {
       this.loadObjets();
       this.loadReclamations(guichetierId);
+      this.loadTechnicians();
     } else {
       alert('Session invalide. Veuillez vous reconnecter.');
       this.router.navigate(['/login']);
     }
+  }
+
+  toggleMode(): void {
+    this.isNightMode = !this.isNightMode;
+    document.body.classList.toggle('night-mode', this.isNightMode);
   }
 
   private getGuichetierIdFromToken(): number | null {
@@ -83,10 +90,11 @@ export class GuiHomeComponent implements OnInit {
     });
   }
 
-  private loadTechniciens(): void {
+  private loadTechnicians(): void {
     this.userInfoService.getAllTechniciens().subscribe({
       next: (techniciens) => {
         console.log('Techniciens received:', techniciens);
+        console.log('Technician IDs:', techniciens.map(t => t.id));
         this.techniciens = techniciens;
       },
       error: (err: HttpErrorResponse) => {
@@ -121,7 +129,7 @@ export class GuiHomeComponent implements OnInit {
           val.toString().toLowerCase().includes(term)
         ) ||
         (objet?.name?.toLowerCase()?.includes(term) ?? false) ||
-        (reclamation.client?.id?.toString().includes(term) ?? false)
+        (reclamation.client.name.toLowerCase().includes(term) ?? false)
       );
     });
     this.currentPage = 1;
@@ -137,8 +145,8 @@ export class GuiHomeComponent implements OnInit {
       let valB: any = b[column as keyof Requete];
 
       if (column === 'client') {
-        valA = a.client?.id ?? 0;
-        valB = b.client?.id ?? 0;
+        valA = a.client.name ?? 'N/A';
+        valB = b.client.name ?? 'N/A';
       } else if (column === 'objet') {
         valA = this.objetMap[a.objet.id]?.name ?? 'N/A';
         valB = this.objetMap[b.objet.id]?.name ?? 'N/A';
@@ -233,7 +241,6 @@ export class GuiHomeComponent implements OnInit {
     if (reclamation) {
       this.selectedRequete = reclamation;
       this.isPopupOpen = true;
-      this.loadTechniciens();
 
       if (reclamation.etat === 'NOUVEAU') {
         reclamation.etat = 'EN_COURS_DE_TRAITEMENT';
@@ -256,7 +263,19 @@ export class GuiHomeComponent implements OnInit {
 
   openTechnicienPopup(): void {
     if (this.selectedRequete && !this.selectedRequete.technicien) {
-      this.isTechnicienPopupOpen = true;
+      this.userInfoService.getAllTechniciens().subscribe({
+        next: (techniciens) => {
+          this.techniciens = techniciens;
+          console.log('Opening technician popup. Technicians:', techniciens);
+          console.log('Available Technician IDs:', techniciens.map(t => t.id));
+          this.isTechnicienPopupOpen = true;
+          this.selectedTechnicienId = null;
+        },
+        error: (err: HttpErrorResponse) => {
+          console.error('Error refreshing technicians:', err);
+          alert('Erreur lors du chargement des techniciens.');
+        }
+      });
     }
   }
 
@@ -266,16 +285,41 @@ export class GuiHomeComponent implements OnInit {
       return;
     }
 
-    this.selectedRequete.technicien = { id: this.selectedTechnicienId };
+    console.log('Assigning technician. Selected ID:', this.selectedTechnicienId);
+    console.log('Selected ID type:', typeof this.selectedTechnicienId);
+    console.log('Technicians list:', this.techniciens);
+    console.log('Technician IDs:', this.techniciens.map(t => t.id));
+    console.log('Technician ID types:', this.techniciens.map(t => typeof t.id));
+
+    // Convert selectedTechnicienId to number
+    const techId = +this.selectedTechnicienId;
+
+    // Validate selectedTechnicienId
+    if (!this.techniciens.some(t => t.id === techId)) {
+      alert('ID de technicien invalide. Veuillez sélectionner un technicien valide.');
+      console.error('Invalid technician ID:', techId);
+      return;
+    }
+
+    const selectedTechnicien = this.techniciens.find(t => t.id === techId);
+    if (!selectedTechnicien) {
+      alert('Technicien non trouvé. Veuillez réessayer.');
+      console.error('Technician not found for ID:', techId);
+      return;
+    }
+
+    this.selectedRequete.technicien = { id: techId, name: selectedTechnicien.name };
+    console.log('Updating requete with payload:', this.selectedRequete);
+
     this.requeteService.updateRequete(this.selectedRequete.id, this.selectedRequete).subscribe({
-      next: () => {
-        console.log('Technicien affecté');
+      next: (response) => {
+        console.log('Technicien affecté avec succès:', response);
         this.loadReclamations(this.getGuichetierIdFromToken()!);
         this.closePopup();
       },
       error: (error: HttpErrorResponse) => {
-        console.error('Erreur lors de l\'affectation du technicien', error);
-        alert('Erreur lors de l\'affectation du technicien.');
+        console.error('Erreur lors de l\'affectation du technicien:', error);
+        alert('Erreur lors de l\'affectation du technicien: ' + (error.error?.message || error.message));
       }
     });
   }
@@ -289,9 +333,10 @@ export class GuiHomeComponent implements OnInit {
     if (this.selectedRequete) {
       this.selectedRequete.etat = 'TRAITEE';
       this.selectedRequete.noteRetour = this.noteRetour;
+      this.selectedRequete.dateTraitement = new Date();
       this.requeteService.updateRequete(this.selectedRequete.id, this.selectedRequete).subscribe({
-        next: () => {
-          console.log('Requête traitée');
+        next: (response: any) => {
+          console.log('Requête traitée', response);
           this.loadReclamations(this.getGuichetierIdFromToken()!);
           this.noteRetour = '';
           this.closePopup();
@@ -308,6 +353,7 @@ export class GuiHomeComponent implements OnInit {
     const reclamation = this.reclamations.find(r => r.id === id);
     if (reclamation) {
       reclamation.etat = 'REFUSEE';
+      reclamation.dateTraitement = new Date();
       this.requeteService.updateRequete(id, reclamation).subscribe({
         next: () => {
           console.log('Réclamation refusée');

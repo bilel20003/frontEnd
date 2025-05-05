@@ -4,6 +4,18 @@
   margin: auto;
   padding: 20px;
   padding-top: 80px;
+  min-height: calc(100vh - 70px);
+  box-sizing: border-box;
+}
+
+/* Header */
+header h2 {
+  color: #1e3c72;
+  font-size: 2rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  margin-left: 250px;
+  padding: 20px 0;
 }
 
 /* Barre de recherche */
@@ -21,7 +33,7 @@
   background-color: #fff;
   border-radius: 25px;
   padding: 8px 15px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 2px 4px rgba(24, 23, 23, 0.15);
   width: 350px;
 }
 
@@ -46,20 +58,99 @@
   background-color: #ff9900;
 }
 
-/* Tableau */
+.search-bar button i {
+  color: #1e3c72;
+}
+
+/* Boutons */
+.btn {
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 14px;
+  transition: all 0.3s ease;
+  margin-right: 10px;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #1e3c72, #2a5298);
+  color: white;
+  border: none;
+}
+
+.btn-primary:hover {
+  background: linear-gradient(135deg, #2a5298, #1e3c72);
+  transform: translateY(-2px);
+}
+
+.btn-primary:disabled {
+  background: #6c757d;
+  cursor: not-allowed;
+}
+
+.btn-primary.active {
+  background: linear-gradient(135deg, #ffcc00, #ff9900);
+  color: #1e3c72;
+  font-weight: bold;
+  transform: translateY(0);
+}
+
+.btn-secondary {
+  background-color: #6c757d;
+  color: white;
+  border: none;
+}
+
+.btn-secondary:hover {
+  background-color: #5a6268;
+  transform: translateY(-2px);
+}
+
+.btn-info {
+  background-color: #17a2b8;
+  color: white;
+  padding: 6px 12px;
+}
+
+.btn-danger {
+  background-color: #dc3545;
+  color: white;
+  border: none;
+}
+
+.btn-danger:hover {
+  background-color: #c82333;
+  transform: translateY(-2px);
+}
+
+.btn-success {
+  background-color: #28a745;
+  color: white;
+  border: none;
+}
+
+.btn-success:hover {
+  background-color: #218838;
+  transform: translateY(-2px);
+}
+
+.btn i {
+  margin-right: 5px;
+}
+
+/* Tableau amélioré */
 .table-responsive {
   margin-top: 20px;
   margin-left: 250px;
   border-radius: 15px;
   overflow: hidden;
   background-color: white;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
 }
 
 .table {
   width: 100%;
   border-radius: 10px;
   border-collapse: separate;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
 }
 
 .table th,
@@ -74,50 +165,33 @@
   cursor: pointer;
 }
 
+.table-header th.sortable:hover {
+  background: linear-gradient(135deg, #2a5298, #1e3c72);
+}
+
 .table-hover tbody tr:hover {
   background-color: #f9f9f9;
 }
 
-/* Boutons */
-td:last-child {
-  white-space: nowrap;
-}
-
-.btn {
-  padding: 6px 12px;
+/* Badges */
+.badge {
+  padding: 5px 10px;
   border-radius: 5px;
-  font-size: 14px;
-  margin-right: 5px;
+  font-size: 13px;
+  font-weight: bold;
 }
 
-.btn-info { background-color: #17a2b8; color: white; }
-.btn-danger { background-color: #dc3545; color: white; }
-.btn-success { background-color: #28a745; color: white; }
-.btn-secondary { background-color: #6c757d; color: white; }
-
-.btn i {
-  margin-right: 5px;
-}
+.badge-primary { background-color: #007bff; color: white; }
+.badge-warning { background-color: #ffc107; color: #ffffff; }
+.badge-success { background-color: #28a745; color: white; }
+.badge-danger { background-color: #dc3545; color: white; }
+.badge-secondary { background-color: #6c757d; color: white; }
 
 /* Navbar */
 .header-actions {
   display: flex;
   align-items: center;
-}
-
-.header-actions button {
-  margin-right: 20px;
-}
-
-.header-actions i {
-  cursor: pointer;
-  font-size: 1.5rem;
-  color: #007bff;
-  transition: 0.3s;
-}
-
-.header-actions i:hover {
-  color: #0056b3;
+  gap: 10px;
 }
 
 /* Pagination */
@@ -128,15 +202,22 @@ td:last-child {
   align-items: center;
 }
 
+.pagination {
+  display: flex;
+  gap: 5px;
+}
+
 .pagination button {
   padding: 8px 12px;
   font-size: 14px;
-  margin: 0 5px;
   border-radius: 5px;
   background-color: #007bff;
   color: white;
   cursor: pointer;
   transition: 0.3s;
+  border: none;
+  min-width: 36px;
+  text-align: center;
 }
 
 .pagination button:disabled {
@@ -145,7 +226,9 @@ td:last-child {
 }
 
 .pagination button.active {
-  background-color: #0056b3;
+  background: linear-gradient(135deg, #ffcc00, #ff9900);
+  color: #1e3c72;
+  font-weight: bold;
 }
 
 .page-options select {
@@ -155,79 +238,198 @@ td:last-child {
   border: 1px solid #aa2727;
 }
 
+/* Interrupteur */
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 40px;
+  height: 20px;
+}
+
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  transition: .3s ease;
+  border-radius: 20px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 16px;
+  width: 16px;
+  left: 2px;
+  bottom: 2px;
+  background-color: white;
+  transition: .3s ease;
+  border-radius: 50%;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+input:checked + .slider {
+  background-color: #28a745;
+}
+
+input:checked + .slider:before {
+  transform: translateX(20px);
+}
+
 /* Mode nuit */
 body.night-mode {
   background-color: #121212;
   color: white;
 }
 
-.night-mode .navbar {
+.night-mode .container {
+  background-color: #121212;
+}
+
+.night-mode .table-responsive {
+  background-color: #1e1f1f;
+}
+
+.night-mode .table-header th {
+  background: linear-gradient(135deg, #333, #555);
+}
+
+.night-mode .table-hover tbody tr:hover {
+  background-color: #2a2a2a;
+}
+
+.night-mode .search-bar {
   background-color: #333;
+  box-shadow: 0 2px 4px rgba(255, 255, 255, 0.1);
 }
 
-.night-mode .table {
-  background-color: #1f1f1f;
-}
-
-.night-mode .table th, .night-mode .table td {
-  color: white;
-}
-
-.night-mode .modal-content {
-  background-color: #1f1f1f;
-  color: white;
-}
-
-.night-mode .modal-content textarea,
-.night-mode .modal-content input {
+.night-mode .search-bar input {
   background-color: #333;
   color: white;
+}
+
+.night-mode .search-bar button {
+  background: linear-gradient(135deg, #333, #555);
+}
+
+.night-mode .search-bar button:hover {
+  background: linear-gradient(135deg, #555, #333);
+}
+
+.night-mode .search-bar button i {
+  color: #2ecc71;
+}
+
+.night-mode .badge-warning {
+  background-color: #ffca2c;
+  color: #212529;
+}
+
+.night-mode .badge-success {
+  background-color: #2ecc71;
+}
+
+.night-mode .badge-danger {
+  background-color: #ff6b6b;
+}
+
+.night-mode .pagination button {
+  background-color: #2ecc71;
+}
+
+.night-mode .pagination button.active {
+  background: linear-gradient(135deg, #ffca2c, #ff9900);
+  color: #121212;
+}
+
+.night-mode .pagination button:disabled {
+  background-color: #555;
+}
+
+.night-mode .page-options select {
+  background-color: #333;
+  color: #2ecc71;
   border-color: #555;
 }
 
-.mode-toggle {
-  background: none;
-  border: none;
-  color: #007bff;
-  font-size: 1.5rem;
-  cursor: pointer;
-  transition: color 0.3s;
+.night-mode header h2 {
+  color: #2ecc71;
 }
 
-.mode-toggle:hover {
-  color: #0056b3;
-}
-
-/* Modale */
+/* Styles de la popup */
 .modal-overlay {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
+  background: rgba(0, 0, 0, 0.6);
   display: flex;
   justify-content: center;
   align-items: center;
   z-index: 1000;
+  overflow-y: auto;
+  padding: 20px;
+  animation: fadeIn 0.3s ease-in;
 }
 
 .modal-content {
   background-color: #fff;
-  padding: 30px;
-  border-radius: 8px;
-  max-width: 600px;
+  border-radius: 12px;
+  max-width: 700px;
   width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+  animation: slideIn 0.3s ease-out;
 }
 
-.modal-content h3 {
-  margin-bottom: 20px;
-  font-size: 20px;
+.modal-header {
+  background: linear-gradient(135deg, #1e3c72, #2a5298);
+  color: white;
+  padding: 15px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-radius: 12px 12px 0 0;
+}
+
+.modal-header h3 {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+.close-btn {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 1.2rem;
+  cursor: pointer;
+  transition: color 0.3s;
+}
+
+.close-btn:hover {
+  color: #ffcc00;
+}
+
+.modal-body {
+  padding: 20px;
 }
 
 .info-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
   gap: 15px;
   margin-bottom: 20px;
 }
@@ -242,9 +444,10 @@ body.night-mode {
 }
 
 .label {
-  font-weight: bold;
-  margin-bottom: 5px;
+  font-weight: 600;
+  margin-bottom: 6px;
   font-size: 14px;
+  color: #1e3c72;
 }
 
 .value {
@@ -254,43 +457,72 @@ body.night-mode {
 
 .value.description {
   margin: 0;
-  line-height: 1.5;
+  line-height: 1.6;
 }
-
-.badge {
-  padding: 5px 10px;
-  border-radius: 12px;
-  font-size: 12px;
-  font-weight: bold;
-}
-
-.badge-primary { background-color: #007bff; color: white; }
-.badge-warning { background-color: #ffc107; color: black; }
-.badge-success { background-color: #28a745; color: white; }
-.badge-danger { background-color: #dc3545; color: white; }
-.badge-secondary { background-color: #6c757d; color: white; }
 
 .modal-content textarea {
   width: 100%;
-  padding: 8px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
   font-size: 14px;
   resize: vertical;
-  min-height: 80px;
+  min-height: 100px;
 }
 
-.modal-content button {
-  margin-top: 10px;
-  padding: 8px 15px;
-  border-radius: 4px;
-  font-size: 14px;
+.modal-content textarea:focus {
+  border-color: #1e3c72;
+  outline: none;
 }
 
-.btn-success:hover {
-  background-color: #218838;
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  padding: 20px;
+  background-color: #f9f9f9;
+  border-radius: 0 0 12px 12px;
+  gap: 10px;
 }
 
-.btn-secondary:hover {
-  background-color: #5a6268;
+/* Night mode for popup */
+.night-mode .modal-content {
+  background-color: #1f1f1f;
+  color: white;
+}
+
+.night-mode .modal-header {
+  background: linear-gradient(135deg, #333, #555);
+}
+
+.night-mode .modal-body .label {
+  color: #2ecc71;
+}
+
+.night-mode .modal-body .value {
+  color: #ddd;
+}
+
+.night-mode .form-actions {
+  background-color: #2a2a2a;
+}
+
+.night-mode .modal-content textarea {
+  background: #333;
+  color: white;
+  border-color: #555;
+}
+
+.night-mode .modal-content textarea:focus {
+  border-color: #2ecc71;
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideIn {
+  from { transform: translateY(-20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
 }

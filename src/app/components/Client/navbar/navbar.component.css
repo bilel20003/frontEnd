@@ -1,190 +1,190 @@
 /* Sidebar (Navbar verticale) */
 .sidebar {
-    position: fixed; /* Fixe la navbar */
-    top: 50px; /* Décale la navbar sous la bande en haut */
-    left: 0;
-    width: 240px; /* Réduit la largeur de la sidebar */
-    height: calc(100vh - 50px); /* Hauteur ajustée pour prendre toute la fenêtre en dessous de la bande en haut */
-    background: linear-gradient(135deg, #1e3c72, #2a5298); /* Dégradé bleu foncé et bleu clair */
-    padding: 10px 20px; /* Réduit le padding pour un look plus compact */
-    box-shadow: 4px 0 15px rgba(0, 0, 0, 0.2);
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    transition: background 0.5s ease;
-    z-index: 999;
-  }
-  
-  /* Logo */
-  .logo {
-    margin-top: 50px; /* Ajuste la position verticale */
-    text-align: center; /* Centre le logo horizontalement */
-    width: 100%;
-    margin-bottom: 20px; /* Ajoute un espacement sous le logo */
-  }
-  
-  /* Logo ajusté */
-  .logo-container {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    width: 150px; /* Réduit la largeur du logo */
-    height: 150px; /* Ajuste la hauteur */
-    background: rgba(255, 255, 255, 0.7); /* Fond semi-transparent */
-    border-radius: 15px; /* Coins arrondis */
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); /* Ombre */
-    margin: 10px auto 20px; /* Espace ajusté sous le logo */
-    padding: 10px;
-  }
-  
-  .logo-container img {
-    width: 100%; /* Ajuste l'image à la largeur du conteneur */
-    height: auto;
-    transition: transform 0.3s ease-in-out;
-  }
-  
-  .logo-container img:hover {
-    transform: scale(1.1);
-  }
-  
-  /* Espacement des éléments de la navbar */
-  .nav-links {
-    list-style-type: none; /* Supprime les puces */
-    padding-left: 0;
-    margin-top: 10px; /* Ajuste l'espacement des liens */
-  }
-  
-  .nav-links li {
-    padding: 8px 0; /* Ajuste l'espacement entre les éléments */
-  }
-  
-  /* Liens de la navbar */
-  .nav-links a {
-    display: block;
-    padding: 10px 15px; /* Réduit le padding */
-    margin: 6px 0;
-    font-size: 14px;
-    font-weight: 500;
-    color: #ffffff;
-    text-decoration: none;
-    border-radius: 8px;
-    transition: 0.3s;
-    background: transparent;
-  }
-  
-  /* Lien actif et hover */
-  .nav-links a:hover,
-  .nav-links a.active {
-    background: #ffcc00; /* Jaune doré pour l'élément actif et hover */
-    color: #000;
-    font-weight: bold;
-    border-radius: 12px; /* Bordure arrondie */
-  }
-  
-  /* Ajustement du contenu principal */
-  body {
-    margin-left: 240px; /* Ajuste le contenu à la nouvelle largeur de la sidebar */
-    margin-top: 50px; /* Ajuste sous la bande en haut */
-    font-family: Arial, sans-serif;
-  }
-  
-  
-  .sidebar .nav-links i {
-    font-size: 20px; /* Taille des icônes */
-  }
-  
-  /* Bande en haut */
-  .top-bar {
-    position: fixed; /* Fixe la bande en haut */
-    top: 0; /* Fixe la bande en haut de la page */
-    left: 0;
-    width: 100%; /* Prend toute la largeur de l'écran */
-    background: linear-gradient(135deg, #1e3c72, #2a5298);
-    padding: 10px;
-    display: flex;
-    justify-content: flex-end;
-    align-items: center;
-    z-index: 1000; /* Assure que la bande en haut est toujours au-dessus de la navbar */
-  }
-  
-  /* Correction de la barre de recherche */
-  .search-bar-container {
-    position: relative;
-    margin-top: 60px; /* Ajoute une marge pour éviter d'être masqué sous la top-bar */
-    width: 100%;
-    display: flex;
-    justify-content: center;
-  }
-  
-  .search-bar {
-    width: 50%;
-    padding: 10px;
-    border-radius: 20px;
-    border: 1px solid #ccc;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-  }
-  /* Bouton de l'icône */
-  .icon-btn {
-    background-color: #fff;
-    border: none;
-    padding: 8px;
-    border-radius: 50%;
-    cursor: pointer;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-  }
-  
-  .icon-btn i {
-    color: #2a5298;
-    font-size: 20px;
-  }
-  
-  /* Menu déroulant */
-  .dropdown-menu {
-    display: none; /* Caché par défaut */
-    position: absolute;
-    right: 0;
-    top: 40px;
-    background-color: #fff;
-    border-radius: 5px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-    width: 150px;
-    z-index: 10;
-  }
-  
-  .dropdown-menu.show {
-    display: block;
-  }
-  
-  .dropdown-menu ul {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-  }
-  
-  .dropdown-menu li {
-    padding: 10px;
-    border-bottom: 1px solid #ddd;
-  }
-  
-  .dropdown-menu li:last-child {
-    border-bottom: none;
-  }
-  
-  .dropdown-menu li a {
-    text-decoration: none;
-    color: #333;
-    display: block;
-  }
-  
-  .dropdown-menu li a:hover {
-    background-color: #f1f1f1;
-  }
-  
-  /* Ajout de la couleur rouge pour le bouton de déconnexion */
-  .dropdown-menu li.logout a {
-    color: red;
-    font-weight: bold;
-  }
-  
+  position: fixed; /* Fixe la navbar */
+  top: 50px; /* Décale la navbar sous la bande en haut */
+  left: 0;
+  width: 240px; /* Réduit la largeur de la sidebar */
+  height: calc(100vh - 50px); /* Hauteur ajustée pour prendre toute la fenêtre en dessous de la bande en haut */
+  background: linear-gradient(135deg, #1e3c72, #2a5298); /* Dégradé bleu foncé et bleu clair */
+  padding: 10px 20px; /* Réduit le padding pour un look plus compact */
+  box-shadow: 4px 0 15px rgba(0, 0, 0, 0.2);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  transition: background 0.5s ease;
+  z-index: 999;
+}
 
-  
+/* Logo */
+.logo {
+  margin-top: 50px; /* Ajuste la position verticale */
+  text-align: center; /* Centre le logo horizontalement */
+  width: 100%;
+  margin-bottom: 20px; /* Ajoute un espacement sous le logo */
+}
+
+/* Logo ajusté */
+.logo-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 200px; /* Réduit la largeur du logo */
+  height: 200px; /* Ajuste la hauteur */
+  background: rgba(181, 203, 207, 0.7); /* Fond semi-transparent */
+  border-radius: 100px; /* Coins arrondis */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); /* Ombre */
+  margin: 0px auto 50px; /* Espace ajusté sous le logo */
+  padding: 10px;
+}
+
+.logo-container img {
+  width: 150%; /* Ajuste l'image à la largeur du conteneur */
+  height: auto;
+  transition: transform 0.3s ease-in-out;
+}
+
+.logo-container img:hover {
+  transform: scale(1.1);
+}
+
+/* Espacement des éléments de la navbar */
+.nav-links {
+  list-style-type: none; /* Supprime les puces */
+  padding-left: 0;
+  margin-top: 10px; /* Ajuste l'espacement des liens */
+}
+
+.nav-links li {
+  padding: 10px 0; /* Ajuste l'espacement entre les éléments */
+}
+
+/* Liens de la navbar */
+.nav-links a {
+  display: block;
+  padding: 10px 15px; /* Réduit le padding */
+  margin: 6px 0;
+  font-size: 17px;
+  font-weight: 500;
+  color: #ffffff;
+  text-decoration: none;
+  border-radius: 28px;
+  transition: .3s;
+  background: transparent;
+}
+
+/* Lien actif et hover */
+.nav-links a:hover,
+.nav-links a.active {
+  background: #ffcc00; /* Jaune doré pour l'élément actif et hover */
+  color: #000;
+  font-weight: bold;
+  width: 180px;
+  border-radius: 12px; /* Bordure arrondie */
+}
+
+/* Ajustement du contenu principal */
+body {
+  margin-left: 240px; /* Ajuste le contenu à la nouvelle largeur de la sidebar */
+  margin-top: 50px; /* Ajuste sous la bande en haut */
+  font-family: Arial, sans-serif;
+}
+
+
+.sidebar .nav-links i {
+  font-size: 20px; /* Taille des icônes */
+}
+
+/* Bande en haut */
+.top-bar {
+  position: fixed; /* Fixe la bande en haut */
+  top: 0; /* Fixe la bande en haut de la page */
+  left: 0;
+  width: 100%; /* Prend toute la largeur de l'écran */
+  background: linear-gradient(135deg, #1e3c72, #2a5298);
+  padding: 10px;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  z-index: 1000; /* Assure que la bande en haut est toujours au-dessus de la navbar */
+}
+
+/* Correction de la barre de recherche */
+.search-bar-container {
+  position: relative;
+  margin-top: 60px; /* Ajoute une marge pour éviter d'être masqué sous la top-bar */
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+.search-bar {
+  width: 50%;
+  padding: 10px;
+  border-radius: 20px;
+  border: 1px solid #ccc;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+/* Bouton de l'icône */
+.icon-btn {
+  background-color: #fff;
+  border: none;
+  padding: 8px;
+  border-radius: 50%;
+  cursor: pointer;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+.icon-btn i {
+  color: #2a5298;
+  font-size: 20px;
+}
+
+/* Menu déroulant */
+.dropdown-menu {
+  display: none; /* Caché par défaut */
+  position: absolute;
+  right: 0;
+  top: 40px;
+  background-color: #fff;
+  border-radius: 5px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  width: 150px;
+  z-index: 10;
+}
+
+.dropdown-menu.show {
+  display: block;
+}
+
+.dropdown-menu ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.dropdown-menu li {
+  padding: 10px;
+  border-bottom: 1px solid #ddd;
+}
+
+.dropdown-menu li:last-child {
+  border-bottom: none;
+}
+
+.dropdown-menu li a {
+  text-decoration: none;
+  color: #333;
+  display: block;
+}
+
+.dropdown-menu li a:hover {
+  background-color: #f1f1f1;
+}
+
+/* Ajout de la couleur rouge pour le bouton de déconnexion */
+.dropdown-menu li.logout a {
+  color: red;
+  font-weight: bold;
+}
+
+

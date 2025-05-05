@@ -3,8 +3,16 @@
 
 <!-- Contenu principal -->
 <div class="container">
-  <!-- Titre de l'interface -->
-  <h2 class="text-center my-4">Gestion des Réclamations</h2>
+  <!-- Header with Title and Actions -->
+  <header class="d-flex justify-content-between align-items-center">
+    <h2>Gestion des Réclamations</h2>
+    <div class="header-actions">
+      <button class="mode-toggle" (click)="toggleMode()">
+        <i class="fas" [ngClass]="isNightMode ? 'fa-sun' : 'fa-moon'"></i>
+      </button>
+    </div>
+  </header>
+
   <!-- Barre de recherche -->
   <div class="search-bar-container">
     <div class="search-bar">
@@ -25,7 +33,7 @@
         <tr>
           <th (click)="sort('id')" class="sortable">ID</th>
           <th (click)="sort('type')" class="sortable">Type</th>
-          <th (click)="sort('date')" class="sortable">Date</th>
+          <th (click)="sort('date')" class="sortable">Date d'envoi</th>
           <th (click)="sort('client')" class="sortable">Émetteur</th>
           <th (click)="sort('objet')" class="sortable">Objet</th>
           <th (click)="sort('etat')" class="sortable">État</th>
@@ -37,7 +45,7 @@
           <td>{{ reclamation.id }}</td>
           <td>{{ reclamation.type }}</td>
           <td>{{ reclamation.date | date: 'dd/MM/yyyy' }}</td>
-          <td>{{ reclamation.client && reclamation.client.id ? reclamation.client.id : 'N/A' }}</td>
+          <td>{{ reclamation.client.name || 'N/A' }}</td>
           <td>{{ objetMap[reclamation.objet.id].name || 'N/A' }}</td>
           <td>
             <span class="badge" [ngClass]="getBadgeClass(reclamation.etat)">
@@ -70,16 +78,13 @@
         </select>
       </div>
       <div class="pagination">
-        <button class="btn btn-pagination" (click)="goToPreviousPage()" [disabled]="currentPage === 1">
+        <button class="btn btn-primary" (click)="goToPreviousPage()" [disabled]="currentPage === 1">
           <i class="fas fa-chevron-left"></i>
         </button>
-        <button *ngFor="let page of getPageNumbers()"
-                class="btn btn-pagination"
-                [ngClass]="{'active': page === currentPage}"
-                (click)="goToPage(page)">
+        <button *ngFor="let page of getPageNumbers()" class="btn btn-primary" [class.active]="page === currentPage" (click)="goToPage(page)">
           {{ page }}
         </button>
-        <button class="btn btn-pagination" (click)="goToNextPage()" [disabled]="currentPage === totalPages">
+        <button class="btn btn-primary" (click)="goToNextPage()" [disabled]="currentPage === totalPages">
           <i class="fas fa-chevron-right"></i>
         </button>
       </div>
@@ -87,9 +92,12 @@
   </div>
 
   <!-- Popup pour les détails de la requête -->
-  <div *ngIf="isPopupOpen && selectedRequete" class="modal-overlay">
-    <div class="modal-content">
-      <h3>📌 Détails de la requête</h3>
+  <div *ngIf="isPopupOpen && selectedRequete" class="modal-overlay" (click)="closePopup()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3>📌 Détails de la requête</h3>
+        <button class="close-btn" (click)="closePopup()">✖</button>
+      </div>
       <div class="info-grid">
         <div class="info-item">
           <span class="label">📄 Type:</span>
@@ -97,7 +105,7 @@
         </div>
         <div class="info-item">
           <span class="label">👤 Émetteur:</span>
-          <span class="value">{{ selectedRequete.client.id || 'ID client non disponible' }}</span>
+          <span class="value">{{ selectedRequete.client.name || 'Non spécifié' }}</span>
         </div>
         <div class="info-item">
           <span class="label">📌 Objet:</span>
@@ -110,47 +118,49 @@
           </span>
         </div>
         <div class="info-item">
-          <span class="label">📅 Date:</span>
-          <span class="value">{{ (selectedRequete.date | date: 'dd/MM/yyyy') ?? 'Non spécifié' }}</span>
+          <span class="label">📅 Date d'envoi:</span>
+          <span class="value">{{ selectedRequete.date ? (selectedRequete.date | date:'dd/MM/yyyy') : 'Non spécifié' }}</span>
         </div>
-        <div class="info-item" *ngIf="selectedRequete as req">
+        <div class="info-item">
+          <span class="label">📅 Date de traitement:</span>
+          <span class="value">{{ selectedRequete.dateTraitement ? (selectedRequete.dateTraitement | date:'dd/MM/yyyy') : 'Non traité' }}</span>
+        </div>
+        <div class="info-item">
           <span class="label">👷 Technicien:</span>
-          <ng-container *ngIf="req.technicien as tech">
-            <span class="value">ID: {{ tech.id }}</span>
-          </ng-container>
-          <ng-container *ngIf="!req.technicien">
-            <span class="value">Non affecté</span>
-          </ng-container>
+          <span class="value">{{ selectedRequete.technicien?.name || 'Non affecté' }}</span>
         </div>
         <div class="info-item full-width">
           <span class="label">📝 Description:</span>
           <p class="value description">{{ selectedRequete.description || 'Aucune description' }}</p>
         </div>
-        <div>
+        <div class="info-item full-width">
           <label for="noteRetour">📋 Note de Retour:</label>
           <textarea id="noteRetour" [(ngModel)]="noteRetour"></textarea>
         </div>
       </div>
-      <button (click)="confirmerTraitement()">Confirmer</button>
+      <button class="btn btn-primary" (click)="confirmerTraitement()">Traiter</button>
       <button class="btn btn-primary" (click)="openTechnicienPopup()" [disabled]="selectedRequete.technicien || selectedRequete.etat === 'TRAITEE' || selectedRequete.etat === 'REFUSEE'">
         <i class="fas fa-user-cog"></i> Affecter Technicien
       </button>
       <button class="btn btn-secondary" (click)="closePopup()">Fermer</button>
 
       <!-- Popup pour sélectionner un technicien -->
-      <div *ngIf="isTechnicienPopupOpen" class="modal-overlay technicien-popup">
-        <div class="modal-content">
-          <h3>👷 Sélectionner un Technicien</h3>
+      <div *ngIf="isTechnicienPopupOpen" class="modal-overlay technicien-popup" (click)="closePopup()">
+        <div class="modal-content" (click)="$event.stopPropagation()">
+          <div class="modal-header">
+            <h3>👷 Sélectionner un Technicien</h3>
+            <button class="close-btn" (click)="closePopup()">✖</button>
+          </div>
           <div class="technicien-select">
             <label for="technicienSelect">Technicien:</label>
-            <select id="technicienSelect" [(ngModel)]="selectedTechnicienId">
+            <select id="technicienSelect" [(ngModel)]="selectedTechnicienId" [ngModelOptions]="{standalone: true}">
               <option value="" disabled selected>Sélectionner un technicien</option>
-              <option *ngFor="let technicien of techniciens" [value]="technicien.id">
+              <option *ngFor="let technicien of techniciens" [ngValue]="technicien.id">
                 {{ technicien.name }} (ID: {{ technicien.id }})
               </option>
             </select>
           </div>
-          <button class="btn btn-primary" (click)="assignTechnicien()">Affecter</button>
+          <button class="btn btn-primary" (click)="assignTechnicien()" [disabled]="!selectedTechnicienId">Affecter</button>
           <button class="btn btn-secondary" (click)="closePopup()">Annuler</button>
         </div>
       </div>
