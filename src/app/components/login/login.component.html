@@ -1,32 +1,63 @@
-<div class="center-wrapper">
-  <div class="login-wrapper">
-    <div class="login-left">
-      <img src="assets/img/logo-cni.png" alt="Login Image" class="login-image" />
+<div class="login-container">
+  <div class="login-card">
+    <div class="login-header">
+      <img src="assets/img/logo-cni.png" alt="CNI Logo" class="login-logo" />
+      <h2>Connexion</h2>
     </div>
 
-    <div class="login-right">
-      <div class="login-card">
-        <h2 class="login-title">Login</h2>
-
-        <form [formGroup]="loginForm" (ngSubmit)="onLogin()">
-          <div class="input-group">
-            <label for="email">Email:</label>
-            <input type="text" id="email" formControlName="email" required />
-          </div>
-
-          <div class="input-group">
-            <label for="password">Password:</label>
-            <input type="password" id="password" formControlName="password" required />
-          </div>
-
-          <button class="login-btn" type="submit" [disabled]="loading">Log In</button>
-          <div class="loader" *ngIf="loading">
-            <div class="spinner-border" role="status">
-              <span class="sr-only">Loading...</span>
-            </div>
-          </div>
-        </form>
+    <form [formGroup]="loginForm" (ngSubmit)="onLogin()">
+      <div class="input-group">
+        <label for="email">Email</label>
+        <input type="email" id="email" formControlName="email" placeholder="Entrez votre email" />
+        <div class="error-message" *ngIf="loginForm.get('email')?.invalid && (loginForm.get('email')?.touched || submitted)">
+          <div *ngIf="loginForm.get('email')?.errors?.['required']">L'email est requis.</div>
+          <div *ngIf="loginForm.get('email')?.errors?.['email']">L'email est invalide.</div>
+        </div>
       </div>
+
+      <div class="input-group">
+        <label for="password">Mot de passe</label>
+        <input type="password" id="password" formControlName="password" placeholder="Entrez votre mot de passe" />
+        <div class="error-message" *ngIf="loginForm.get('password')?.invalid && (loginForm.get('password')?.touched || submitted)">
+          <div *ngIf="loginForm.get('password')?.errors?.['required']">Le mot de passe est requis.</div>
+        </div>
+      </div>
+
+      <button class="login-btn" type="submit" [disabled]="loading">
+        <span *ngIf="!loading">Se connecter</span>
+        <div class="spinner-border spinner-border-sm" role="status" *ngIf="loading">
+          <span class="sr-only">Chargement...</span>
+        </div>
+      </button>
+
+      <div class="forgot-password">
+        <a (click)="openForgotPasswordModal()">Mot de passe oublié ?</a>
+      </div>
+    </form>
+  </div>
+
+  <!-- Forgot Password Modal -->
+  <div class="modal" *ngIf="isForgotPasswordModalOpen">
+    <div class="modal-content">
+      <span class="close" (click)="closeForgotPasswordModal()">&times;</span>
+      <h3>Réinitialiser le mot de passe</h3>
+      <form [formGroup]="forgotPasswordForm" (ngSubmit)="onForgotPassword()">
+        <div class="input-group">
+          <label for="forgot-email">Email</label>
+          <input type="email" id="forgot-email" formControlName="email" placeholder="Entrez votre email" />
+          <div class="error-message" *ngIf="forgotPasswordForm.get('email')?.invalid && (forgotPasswordForm.get('email')?.touched || forgotSubmitted)">
+            <div *ngIf="forgotPasswordForm.get('email')?.errors?.['required']">L'email est requis.</div>
+            <div *ngIf="forgotPasswordForm.get('email')?.errors?.['email']">L'email est invalide.</div>
+          </div>
+        </div>
+
+        <button class="modal-btn" type="submit" [disabled]="forgotLoading">
+          <span *ngIf="!forgotLoading">Envoyer</span>
+          <div class="spinner-border spinner-border-sm" role="status" *ngIf="forgotLoading">
+            <span class="sr-only">Chargement...</span>
+          </div>
+        </button>
+      </form>
     </div>
   </div>
 </div>

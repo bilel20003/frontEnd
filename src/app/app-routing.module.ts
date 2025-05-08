@@ -6,7 +6,6 @@ import { AuthGuard } from './guards/auth.guard';  // Adjust the path according t
 
 //client
 import { NavbarComponent } from './components/Client/navbar/navbar.component';
-import { DocumentsComponent } from './components/Client/document/document.component';
 import { HomeComponent } from './components/Client/home/home.component';
 import { ReclamationComponent } from './components/Client/reclamation/reclamation.component';
 import { RendezVousComponent } from './components/Client/rendez-vous/rendez-vous.component';
@@ -30,11 +29,15 @@ import { MinistryManagementComponent } from './components/Admin/ministere/minist
 import { ServiceComponent } from './components/Admin/service/service.component';
 import { ScheduleComponent } from './components/Admin/schedule/schedule.component';
 import { TechRendezVousComponent } from './components/Technicien/tech-rendez-vous/tech-rendez-vous.component';
+import { ArchiveComponent } from './components/Admin/archive/archive.component';
+import { ResetPasswordComponent } from './components/reset-password/reset-password.component';
 
 
 const routes: Routes = [
   { path: '', redirectTo: '/login', pathMatch: 'full' },
   { path: 'login', component: LoginComponent },
+  { path: 'reset-password', component: ResetPasswordComponent },
+
 
   // Admin routes (protected by AuthGuard and role-based authorization)
   { path: 'utilisateurs', component: UtilisateursComponent, canActivate: [AuthGuard], data: { role: 'ADMIN' } },
@@ -47,13 +50,13 @@ const routes: Routes = [
   { path: 'service', component: ServiceComponent, canActivate: [AuthGuard], data: { role: 'ADMIN' } },
   { path: 'profile-admin', component: ProfileAdminComponent, canActivate: [AuthGuard], data: { role: 'ADMIN' } },
   { path: 'schedule', component: ScheduleComponent, canActivate: [AuthGuard], data: { role: 'ADMIN' } },
+  { path: 'archive', component: ArchiveComponent, canActivate: [AuthGuard], data: { role: 'ADMIN' } },
 
   // Client routes (protected by AuthGuard)
   { path: 'home', component: HomeComponent, canActivate: [AuthGuard], data: { role: 'CLIENT' }  },
   { path: 'rendez-vous', component: RendezVousComponent, canActivate: [AuthGuard] , data: { role: 'CLIENT' } },
   { path: 'navbar', component: NavbarComponent, canActivate: [AuthGuard], data: { role: 'CLIENT' }  },
   { path: 'reclamation', component: ReclamationComponent, canActivate: [AuthGuard] , data: { role: 'CLIENT' } },
-  { path: 'documents', component: DocumentsComponent, canActivate: [AuthGuard] , data: { role: 'CLIENT' } },
   { path: 'profile-client', component:  ProfileClientComponent, canActivate: [AuthGuard] , data: { role: 'CLIENT' } },
   // Technicien routes
   { path: 'tech-home', component: TechHomeComponent, canActivate: [AuthGuard] , data: { role: 'TECHNICIEN' }},

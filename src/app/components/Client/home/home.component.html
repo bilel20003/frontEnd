@@ -31,7 +31,6 @@
           <th (click)="sort('id')" class="sortable">ID</th>
           <th (click)="sort('objetName')" class="sortable">Objet</th>
           <th (click)="sort('type')" class="sortable">Type de requête</th>
-          <th *ngIf="userInfo?.role === 'CLIENT' || userInfo?.role === 'ADMIN'" (click)="sort('produitName')" class="sortable">Produit</th>
           <th (click)="sort('date')" class="sortable">Date d'envoi</th>
           <th (click)="sort('dateTraitement')" class="sortable">Date de traitement</th>
           <th (click)="sort('etat')" class="sortable">État</th>
@@ -42,22 +41,22 @@
         <tr *ngFor="let requete of paginatedRequetes">
           <td>{{ requete.id }}</td>
           <td>{{ objetMap[requete.objet.id].name || 'N/A' }}</td>
-          <td>{{ requete.type }}</td>
-          <td *ngIf="userInfo?.role === 'CLIENT' || userInfo?.role === 'ADMIN'">
-            <ng-container *ngIf="objetMap[requete.objet.id] as objet">
-              {{ produitMap[objet.produit.id].nom || 'N/A' }}
-            </ng-container>
+          <td>
+            <span class="badge" [ngClass]="getTypeBadgeClass(requete.type)">
+              {{ formatDisplayText(requete.type) }}
+            </span>
           </td>
           <td>{{ requete.date | date:'dd/MM/yyyy' }}</td>
           <td>{{ requete.dateTraitement ? (requete.dateTraitement | date:'dd/MM/yyyy') : 'Non traité' }}</td>
           <td>
             <span class="badge" [ngClass]="getBadgeClass(requete.etat)">
-              {{ requete.etat }}
+              {{ formatDisplayText(requete.etat) }}
             </span>
           </td>
           <td>
-            <button class="btn btn-info btn-sm me-2" (click)="openPopup(requete)">
-              <i class="fas fa-eye"></i> Voir
+            <button class="action-icon consult-icon" (click)="openPopup(requete)" data-tooltip="Consulter">
+              <i class="fas fa-eye default-icon closed-eye"></i>
+              <i class="fas fa-eye hover-icon"></i>
             </button>
           </td>
         </tr>
@@ -88,20 +87,54 @@
     <div *ngIf="isPopupOpen && selectedRequete" class="modal-overlay" (click)="closePopup()">
       <div class="modal-content" (click)="$event.stopPropagation()">
         <div class="modal-header">
-          <h3>Détails de la Requête</h3>
+          <h3>📌 Détails de la requête</h3>
           <button class="close-btn" (click)="closePopup()">
             <i class="fas fa-times"></i>
           </button>
         </div>
         <div class="modal-body">
-          <p><strong>ID:</strong> {{ selectedRequete.id }}</p>
-          <p><strong>Objet:</strong> {{ objetMap[selectedRequete.objet.id].name || 'N/A' }}</p>
-          <p><strong>Description:</strong> {{ selectedRequete.description }}</p>
-          <p><strong>Date d'envoi:</strong> {{ selectedRequete.date | date:'dd/MM/yyyy' }}</p>
-          <p><strong>Date de traitement:</strong> {{ selectedRequete.dateTraitement ? (selectedRequete.dateTraitement | date:'dd/MM/yyyy') : 'Non traité' }}</p>
-          <p><strong>État:</strong> <span class="badge" [ngClass]="getBadgeClass(selectedRequete.etat)">{{ selectedRequete.etat }}</span></p>
-          <p><strong>Guichetier:</strong> {{ selectedRequete.guichetier.name || 'Non assigné' }}</p>
-          <p><strong>Note de retour:</strong> {{ selectedRequete.noteRetour || 'Aucune note' }}</p>
+          <div class="info-grid">
+            <div class="info-item">
+              <span class="label">🆔 ID:</span>
+              <span class="value">{{ selectedRequete.id }}</span>
+            </div>
+            <div class="info-item">
+              <span class="label">📌 Objet:</span>
+              <span class="value">{{ objetMap[selectedRequete.objet.id].name || 'N/A' }}</span>
+            </div>
+            <div class="info-item">
+              <span class="label">📄 Type:</span>
+              <span class="value">
+                <span class="badge" [ngClass]="getTypeBadgeClass(selectedRequete.type)">
+                  {{ formatDisplayText(selectedRequete.type) || 'Non spécifié' }}
+                </span>
+              </span>
+            </div>
+            <div class="info-item">
+              <span class="label">📝 Description:</span>
+              <span class="value description">{{ selectedRequete.description }}</span>
+            </div>
+            <div class="info-item">
+              <span class="label">📅 Date d'envoi:</span>
+              <span class="value">{{ selectedRequete.date | date:'dd/MM/yyyy' }}</span>
+            </div>
+            <div class="info-item">
+              <span class="label">📅 Date de traitement:</span>
+              <span class="value">{{ selectedRequete.dateTraitement ? (selectedRequete.dateTraitement | date:'dd/MM/yyyy') : 'Non traité' }}</span>
+            </div>
+            <div class="info-item">
+              <span class="label">⚡ État:</span>
+              <span class="badge" [ngClass]="getBadgeClass(selectedRequete.etat)">{{ formatDisplayText(selectedRequete.etat) }}</span>
+            </div>
+            <div class="info-item">
+              <span class="label">👤 Guichetier:</span>
+              <span class="value">{{ selectedRequete.guichetier.name || 'Non assigné' }}</span>
+            </div>
+            <div class="info-item">
+              <span class="label">📋 Note de retour:</span>
+              <span class="value">{{ selectedRequete.noteRetour || 'Aucune note' }}</span>
+            </div>
+          </div>
         </div>
         <div class="form-actions">
           <button class="btn btn-secondary" (click)="closePopup()">Fermer</button>
@@ -119,55 +152,53 @@
           </button>
         </div>
         <form #newRequeteForm="ngForm" (ngSubmit)="submitNewRequete()">
-          <div class="form-group">
-            <label for="objet">Objet</label>
-            <select id="objet" name="objet" [(ngModel)]="newRequete.objet.id" required #objet="ngModel">
-              <option value="0" disabled>Sélectionnez un objet</option>
-              <option *ngFor="let obj of objets" [value]="obj.id">
-                {{ obj.name }}
-              </option>
-            </select>
-            <div *ngIf="objet.invalid && (objet.dirty || objet.touched)" class="error-message">
-              <div *ngIf="objet.errors?.['required']">L'objet est requis.</div>
+          <div class="modal-body">
+            <div class="form-group">
+              <label for="objet">Objet</label>
+              <select id="objet" name="objet" [(ngModel)]="newRequete.objet.id" required #objet="ngModel">
+                <option value="0" disabled>Sélectionnez un objet</option>
+                <option *ngFor="let obj of objets" [value]="obj.id">
+                  {{ obj.name }}
+                </option>
+              </select>
+              <div *ngIf="objet.invalid && (objet.dirty || objet.touched)" class="error-message">
+                <div *ngIf="objet.errors?.['required']">L'objet est requis.</div>
+              </div>
             </div>
-          </div>
-          <div class="form-group">
-            <label for="type">Type de requête</label>
-            <select id="type" name="type" [(ngModel)]="newRequete.type" required #type="ngModel">
-              <option value="" disabled>Sélectionnez un type</option>
-              <option value="DEMANDE_DE_TRAVAUX">Demande de travaux</option>
-              <option value="RECLAMATION">Réclamation</option>
-            </select>
-            <div *ngIf="type.invalid && (type.dirty || type.touched)" class="error-message">
-              <div *ngIf="type.errors?.['required']">Le type de requête est requis.</div>
+            <div class="form-group">
+              <label for="type">Type de requête</label>
+              <select id="type" name="type" [(ngModel)]="newRequete.type" required #type="ngModel">
+                <option value="" disabled>Sélectionnez un type</option>
+                <option value="DEMANDE_DE_TRAVAUX">Demande de travaux</option>
+                <option value="RECLAMATION">Réclamation</option>
+              </select>
+              <div *ngIf="type.invalid && (type.dirty || type.touched)" class="error-message">
+                <div *ngIf="type.errors?.['required']">Le type de requête est requis.</div>
+              </div>
             </div>
-          </div>
-          <div class="form-group">
-            <label for="description">Description</label>
-            <textarea id="description" name="description" [(ngModel)]="newRequete.description" required #description="ngModel" minlength="10"></textarea>
-            <div *ngIf="description.invalid && (description.dirty || description.touched)" class="error-message">
-              <div *ngIf="description.errors?.['required']">La description est requise.</div>
-              <div *ngIf="description.errors?.['minlength']">La description doit contenir au moins 10 caractères.</div>
+            <div class="form-group">
+              <label for="description">Description</label>
+              <textarea id="description" name="description" [(ngModel)]="newRequete.description" required #description="ngModel" minlength="10"></textarea>
+              <div *ngIf="description.invalid && (description.dirty || description.touched)" class="error-message">
+                <div *ngIf="description.errors?.['required']">La description est requise.</div>
+                <div *ngIf="description.errors?.['minlength']">La description doit contenir au moins 10 caractères.</div>
+              </div>
             </div>
-          </div>
-          <div class="form-group">
-            <label for="noteRetour">Note de retour</label>
-            <textarea id="noteRetour" name="noteRetour" [(ngModel)]="newRequete.noteRetour" #noteRetour="ngModel"></textarea>
-          </div>
-          <div class="form-group">
-            <button type="button" class="btn btn-primary" (click)="toggleAIPrompt()">
-              Générer une description avec l’IA
-            </button>
-          </div>
-          <div *ngIf="isAIPromptVisible" class="form-group ai-prompt-group">
-            <label for="aiPrompt">Décrivez ce que vous voulez générer</label>
-            <textarea id="aiPrompt" name="aiPrompt" [(ngModel)]="aiPrompt" placeholder="Ex: Décrivez un problème avec un ordinateur portable qui ne s'allume pas"></textarea>
-            <div class="ai-actions">
-              <button type="button" class="btn btn-primary" (click)="generateAIDescription()" [disabled]="isAILoading">
-                <i *ngIf="isAILoading" class="fas fa-spinner fa-spin"></i>
-                Générer
+            <div class="form-group">
+              <button type="button" class="btn btn-primary" (click)="toggleAIPrompt()">
+                Générer une description avec l’IA
               </button>
-              <button type="button" class="btn btn-secondary" (click)="toggleAIPrompt()">Annuler</button>
+            </div>
+            <div *ngIf="isAIPromptVisible" class="form-group ai-prompt-group">
+              <label for="aiPrompt">Décrivez ce que vous voulez générer</label>
+              <textarea id="aiPrompt" name="aiPrompt" [(ngModel)]="aiPrompt" placeholder="Ex: Décrivez un problème avec un ordinateur portable qui ne s'allume pas"></textarea>
+              <div class="ai-actions">
+                <button type="button" class="btn btn-primary" (click)="generateAIDescription()" [disabled]="isAILoading">
+                  <i *ngIf="isAILoading" class="fas fa-spinner fa-spin"></i>
+                  Générer
+                </button>
+                <button type="button" class="btn btn-secondary" (click)="toggleAIPrompt()">Annuler</button>
+              </div>
             </div>
           </div>
           <div class="form-actions">

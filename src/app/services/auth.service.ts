@@ -3,20 +3,15 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable, BehaviorSubject } from 'rxjs';
 import { tap } from 'rxjs/operators';
 import { jwtDecode } from 'jwt-decode';
-import { Router } from '@angular/router';  // Ajoute le Router pour la redirection
+import { Router } from '@angular/router';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AuthService {
-  
   private apiUrl = 'http://localhost:8082/api/personnes';
 
-  constructor(private http: HttpClient, private router: Router) {
-    
-    
-    
-  }
+  constructor(private http: HttpClient, private router: Router) {}
 
   // Méthode de connexion
   login(email: string, password: string): Observable<any> {
@@ -24,22 +19,21 @@ export class AuthService {
     return this.http.post(`${this.apiUrl}/login`, { email: email.toLowerCase(), password }, { headers })
       .pipe(tap((response: any) => {
         if (response.token) {
-          // Sauvegarder le token dans localStorage
           localStorage.setItem('token', response.token);
-          // Décoder le token pour obtenir les informations de l'utilisateur (nom, rôle, etc.)
           const decodedUser = jwtDecode(response.token);
-          
-          
         }
       }));
   }
 
+  // Méthode pour mot de passe oublié
+  forgotPassword(email: string): Observable<any> {
+    const headers = new HttpHeaders({ 'Content-Type': 'application/json' });
+    return this.http.post(`${this.apiUrl}/forgot-password`, { email: email.toLowerCase() }, { headers });
+  }
+
   // Méthode de déconnexion
   logout() {
-    // Supprimer les informations de l'utilisateur et le token du localStorage
     localStorage.removeItem('token');
-     // Mettre à jour le BehaviorSubject avec null
-    // Rediriger l'utilisateur vers la page de login après la déconnexion
     this.router.navigate(['/login']);
   }
 
@@ -72,5 +66,9 @@ export class AuthService {
     return null;
   }
 
-  
+  // Méthode pour réinitialiser le mot de passe
+  resetPassword(token: string, password: string): Observable<any> {
+    const headers = new HttpHeaders({ 'Content-Type': 'application/json' });
+    return this.http.post(`${this.apiUrl}/reset-password`, { token, password }, { headers });
+  }
 }

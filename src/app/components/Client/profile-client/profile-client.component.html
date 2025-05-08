@@ -5,7 +5,7 @@
 
   <div class="profile-grid">
     <div class="form-group">
-      <label>👨 Nom :</label>
+      <label>👨 Nom & Prénom:</label>
       <input type="text" [(ngModel)]="userInfo.name" [readonly]="!editionActive">
     </div>
 
@@ -19,10 +19,7 @@
       <input type="text" [value]="userInfo.role.name" readonly>
     </div>
 
-    <div class="form-group">
-      <label>✅ Status :</label>
-      <input type="text" [value]="userInfo.status" readonly>
-    </div>
+    
 
     <div class="form-group">
       <label>🏢 Service :</label>
@@ -46,7 +43,7 @@
     </button>
     <button *ngIf="editionActive" (click)="enregistrerModifications()">💾 Enregistrer</button>
     <button (click)="ouvrirPopupMotDePasse()">🔒 Changer mot de passe</button>
-    <button (click)="retour()">🔙 Retour</button>
+    
   </div>
 
   <!-- POPUP mot de passe -->

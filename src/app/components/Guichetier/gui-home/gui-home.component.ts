@@ -129,7 +129,10 @@ export class GuiHomeComponent implements OnInit {
           val.toString().toLowerCase().includes(term)
         ) ||
         (objet?.name?.toLowerCase()?.includes(term) ?? false) ||
-        (reclamation.client.name.toLowerCase().includes(term) ?? false)
+        (reclamation.client.name.toLowerCase().includes(term) ?? false) ||
+        (reclamation.client.service?.ministere?.nomMinistere?.toLowerCase()?.includes(term) ?? false) ||
+        (reclamation.client.service?.nomService?.toLowerCase()?.includes(term) ?? false) ||
+        (reclamation.objet.produit?.nom?.toLowerCase()?.includes(term) ?? false)
       );
     });
     this.currentPage = 1;
@@ -153,6 +156,18 @@ export class GuiHomeComponent implements OnInit {
       } else if (column === 'date') {
         valA = a.date ? new Date(a.date).getTime() : 0;
         valB = b.date ? new Date(b.date).getTime() : 0;
+      } else if (column === 'ministere') {
+        valA = a.client.service?.ministere?.nomMinistere ?? 'N/A';
+        valB = b.client.service?.ministere?.nomMinistere ?? 'N/A';
+      } else if (column === 'service') {
+        valA = a.client.service?.nomService ?? 'N/A';
+        valB = b.client.service?.nomService ?? 'N/A';
+      } else if (column === 'produit') {
+        valA = a.objet.produit?.nom ?? 'N/A';
+        valB = b.objet.produit?.nom ?? 'N/A';
+      } else if (column === 'type' || column === 'etat') {
+        valA = this.formatDisplayText(valA) ?? 'N/A';
+        valB = this.formatDisplayText(valB) ?? 'N/A';
       }
 
       if (typeof valA === 'number' && typeof valB === 'number') {
@@ -231,9 +246,44 @@ export class GuiHomeComponent implements OnInit {
       case 'EN_COURS_DE_TRAITEMENT': return 'badge-warning';
       case 'TRAITEE': return 'badge-success';
       case 'REFUSEE': return 'badge-danger';
-      case 'BROUILLON': return 'badge-secondary';
+      
       default: return 'badge-secondary';
     }
+  }
+
+  getTypeBadgeClass(type: string): string {
+    switch (type.toUpperCase()) {
+      case 'DEMANDE_DE_TRAVAUX': return 'badge-info';
+      case 'RECLAMATION': return 'badge-secondary';
+      default: return 'badge-secondary';
+    }
+  }
+
+  formatDisplayText(text: string): string {
+    if (!text) return '';
+
+    // Map database values to French display text
+    const displayMap: { [key: string]: string } = {
+      'DEMANDE_TRAVAUX': 'Demande de travaux',
+      'RECLAMATION': 'Réclamation',
+      'NOUVEAU': 'Nouveau',
+      'EN_COURS_DE_TRAITEMENT': 'En cours de traitement',
+      'TRAITEE': 'Traitée',
+      'REFUSEE': 'Refusée',
+      'BROUILLON': 'Brouillon'
+    };
+
+    // Return mapped value if exists
+    const upperText = text.toUpperCase();
+    if (displayMap[upperText]) {
+      return displayMap[upperText];
+    }
+
+    // Fallback: Replace underscores and format to title case
+    return text
+      .replace(/_/g, ' ')
+      .toLowerCase()
+      .replace(/(^|\s)\w/g, char => char.toUpperCase());
   }
 
   consulterReclamation(id: number): void {
@@ -291,10 +341,8 @@ export class GuiHomeComponent implements OnInit {
     console.log('Technician IDs:', this.techniciens.map(t => t.id));
     console.log('Technician ID types:', this.techniciens.map(t => typeof t.id));
 
-    // Convert selectedTechnicienId to number
     const techId = +this.selectedTechnicienId;
 
-    // Validate selectedTechnicienId
     if (!this.techniciens.some(t => t.id === techId)) {
       alert('ID de technicien invalide. Veuillez sélectionner un technicien valide.');
       console.error('Invalid technician ID:', techId);

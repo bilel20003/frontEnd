@@ -2,8 +2,13 @@
 
 <!-- Top Bar -->
 <div class="top-bar">
+  <span class="welcome-message">
+    Bienvenue <span class="name-highlight">{{ userInfo?.name || 'Technicien' }}</span>, voici l'interface du technicien du Centre National de l'Informatique
+  </span>
+  <span class="technicien-badge">Technicien</span>
+
   <button class="icon-btn" (click)="toggleDropdown($event)">
-    <i class="fas fa-bars"></i>
+    <i class="fas fa-user-gear"></i>
   </button>
   <ul class="dropdown-menu" [ngClass]="{ 'show': dropdownVisible }">
     <li>
@@ -11,11 +16,7 @@
         <i class="fas fa-user"></i> <span>Profil</span>
       </a>
     </li>
-    <li>
-      <a routerLink="/admin/parametres">
-        <i class="fas fa-cog"></i> <span>Paramètres</span>
-      </a>
-    </li>
+    
     <li class="logout">
       <a href="#" (click)="logout()">
         <i class="fas fa-sign-out-alt"></i> <span>Déconnexion</span>

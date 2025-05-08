@@ -2,18 +2,27 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpErrorResponse } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
-import { Produit, CreateProduit } from '../models/produit.model';
+import { Ministere } from '../models/ministere.model';
+import { Servicee } from '../models/service.model';
+import { UserInfo } from '../models/user-info.model';
+import { Produit } from '../models/produit.model';
+import { Objet } from '../models/objet.model';
+import { Requete } from '../models/requete.model';
+import { Rdv } from '../models/rendez-vous.model'; 
 
 @Injectable({
   providedIn: 'root'
 })
-export class ProduitService {
-  private apiUrl = 'http://localhost:8082/api/produits';
+export class ArchiveService {
+  private apiUrl = 'http://localhost:8082/api/archive';
 
   constructor(private http: HttpClient) {}
 
   private getHttpOptions(): { headers: HttpHeaders } {
     const token = localStorage.getItem('token');
+    if (!token) {
+      console.warn('No JWT token found in localStorage');
+    }
     return {
       headers: new HttpHeaders({
         'Content-Type': 'application/json',
@@ -26,7 +35,7 @@ export class ProduitService {
     console.error('Erreur lors de la requête:', error);
     let errorMessage = 'Une erreur est survenue, veuillez réessayer.';
     if (error.status === 500) {
-      errorMessage = `Erreur serveur interne: ${JSON.stringify(error.error, null, 2) || 'Vérifiez les logs du serveur.'}`;
+      errorMessage = 'Erreur serveur interne. Vérifiez les logs du serveur pour plus de détails.';
     } else if (error.status === 400) {
       errorMessage = `Données invalides envoyées au serveur: ${JSON.stringify(error.error, null, 2)}`;
     } else if (error.status === 403) {
@@ -35,27 +44,14 @@ export class ProduitService {
     return throwError(() => new Error(errorMessage));
   }
 
-  getAllProduits(): Observable<Produit[]> {
-    return this.http.get<Produit[]>(`${this.apiUrl}/getallproduits`, this.getHttpOptions()).pipe(
+  getArchivedEntities(entity: string): Observable<(Ministere | Servicee | UserInfo | Produit | Objet | Requete | Rdv)[]> {
+    return this.http.get<(Ministere | Servicee | UserInfo | Produit | Objet | Requete | Rdv)[]>(`${this.apiUrl}/${entity}`, this.getHttpOptions()).pipe(
       catchError(this.handleError)
     );
   }
 
-  addProduit(produit: CreateProduit): Observable<Produit> {
-    return this.http.post<Produit>(`${this.apiUrl}/addproduit`, produit, this.getHttpOptions()).pipe(
-      catchError(this.handleError)
-    );
-  }
-
-  updateProduit(id: number, produit: Produit): Observable<Produit> {
-    return this.http.put<Produit>(`${this.apiUrl}/updateproduit/${id}`, produit, this.getHttpOptions()).pipe(
-      catchError(this.handleError)
-    );
-  }
-
-  archiveProduit(id: number): Observable<void> {
-    const url = `${this.apiUrl}/archiveproduit/${id}`;
-    return this.http.put<void>(url, {}, this.getHttpOptions()).pipe(
+  unarchiveEntity(entity: string, id: number): Observable<void> {
+    return this.http.put<void>(`${this.apiUrl}/${entity}/${id}/unarchive`, {}, this.getHttpOptions()).pipe(
       catchError(this.handleError)
     );
   }

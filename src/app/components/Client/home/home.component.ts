@@ -42,8 +42,8 @@ export class HomeComponent implements OnInit {
   userInfo: { id: number; role: string; produit?: { id: number }; name?: string } | null = null;
   isObjetsLoaded: boolean = false;
   isProduitsLoaded: boolean = false;
+  welcomeMessage: string = '';
 
-  // AI-related properties
   isAIPromptVisible: boolean = false;
   aiPrompt: string = '';
   isAILoading: boolean = false;
@@ -74,64 +74,29 @@ export class HomeComponent implements OnInit {
     try {
       const decoded = jwtDecode<{ id: number; role: string; produit?: { id: number } }>(token);
       this.userInfoService.getUserById(decoded.id).subscribe({
-        next: (user) => {
+        next: (user: UserInfo) => {
           this.userInfo = {
             id: decoded.id,
             role: decoded.role,
             produit: decoded.produit,
             name: user.name || 'Client'
           };
+          const productName = decoded.produit?.id && this.produitMap[decoded.produit.id]
+            ? this.produitMap[decoded.produit.id].nom
+            : 'N/A';
+          const ministryName = user.service?.ministere?.nomMinistere || 'N/A';
+          this.welcomeMessage = `Bienvenue ${this.userInfo.name}, utilisateur du produit ${productName} / ministère ${ministryName}`;
           this.loadRequetes();
         },
         error: (err: HttpErrorResponse) => {
-          console.error('Error fetching user info:', err);
+          console.error('Error fetching user info:', err.message);
           this.redirectToLogin();
         }
       });
     } catch (e) {
-      console.error('Error decoding token:', e);
+      console.error('Error decoding token:', (e as Error).message);
       this.redirectToLogin();
     }
-  }
-
-  private loadProduits(): void {
-    this.produitService.getAllProduits().subscribe({
-      next: (produits) => {
-        console.log('Produits received:', JSON.stringify(produits, null, 2));
-        this.produits = produits.filter(p => p.id && p.nom); // Ensure valid products
-        this.produitMap = produits.reduce((map, prod) => {
-          if (prod.id) map[prod.id] = prod;
-          return map;
-        }, {} as { [key: number]: Produit });
-        this.isProduitsLoaded = true;
-      },
-      error: (err: HttpErrorResponse) => {
-        console.error('Error loading produits:', err);
-        alert('Impossible de charger les produits.');
-        this.isProduitsLoaded = true;
-      }
-    });
-  }
-
-  private loadObjets(): void {
-    this.objetService.getAllObjets().subscribe({
-      next: (objets) => {
-        console.log('Objets received:', JSON.stringify(objets, null, 2));
-        this.objets = objets.filter(o => o.id && o.name && o.produit?.id); // Ensure valid objects
-        this.objetMap = objets.reduce((map, obj) => {
-          if (obj.id && obj.produit?.id && this.produitMap[obj.produit.id]) {
-            map[obj.id] = obj;
-          }
-          return map;
-        }, {} as { [key: number]: Objet });
-        this.isObjetsLoaded = true;
-      },
-      error: (err: HttpErrorResponse) => {
-        console.error('Error loading objets:', err);
-        alert('Impossible de charger les objets.');
-        this.isObjetsLoaded = true;
-      }
-    });
   }
 
   private refreshData(): void {
@@ -140,8 +105,6 @@ export class HomeComponent implements OnInit {
       objets: this.objetService.getAllObjets()
     }).subscribe({
       next: ({ produits, objets }) => {
-        console.log('Produits received:', JSON.stringify(produits, null, 2));
-        console.log('Objets received:', JSON.stringify(objets, null, 2));
         this.produits = produits.filter(p => p.id && p.nom);
         this.produitMap = produits.reduce((map, prod) => {
           if (prod.id) map[prod.id] = prod;
@@ -159,7 +122,7 @@ export class HomeComponent implements OnInit {
         this.loadRequetes();
       },
       error: (err: HttpErrorResponse) => {
-        console.error('Error refreshing data:', err);
+        console.error('Error refreshing data:', err.message);
         alert('Impossible de rafraîchir les données.');
         this.isProduitsLoaded = true;
         this.isObjetsLoaded = true;
@@ -191,34 +154,30 @@ export class HomeComponent implements OnInit {
 
     observable.subscribe({
       next: (data) => {
-        console.log('Requetes received:', JSON.stringify(data, null, 2));
         this.requetes = data.map(req => ({
           ...req,
           client: { id: req.client.id, name: req.client.name || 'Inconnu' }
         }));
-        // Récupérer les noms des guichetiers
         const guichetierRequests = data.map(req =>
           this.userInfoService.getUserById(req.guichetier.id).subscribe({
             next: (user) => {
               req.guichetier.name = user.name || 'Inconnu';
             },
             error: (err) => {
-              console.error(`Error fetching guichetier ${req.guichetier.id}:`, err);
+              console.error(`Error fetching guichetier ${req.guichetier.id}:`, err.message);
               req.guichetier.name = 'Inconnu';
             }
           })
         );
 
-        // Attendre que toutes les requêtes soient terminées
         Promise.all(guichetierRequests).then(() => {
           this.filteredRequetes = [...this.requetes];
           this.filteredRequetes.sort((a, b) => b.id - a.id);
-          console.log('Sorted requetes (descending by id):', this.filteredRequetes);
           this.updatePagination();
         });
       },
       error: (err: HttpErrorResponse) => {
-        console.error('Error loading requetes:', err);
+        console.error('Error loading requetes:', err.message);
         alert('Impossible de charger les requêtes.');
       }
     });
@@ -232,7 +191,6 @@ export class HomeComponent implements OnInit {
       etat: 'NOUVEAU',
       date: new Date(),
       dateTraitement: null,
-      noteRetour: '',
       client: { id: 0, name: 'Inconnu' },
       guichetier: { id: 0 },
       technicien: null
@@ -248,14 +206,12 @@ export class HomeComponent implements OnInit {
     const term = this.searchTerm.toLowerCase();
     this.filteredRequetes = this.requetes.filter(req => {
       const objet = this.objetMap[req.objet.id];
-      const produit = objet && objet.produit?.id ? this.produitMap[objet.produit.id] : null;
       return (
         Object.values(req).some(val =>
           (typeof val === 'string' || typeof val === 'number' || val instanceof Date) &&
           val.toString().toLowerCase().includes(term)
         ) ||
         (objet?.name?.toLowerCase()?.includes(term) ?? false) ||
-        (produit?.nom?.toLowerCase()?.includes(term) ?? false) ||
         (req.guichetier.name?.toLowerCase()?.includes(term) ?? false) ||
         (req.client.name.toLowerCase().includes(term) ?? false)
       );
@@ -264,7 +220,7 @@ export class HomeComponent implements OnInit {
     this.updatePagination();
   }
 
-  sort(column: keyof Requete | 'objetName' | 'produitName'): void {
+  sort(column: keyof Requete | 'objetName'): void {
     if (this.sortDirection[column] === undefined) {
       this.sortDirection[column] = column === 'id' ? false : true;
     } else {
@@ -284,12 +240,6 @@ export class HomeComponent implements OnInit {
         valA = this.objetMap[a.objet.id]?.name ?? 'N/A';
         valB = this.objetMap[b.objet.id]?.name ?? 'N/A';
         return dir * valA.localeCompare(valB, 'fr', { numeric: true });
-      } else if (column === 'produitName') {
-        const produitA = this.objetMap[a.objet.id]?.produit?.id ? this.produitMap[this.objetMap[a.objet.id].produit.id] : null;
-        const produitB = this.objetMap[b.objet.id]?.produit?.id ? this.produitMap[this.objetMap[b.objet.id].produit.id] : null;
-        valA = produitA?.nom ?? 'N/A';
-        valB = produitB?.nom ?? 'N/A';
-        return dir * valA.localeCompare(valB, 'fr', { numeric: true });
       } else if (column === 'date') {
         valA = a.date ? new Date(a.date).getTime() : 0;
         valB = b.date ? new Date(b.date).getTime() : 0;
@@ -302,6 +252,10 @@ export class HomeComponent implements OnInit {
         valA = a.client.name ?? 'N/A';
         valB = b.client.name ?? 'N/A';
         return dir * valA.localeCompare(valB, 'fr', { numeric: true });
+      } else if (column === 'type' || column === 'etat') {
+        valA = this.formatDisplayText(a[column as keyof Requete] as string) ?? 'N/A';
+        valB = this.formatDisplayText(b[column as keyof Requete] as string) ?? 'N/A';
+        return dir * valA.localeCompare(valB, 'fr', { numeric: true });
       } else {
         valA = a[column as keyof Requete] ?? '';
         valB = b[column as keyof Requete] ?? '';
@@ -309,7 +263,6 @@ export class HomeComponent implements OnInit {
       }
     });
 
-    console.log(`Sorted by ${column}, direction: ${this.sortDirection[column] ? 'ascending' : 'descending'}`, this.filteredRequetes);
     this.updatePagination();
   }
 
@@ -388,7 +341,6 @@ export class HomeComponent implements OnInit {
     this.newRequete.type = '';
     this.isAIPromptVisible = false;
     this.aiPrompt = '';
-    console.log('Opening create popup, objets:', this.objets);
     this.isCreatePopupOpen = true;
   }
 
@@ -454,29 +406,25 @@ export class HomeComponent implements OnInit {
           etat: 'NOUVEAU',
           date: new Date(),
           dateTraitement: null,
-          noteRetour: this.newRequete.noteRetour || '',
           client: { id: this.userInfo!.id, name: this.userInfo!.name || 'Client' },
           guichetier: { id: guichetier.id },
           technicien: null
         };
 
-        console.log('Sending requete:', completeRequete);
-
         this.requeteService.createRequete(completeRequete).subscribe({
-          next: (response: any) => {
-            console.log('Create requete response:', response);
+          next: () => {
             this.refreshData();
             this.closeCreatePopup();
             alert('Requête créée avec succès !');
           },
           error: (error: HttpErrorResponse) => {
-            console.error('Error creating requete:', error);
+            console.error('Error creating requete:', error.message);
             alert(`Erreur lors de la création de la requête: ${error.message}`);
           }
         });
       },
       error: (error: HttpErrorResponse) => {
-        console.error('Error fetching guichetier:', error);
+        console.error('Error fetching guichetier:', error.message);
         alert('Impossible de récupérer le guichetier.');
       }
     });
@@ -491,6 +439,38 @@ export class HomeComponent implements OnInit {
       case 'BROUILLON': return 'badge-secondary';
       default: return 'badge-secondary';
     }
+  }
+
+  getTypeBadgeClass(type: string): string {
+    switch (type.toUpperCase()) {
+      case 'DEMANDE_DE_TRAVAUX': return 'badge-info';
+      case 'RECLAMATION': return 'badge-secondary';
+      default: return 'badge-secondary';
+    }
+  }
+
+  formatDisplayText(text: string): string {
+    if (!text) return '';
+
+    const displayMap: { [key: string]: string } = {
+      'DEMANDE_DE_TRAVAUX': 'Demande de travaux',
+      'RECLAMATION': 'Réclamation',
+      'NOUVEAU': 'Nouveau',
+      'EN_COURS_DE_TRAITEMENT': 'En cours de traitement',
+      'TRAITEE': 'Traitée',
+      'REFUSEE': 'Refusée',
+      'BROUILLON': 'Brouillon'
+    };
+
+    const upperText = text.toUpperCase();
+    if (displayMap[upperText]) {
+      return displayMap[upperText];
+    }
+
+    return text
+      .replace(/_/g, ' ')
+      .toLowerCase()
+      .replace(/(^|\s)\w/g, char => char.toUpperCase());
   }
 
   onItemsPerPageChange(event: Event): void {

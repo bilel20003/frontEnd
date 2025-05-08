@@ -17,7 +17,6 @@ import { TechHomeComponent } from './components/Technicien/tech-home/tech-home.c
 import { GuiHomeComponent } from './components/Guichetier/gui-home/gui-home.component';
 import { NgxPaginationModule } from 'ngx-pagination';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { DocumentsComponent } from './components/Client/document/document.component';
 import { HomeComponent } from './components/Client/home/home.component';
 import { ReclamationComponent } from './components/Client/reclamation/reclamation.component';
 import { RendezVousComponent } from './components/Client/rendez-vous/rendez-vous.component';
@@ -39,6 +38,8 @@ import { ProfileGuichetierComponent } from './components/Guichetier/profile-guic
 import { ProfileClientComponent } from './components/Client/profile-client/profile-client.component';
 import { ProfileAdminComponent } from './components/Admin/profile-admin/profile-admin.component';
 import { TechRendezVousComponent } from './components/Technicien/tech-rendez-vous/tech-rendez-vous.component';
+import { ArchiveComponent } from './components/Admin/archive/archive.component';
+import { ResetPasswordComponent } from './components/reset-password/reset-password.component';
 
 @NgModule({
   declarations: [
@@ -48,7 +49,7 @@ import { TechRendezVousComponent } from './components/Technicien/tech-rendez-vou
     GuiNavComponent,
     TechHomeComponent,
     GuiHomeComponent,
-    DocumentsComponent,
+    
     HomeComponent,
     ReclamationComponent,
     RendezVousComponent,
@@ -66,7 +67,9 @@ import { TechRendezVousComponent } from './components/Technicien/tech-rendez-vou
     ProfileGuichetierComponent,
     ProfileClientComponent,
     ProfileAdminComponent,
-    TechRendezVousComponent
+    TechRendezVousComponent,
+    ArchiveComponent,
+    ResetPasswordComponent
   ],
   imports: [
     BrowserModule,

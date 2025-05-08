@@ -27,6 +27,8 @@
           <th (click)="sort('type')" class="sortable">Type</th>
           <th (click)="sort('date')" class="sortable">Date d'envoi</th>
           <th (click)="sort('client')" class="sortable">Émetteur</th>
+          <th (click)="sort('ministere')" class="sortable">Ministère</th>
+          <th (click)="sort('service')" class="sortable">Service</th>
           <th (click)="sort('produit')" class="sortable">Produit</th>
           <th (click)="sort('objet')" class="sortable">Objet</th>
           <th (click)="sort('etat')" class="sortable">État</th>
@@ -36,22 +38,29 @@
       <tbody>
         <tr *ngFor="let reclamation of paginatedReclamations">
           <td>{{ reclamation.id }}</td>
-          <td>{{ reclamation.type }}</td>
+          <td>
+            <span class="badge" [ngClass]="getTypeBadgeClass(reclamation.type)">
+              {{ formatDisplayText(reclamation.type) }}
+            </span>
+          </td>
           <td>{{ reclamation.date | date: 'dd/MM/yyyy' }}</td>
           <td>{{ reclamation.client.name || 'N/A' }}</td>
+          <td>{{ reclamation.client.service?.ministere?.nomMinistere || 'N/A' }}</td>
+          <td>{{ reclamation.client.service?.nomService || 'N/A' }}</td>
           <td>{{ reclamation.objet.produit?.nom || 'N/A' }}</td>
           <td>{{ objetMap[reclamation.objet.id].name || 'N/A' }}</td>
           <td>
             <span class="badge" [ngClass]="getBadgeClass(reclamation.etat)">
-              {{ reclamation.etat }}
+              {{ formatDisplayText(reclamation.etat) }}
             </span>
           </td>
           <td>
-            <button class="btn btn-info btn-sm me-2" (click)="openPopup(reclamation)">
-              <i class="fas fa-eye"></i> Consulter
+            <button class="action-icon consult-icon" (click)="openPopup(reclamation)" data-tooltip="Consulter">
+              <i class="fas fa-eye default-icon closed-eye"></i>
+              <i class="fas fa-eye hover-icon"></i>
             </button>
-            <button class="btn btn-danger btn-sm" (click)="refuserReclamation(reclamation.id)">
-              <i class="fas fa-times"></i> Refuser
+            <button class="action-icon refuse-icon" (click)="refuserReclamation(reclamation.id)" data-tooltip="Refuser">
+              <i class="fas fa-xmark"></i>
             </button>
           </td>
         </tr>
@@ -66,16 +75,13 @@
         </select>
       </div>
       <div class="pagination">
-        <button class="btn btn-pagination" (click)="previousPage()" [disabled]="currentPage === 1">
+        <button class="btn btn-primary" (click)="previousPage()" [disabled]="currentPage === 1">
           <i class="fas fa-chevron-left"></i>
         </button>
-        <button *ngFor="let page of getPageNumbers()"
-                class="btn btn-pagination"
-                [ngClass]="{'active': page === currentPage}"
-                (click)="goToPage(page)">
+        <button *ngFor="let page of getPageNumbers()" class="btn btn-primary" [ngClass]="{'active': page === currentPage}" (click)="goToPage(page)">
           {{ page }}
         </button>
-        <button class="btn btn-pagination" (click)="nextPage()" [disabled]="currentPage === totalPages">
+        <button class="btn btn-primary" (click)="nextPage()" [disabled]="currentPage === totalPages">
           <i class="fas fa-chevron-right"></i>
         </button>
       </div>
@@ -95,7 +101,11 @@
         <div class="info-grid">
           <div class="info-item">
             <span class="label">📄 Type de la requête:</span>
-            <span class="value">{{ selectedReclamation.type || 'Non spécifié' }}</span>
+            <span class="value">
+              <span class="badge" [ngClass]="getTypeBadgeClass(selectedReclamation.type)">
+                {{ formatDisplayText(selectedReclamation.type) || 'Non spécifié' }}
+              </span>
+            </span>
           </div>
           <div class="info-item">
             <span class="label">👤 Émetteur:</span>
@@ -111,30 +121,16 @@
           </div>
           <div class="info-item">
             <span class="label">🏛 Ministère:</span>
-            <span class="value">
-              <ng-container *ngIf="selectedReclamation.client.service?.ministere?.id as ministereId">
-                {{ ministereMap[ministereId] || 'Non spécifié' }}
-              </ng-container>
-              <ng-container *ngIf="!selectedReclamation.client.service?.ministere?.id">
-                Non spécifié
-              </ng-container>
-            </span>
+            <span class="value">{{ selectedReclamation.client.service?.ministere?.nomMinistere || 'Non spécifié' }}</span>
           </div>
           <div class="info-item">
             <span class="label">🔧 Service:</span>
-            <span class="value">
-              <ng-container *ngIf="selectedReclamation.client.service?.nomService as nomService">
-                {{ nomService || 'Non spécifié' }}
-              </ng-container>
-              <ng-container *ngIf="!selectedReclamation.client.service?.nomService">
-                Non spécifié
-              </ng-container>
-            </span>
+            <span class="value">{{ selectedReclamation.client.service?.nomService || 'Non spécifié' }}</span>
           </div>
           <div class="info-item">
             <span class="label">⚡ État:</span>
             <span class="badge" [ngClass]="getBadgeClass(selectedReclamation.etat || '')">
-              {{ selectedReclamation.etat || 'Non spécifié' }}
+              {{ formatDisplayText(selectedReclamation.etat) || 'Non spécifié' }}
             </span>
           </div>
           <div class="info-item">

@@ -4,5 +4,6 @@ export interface Produit {
   description: string;
   topologie: string;
   prix: number;
-
 }
+
+export type CreateProduit = Omit<Produit, 'id'>;

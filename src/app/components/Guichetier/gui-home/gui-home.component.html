@@ -35,6 +35,9 @@
           <th (click)="sort('type')" class="sortable">Type</th>
           <th (click)="sort('date')" class="sortable">Date d'envoi</th>
           <th (click)="sort('client')" class="sortable">Émetteur</th>
+          <th (click)="sort('ministere')" class="sortable">Ministères</th>
+          <th (click)="sort('service')" class="sortable">Services</th>
+          <th (click)="sort('produit')" class="sortable">Produits</th>
           <th (click)="sort('objet')" class="sortable">Objet</th>
           <th (click)="sort('etat')" class="sortable">État</th>
           <th>Actions</th>
@@ -43,27 +46,37 @@
       <tbody>
         <tr *ngFor="let reclamation of paginatedReclamations">
           <td>{{ reclamation.id }}</td>
-          <td>{{ reclamation.type }}</td>
+          <td>
+            <span class="badge" [ngClass]="getTypeBadgeClass(reclamation.type)">
+              {{ formatDisplayText(reclamation.type) }}
+            </span>
+          </td>
           <td>{{ reclamation.date | date: 'dd/MM/yyyy' }}</td>
           <td>{{ reclamation.client.name || 'N/A' }}</td>
+          <td>{{ reclamation.client.service?.ministere?.nomMinistere || 'N/A' }}</td>
+          <td>{{ reclamation.client.service?.nomService || 'N/A' }}</td>
+          <td>{{ reclamation.objet.produit?.nom || 'N/A' }}</td>
           <td>{{ objetMap[reclamation.objet.id].name || 'N/A' }}</td>
           <td>
             <span class="badge" [ngClass]="getBadgeClass(reclamation.etat)">
-              {{ reclamation.etat }}
+              {{ formatDisplayText(reclamation.etat) }}
             </span>
           </td>
           <td>
             <button
-              class="btn btn-info btn-sm me-2"
+              class="action-icon consult-icon"
               (click)="consulterReclamation(reclamation.id)"
+              data-tooltip="Consulter"
             >
-              <i class="fas fa-eye"></i> Consulter
+              <i class="fas fa-eye default-icon closed-eye"></i>
+              <i class="fas fa-eye hover-icon"></i>
             </button>
             <button
-              class="btn btn-danger btn-sm"
+              class="action-icon refuse-icon"
               (click)="refuserReclamation(reclamation.id)"
+              data-tooltip="Refuser"
             >
-              <i class="fas fa-times"></i> Refuser
+              <i class="fas fa-xmark"></i>
             </button>
           </td>
         </tr>
@@ -98,51 +111,71 @@
         <h3>📌 Détails de la requête</h3>
         <button class="close-btn" (click)="closePopup()">✖</button>
       </div>
-      <div class="info-grid">
-        <div class="info-item">
-          <span class="label">📄 Type:</span>
-          <span class="value">{{ selectedRequete.type || 'Non spécifié' }}</span>
-        </div>
-        <div class="info-item">
-          <span class="label">👤 Émetteur:</span>
-          <span class="value">{{ selectedRequete.client.name || 'Non spécifié' }}</span>
-        </div>
-        <div class="info-item">
-          <span class="label">📌 Objet:</span>
-          <span class="value">{{ objetMap[selectedRequete.objet.id].name || 'Non spécifié' }}</span>
-        </div>
-        <div class="info-item">
-          <span class="label">⚡ État:</span>
-          <span class="badge" [ngClass]="getBadgeClass(selectedRequete.etat || '')">
-            {{ selectedRequete.etat || 'Non spécifié' }}
-          </span>
-        </div>
-        <div class="info-item">
-          <span class="label">📅 Date d'envoi:</span>
-          <span class="value">{{ selectedRequete.date ? (selectedRequete.date | date:'dd/MM/yyyy') : 'Non spécifié' }}</span>
-        </div>
-        <div class="info-item">
-          <span class="label">📅 Date de traitement:</span>
-          <span class="value">{{ selectedRequete.dateTraitement ? (selectedRequete.dateTraitement | date:'dd/MM/yyyy') : 'Non traité' }}</span>
-        </div>
-        <div class="info-item">
-          <span class="label">👷 Technicien:</span>
-          <span class="value">{{ selectedRequete.technicien?.name || 'Non affecté' }}</span>
-        </div>
-        <div class="info-item full-width">
-          <span class="label">📝 Description:</span>
-          <p class="value description">{{ selectedRequete.description || 'Aucune description' }}</p>
-        </div>
-        <div class="info-item full-width">
-          <label for="noteRetour">📋 Note de Retour:</label>
-          <textarea id="noteRetour" [(ngModel)]="noteRetour"></textarea>
+      <div class="modal-body">
+        <div class="info-grid">
+          <div class="info-item">
+            <span class="label">📄 Type:</span>
+            <span class="value">
+              <span class="badge" [ngClass]="getTypeBadgeClass(selectedRequete.type)">
+                {{ formatDisplayText(selectedRequete.type) || 'Non spécifié' }}
+              </span>
+            </span>
+          </div>
+          <div class="info-item">
+            <span class="label">👤 Émetteur:</span>
+            <span class="value">{{ selectedRequete.client.name || 'Non spécifié' }}</span>
+          </div>
+          <div class="info-item">
+            <span class="label">🏛️ Ministère:</span>
+            <span class="value">{{ selectedRequete.client.service?.ministere?.nomMinistere || 'Non spécifié' }}</span>
+          </div>
+          <div class="info-item">
+            <span class="label">🛠️ Service:</span>
+            <span class="value">{{ selectedRequete.client.service?.nomService || 'Non spécifié' }}</span>
+          </div>
+          <div class="info-item">
+            <span class="label">📦 Produit:</span>
+            <span class="value">{{ selectedRequete.objet.produit?.nom || 'Non spécifié' }}</span>
+          </div>
+          <div class="info-item">
+            <span class="label">📌 Objet:</span>
+            <span class="value">{{ objetMap[selectedRequete.objet.id].name || 'Non spécifié' }}</span>
+          </div>
+          <div class="info-item">
+            <span class="label">⚡ État:</span>
+            <span class="badge" [ngClass]="getBadgeClass(selectedRequete.etat || '')">
+              {{ formatDisplayText(selectedRequete.etat) || 'Non spécifié' }}
+            </span>
+          </div>
+          <div class="info-item">
+            <span class="label">📅 Date d'envoi:</span>
+            <span class="value">{{ selectedRequete.date ? (selectedRequete.date | date:'dd/MM/yyyy') : 'Non spécifié' }}</span>
+          </div>
+          <div class="info-item">
+            <span class="label">📅 Date de traitement:</span>
+            <span class="value">{{ selectedRequete.dateTraitement ? (selectedRequete.dateTraitement | date:'dd/MM/yyyy') : 'Non traité' }}</span>
+          </div>
+          <div class="info-item">
+            <span class="label">👷 Technicien:</span>
+            <span class="value">{{ selectedRequete.technicien?.name || 'Non affecté' }}</span>
+          </div>
+          <div class="info-item full-width">
+            <span class="label">📝 Description:</span>
+            <p class="value description">{{ selectedRequete.description || 'Aucune description' }}</p>
+          </div>
+          <div class="info-item full-width">
+            <label for="noteRetour" class="label">📋 Note de Retour:</label>
+            <textarea id="noteRetour" [(ngModel)]="noteRetour"></textarea>
+          </div>
         </div>
       </div>
-      <button class="btn btn-primary" (click)="confirmerTraitement()">Traiter</button>
-      <button class="btn btn-primary" (click)="openTechnicienPopup()" [disabled]="selectedRequete.technicien || selectedRequete.etat === 'TRAITEE' || selectedRequete.etat === 'REFUSEE'">
-        <i class="fas fa-user-cog"></i> Affecter Technicien
-      </button>
-      <button class="btn btn-secondary" (click)="closePopup()">Fermer</button>
+      <div class="form-actions">
+        <button class="btn btn-primary" (click)="confirmerTraitement()">Traiter</button>
+        <button class="btn btn-primary" (click)="openTechnicienPopup()" [disabled]="selectedRequete.technicien || selectedRequete.etat === 'TRAITEE' || selectedRequete.etat === 'REFUSEE'">
+          <i class="fas fa-user-cog"></i> Affecter Technicien
+        </button>
+        <button class="btn btn-secondary" (click)="closePopup()">Fermer</button>
+      </div>
 
       <!-- Popup pour sélectionner un technicien -->
       <div *ngIf="isTechnicienPopupOpen" class="modal-overlay technicien-popup" (click)="closePopup()">

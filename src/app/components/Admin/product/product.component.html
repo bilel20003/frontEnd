@@ -1,6 +1,6 @@
 <app-navbar-admin></app-navbar-admin>
 <div class="container">
-  <!-- Barre de recherche -->
+  <!-- Search Bar -->
   <div class="search-bar-container">
     <div class="search-bar">
       <input type="text" placeholder="Rechercher un produit..." [(ngModel)]="searchTerm" (input)="filterProducts()">
@@ -8,9 +8,9 @@
     </div>
   </div>
 
-  <!-- Titre + actions -->
+  <!-- Header -->
   <header class="d-flex justify-content-between align-items-center">
-    <h2 style="margin-left: 250px;">Gestion des Produits</h2>
+    <h2>Gestion des Produits</h2>
     <div class="header-actions">
       <button class="mode-toggle" (click)="toggleMode()">
         <i class="fas" [ngClass]="isNightMode ? 'fa-sun' : 'fa-moon'"></i>
@@ -19,16 +19,16 @@
     </div>
   </header>
 
-  <!-- Tableau -->
+  <!-- Table -->
   <div class="table-responsive">
     <table class="table table-hover shadow-sm rounded">
       <thead class="table-header">
         <tr>
-          <th>ID</th>
-          <th>Nom</th>
-          <th>Description</th>
-          <th>Prix en DT</th>
-          <th>Topologie</th>
+          <th class="sortable" (click)="sort('id')">ID</th>
+          <th class="sortable" (click)="sort('nom')">Nom</th>
+          <th class="sortable" (click)="sort('description')">Description</th>
+          <th class="sortable" (click)="sort('prix')">Prix en DT</th>
+          <th class="sortable" (click)="sort('topologie')">Topologie</th>
           <th>Actions</th>
         </tr>
       </thead>
@@ -37,14 +37,14 @@
           <td>{{ product.id }}</td>
           <td>{{ product.nom }}</td>
           <td>{{ product.description }}</td>
-          <td>{{ product.prix }}</td>
+          <td>{{ product.prix | number:'1.2-2' }}</td>
           <td>{{ product.topologie }}</td>
           <td>
             <button class="btn btn-info btn-sm me-2" (click)="openModal(product)">
               <i class="fas fa-edit"></i> Modifier
             </button>
-            <button class="btn btn-danger btn-sm" (click)="deleteProduct(product.id)">
-              <i class="fas fa-trash"></i> Supprimer
+            <button class="btn btn-warning btn-sm" (click)="archiveProduct(product.id)">
+              <i class="fas fa-archive"></i> Archiver
             </button>
           </td>
         </tr>
@@ -52,49 +52,66 @@
     </table>
 
     <!-- Pagination -->
-    <div class="pagination-container">
+    <div class="pagination-container d-flex justify-content-between align-items-center">
       <div class="page-options">
         <select [(ngModel)]="itemsPerPage" (change)="onItemsPerPageChange($event)">
           <option *ngFor="let option of [5, 10, 20]" [value]="option">{{ option }} lignes par page</option>
         </select>
       </div>
       <div class="pagination">
-        <button (click)="goToPreviousPage()" [disabled]="currentPage === 1">Précédent</button>
-        <span>Page {{ currentPage }} sur {{ totalPages }}</span>
-        <button (click)="goToNextPage()" [disabled]="currentPage === totalPages">Suivant</button>
+        <button class="btn btn-primary" (click)="goToPreviousPage()" [disabled]="currentPage === 1">
+          <i class="fas fa-chevron-left"></i>
+        </button>
+        <button *ngFor="let page of getPageNumbers()" class="btn btn-primary" [class.active]="page === currentPage" (click)="goToPage(page)">
+          {{ page }}
+        </button>
+        <button class="btn btn-primary" (click)="goToNextPage()" [disabled]="currentPage === totalPages">
+          <i class="fas fa-chevron-right"></i>
+        </button>
       </div>
     </div>
   </div>
 
-  <!-- Modale pour formulaire Ajouter / Modifier Produit -->
-  <div *ngIf="isModalOpen" class="modal-overlay">
+  <!-- Modal -->
+  <div *ngIf="isModalOpen" class="modal-overlay" (click)="closeModalOnOutsideClick($event)">
     <div class="modal-content">
-      <h3>{{ editingProduct ? 'Modifier Produit' : 'Ajouter Produit' }}</h3>
+      <div class="modal-header">
+        <h3>{{ editingProduct ? 'Modifier Produit' : 'Ajouter Produit' }}</h3>
+        <button class="close-btn" (click)="closeModal()">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
       <form (ngSubmit)="editingProduct ? updateProduct() : addProduct()">
-        <div class="form-group">
-          <label for="name">Nom</label>
-          <input type="text" [(ngModel)]="productForm.nom" name="name" required>
-        </div>
-        <div class="form-group">
-          <label for="description">Description</label>
-          <textarea [(ngModel)]="productForm.description" name="description" required></textarea>
-        </div>
-       
-        <div class="form-group">
-          <label for="topologie">Topologie</label>
-          <select [(ngModel)]="productForm.topologie" name="topologie" required>
-            <option value="0-2 utilisateurs">0-2 utilisateurs</option>
-            <option value="2-6 utilisateurs">2-6 utilisateurs</option>
-            <option value="6-10 utilisateurs">6-10 utilisateurs</option>
-            <option value="plus de 10 utilisateurs">Plus de 10 utilisateurs</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label for="price">Prix</label>
-          <input type="number" [(ngModel)]="productForm.prix" name="price" required>
+        <div class="modal-body">
+          <div class="form-group">
+            <label for="name">Nom</label>
+            <input type="text" id="name" [(ngModel)]="productForm.nom" name="name" required (ngModelChange)="updateFormErrors()">
+            <div *ngIf="formErrors.nom" class="error-message">{{ formErrors.nom }}</div>
+          </div>
+          <div class="form-group">
+            <label for="description">Description</label>
+            <textarea id="description" [(ngModel)]="productForm.description" name="description" required (ngModelChange)="updateFormErrors()"></textarea>
+            <div *ngIf="formErrors.description" class="error-message">{{ formErrors.description }}</div>
+          </div>
+          <div class="form-group">
+            <label for="topologie">Topologie</label>
+            <select id="topologie" [(ngModel)]="productForm.topologie" name="topologie" required (ngModelChange)="updateFormErrors()">
+              <option value="">Sélectionner une topologie</option>
+              <option value="0-2 utilisateurs">0-2 utilisateurs</option>
+              <option value="2-6 utilisateurs">2-6 utilisateurs</option>
+              <option value="6-10 utilisateurs">6-10 utilisateurs</option>
+              <option value="plus de 10 utilisateurs">Plus de 10 utilisateurs</option>
+            </select>
+            <div *ngIf="formErrors.topologie" class="error-message">{{ formErrors.topologie }}</div>
+          </div>
+          <div class="form-group">
+            <label for="prix">Prix (DT)</label>
+            <input type="number" id="prix" [(ngModel)]="productForm.prix" name="prix" min="0" step="0.01" required (ngModelChange)="updateFormErrors()">
+            <div *ngIf="formErrors.prix" class="error-message">{{ formErrors.prix }}</div>
+          </div>
         </div>
         <div class="form-actions">
-          <button type="submit" class="btn btn-success">{{ editingProduct ? 'Mettre à jour' : 'Ajouter' }}</button>
+          <button type="submit" class="btn btn-success" [disabled]="!isFormValid()">{{ editingProduct ? 'Mettre à jour' : 'Ajouter' }}</button>
           <button type="button" class="btn btn-secondary" (click)="closeModal()">Annuler</button>
         </div>
       </form>

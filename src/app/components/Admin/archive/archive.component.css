@@ -1,0 +1,328 @@
+/* Conteneur principal */
+.container {
+    max-width: 1700px;
+    margin: auto;
+    padding: 20px;
+    padding-top: 80px;
+    min-height: calc(100vh - 70px);
+    box-sizing: border-box;
+  }
+  
+  /* Header */
+  header h2 {
+    color: #1e3c72;
+    font-size: 2rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    margin-left: 250px;
+    padding: 20px 0;
+  }
+  
+  /* Barre de recherche */
+  .search-bar-container {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 15px;
+    background-color: white;
+    padding: 10px 0;
+  }
+  
+  .search-bar {
+    display: flex;
+    align-items: center;
+    background-color: #fff;
+    border-radius: 25px;
+    padding: 8px 15px;
+    box-shadow: 0 2px 4px rgba(24, 23, 23, 0.15);
+    width: 350px;
+  }
+  
+  .search-bar input {
+    flex: 1;
+    border: none;
+    outline: none;
+    padding: 8px 12px;
+    font-size: 14px;
+  }
+  
+  .search-bar button {
+    background-color: #ffcc00;
+    border: none;
+    border-radius: 50%;
+    padding: 8px;
+    cursor: pointer;
+    transition: 0.3s;
+  }
+  
+  .search-bar button:hover {
+    background-color: #ff9900;
+  }
+  
+  /* Boutons */
+  .btn {
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-size: 14px;
+    transition: all 0.3s ease;
+    margin-right: 10px;
+  }
+  
+  .btn-primary {
+    background: linear-gradient(135deg, #1e3c72, #2a5298);
+    color: white;
+    border: none;
+  }
+  
+  .btn-primary:hover {
+    background: linear-gradient(135deg, #2a5298, #1e3c72);
+    transform: translateY(-2px);
+  }
+  
+  .btn-primary:disabled {
+    background: #6c757d;
+    cursor: not-allowed;
+  }
+  
+  .btn-primary.active {
+    background: linear-gradient(135deg, #ffcc00, #ff9900);
+    color: #1e3c72;
+    font-weight: bold;
+    transform: translateY(0);
+  }
+  
+  .btn-secondary {
+    background-color: #6c757d;
+    color: white;
+    border: none;
+  }
+  
+  .btn-secondary:hover {
+    background-color: #5a6268;
+    transform: translateY(-2px);
+  }
+  
+  .btn-success {
+    background-color: #28a745;
+    color: white;
+    border: none;
+  }
+  
+  .btn-success:hover {
+    background-color: #218838;
+    transform: translateY(-2px);
+  }
+  
+  /* Tabs */
+  .tabs {
+    display: flex;
+    gap: 10px;
+    margin-left: 250px;
+    margin-bottom: 20px;
+  }
+  
+  /* Tableau amélioré */
+  .table-responsive {
+    margin-top: 20px;
+    margin-left: 250px;
+    border-radius: 15px;
+    overflow: hidden;
+    background-color: white;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  }
+  
+  .table {
+    width: 100%;
+    border-radius: 10px;
+    border-collapse: separate;
+  }
+  
+  .table th,
+  .table td {
+    padding: 12px 15px;
+    text-align: left;
+  }
+  
+  .table-header th {
+    background: linear-gradient(135deg, #1e3c72, #2a5298);
+    color: white;
+    cursor: pointer;
+  }
+  
+  .table-header th.sortable:hover {
+    background: linear-gradient(135deg, #2a5298, #1e3c72);
+  }
+  
+  .table-hover tbody tr:hover {
+    background-color: #f9f9f9;
+  }
+  
+  /* Badges */
+  .badge {
+    padding: 5px 10px;
+    border-radius: 5px;
+    font-size: 13px;
+    font-weight: bold;
+  }
+  
+  .badge-primary { background-color: #007bff; color: white; }
+  .badge-warning { background-color: #ffc107; color: #ffffff; }
+  .badge-success { background-color: #28a745; color: white; }
+  .badge-danger { background-color: #dc3545; color: white; }
+  .badge-secondary { background-color: #6c757d; color: white; }
+  
+  /* Navbar */
+  .header-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  
+  /* Pagination */
+  .pagination-container {
+    margin-top: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  .pagination {
+    display: flex;
+    gap: 5px;
+  }
+  
+  .pagination button {
+    padding: 8px 12px;
+    font-size: 14px;
+    border-radius: 5px;
+    background-color: #007bff;
+    color: white;
+    cursor: pointer;
+    transition: 0.3s;
+    border: none;
+    min-width: 36px;
+    text-align: center;
+  }
+  
+  .pagination button:disabled {
+    background-color: #6c757d;
+    cursor: not-allowed;
+  }
+  
+  .pagination button.active {
+    background: linear-gradient(135deg, #ffcc00, #ff9900);
+    color: #1e3c72;
+    font-weight: bold;
+  }
+  
+  .page-options select {
+    padding: 5px;
+    font-size: 14px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+  }
+  
+  /* Icône de mode nuit/jour */
+  .mode-toggle {
+    background: none;
+    border: none;
+    color: #1e3c72;
+    font-size: 1.5rem;
+    cursor: pointer;
+    transition: color 0.3s;
+  }
+  
+  .mode-toggle:hover {
+    color: #2a5298;
+  }
+  
+  /* Mode nuit */
+  body.night-mode {
+    background-color: #121212;
+    color: white;
+  }
+  
+  .night-mode .container {
+    background-color: #121212;
+  }
+  
+  .night-mode .table-responsive {
+    background-color: #1e1f1f;
+  }
+  
+  .night-mode .table-header th {
+    background: linear-gradient(135deg, #333, #555);
+  }
+  
+  .night-mode .table-hover tbody tr:hover {
+    background-color: #2a2a2a;
+  }
+  
+  .night-mode .search-bar {
+    background-color: #333;
+    box-shadow: 0 2px 4px rgba(255, 255, 255, 0.1);
+  }
+  
+  .night-mode .search-bar input {
+    background-color: #333;
+    color: white;
+  }
+  
+  .night-mode .search-bar button {
+    background: linear-gradient(135deg, #333, #555);
+  }
+  
+  .night-mode .search-bar button:hover {
+    background: linear-gradient(135deg, #555, #333);
+  }
+  
+  .night-mode .badge-warning {
+    background-color: #ffca2c;
+    color: #212529;
+  }
+  
+  .night-mode .badge-success {
+    background-color: #2ecc71;
+  }
+  
+  .night-mode .badge-danger {
+    background-color: #ff6b6b;
+  }
+  
+  .night-mode .pagination button {
+    background-color: #2ecc71;
+  }
+  
+  .night-mode .pagination button.active {
+    background: linear-gradient(135deg, #ffca2c, #ff9900);
+    color: #121212;
+  }
+  
+  .night-mode .pagination button:disabled {
+    background-color: #555;
+  }
+  
+  .night-mode .page-options select {
+    background-color: #333;
+    color: #2ecc71;
+    border-color: #555;
+  }
+  
+  .night-mode .mode-toggle {
+    color: #2ecc71;
+  }
+  
+  .night-mode .mode-toggle:hover {
+    color: #27ae60;
+  }
+  
+  .night-mode header h2 {
+    color: #2ecc71;
+  }
+  
+  .night-mode .btn-success {
+    background-color: #2ecc71;
+  }
+  
+  .night-mode .btn-success:hover {
+    background-color: #27ae60;
+  }

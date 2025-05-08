@@ -10,7 +10,7 @@ export interface Requete {
   etat: string;
   date: Date;
   dateTraitement?: Date | null;
-  noteRetour: string;
+  noteRetour?: string;
   client: {
     id: number;
     name: string;

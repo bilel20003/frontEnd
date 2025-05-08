@@ -2,79 +2,78 @@
 
 <!-- Bande en haut -->
 <div class="top-bar">
+    
+    <span class="welcome-message">
+        Bienvenue <span class="name-highlight">{{ userInfo?.name || 'Admin' }}</span>, voici l'interface d'administration du CSI CONNECT
+    </span>
+    <span class="admin-badge">Administrateur</span>
     <button class="icon-btn" (click)="toggleDropdown($event)">
-      <i class="fas fa-bars"></i>
+        <i class="fas fa-user-shield"></i>
     </button>
     <ul class="dropdown-menu" [ngClass]="{ 'show': dropdownVisible }">
-      <li>
-        <a routerLink="/profile-admin">
-          <i class="fas fa-user"></i> <span>Profil</span>
-        </a>
-      </li>
-      <li>
-        <a routerLink="/admin/parametres">
-          <i class="fas fa-cog"></i> <span>Paramètres</span>
-        </a>
-      </li>
-      <li class="logout">
-        <a href="#" (click)="logout()">
-          <i class="fas fa-sign-out-alt"></i> <span>Déconnexion</span>
-        </a>
-      </li>
+        <li>
+            <a routerLink="/profile-admin">
+                <i class="fas fa-user"></i> <span>Profil</span>
+            </a>
+        </li>
+        <li>
+            <a routerLink="/archive">
+                <i class="fas fa-archive"></i> <span>Archive</span>
+            </a>
+        </li>
+        <li class="logout">
+            <a href="#" (click)="logout()">
+                <i class="fas fa-sign-out-alt"></i> <span>Déconnexion</span>
+            </a>
+        </li>
     </ul>
-  </div>
-  
-  <!-- Sidebar Admin -->
-  <nav class="sidebar">
+</div>
+
+<!-- Sidebar Admin -->
+<nav class="sidebar">
     <div class="logo-container">
-      <img src="assets/img/logo.png" alt="Logo CNI" />
+        <img src="assets/img/logo.png" alt="Logo CNI" />
     </div>
     <ul class="nav-links">
         <li>
             <a routerLink="/utilisateurs" routerLinkActive="active">
-              <i class="fas fa-users-cog"></i> <span>Utilisateurs</span>
+                <i class="fas fa-users-cog"></i> <span>Utilisateurs</span>
             </a>
-          </li>
-      <li>
-        <a routerLink="/dashboard" routerLinkActive="active">
-          <i class="fas fa-home"></i> <span>Dashboard</span>
-        </a>
-      </li>
-      
-      <li>
-        <a routerLink="/product" routerLinkActive="active">
-          <i class="fas fa-box"></i> <span>Produits</span>
-        </a>
-      </li>
-      <li>
-        <a routerLink="/objet-reclamation" routerLinkActive="active">
-          <i class="fas fa-list"></i> <span>Objets Réclamation</span>
-        </a>
-      </li>
-      <li>
-        <a routerLink="/role" routerLinkActive="active">
-          <i class="fas fa-user-tag"></i> <span>Rôles</span>
-        </a>
-      </li>
-      <li>
-        <a routerLink="/ministere" routerLinkActive="active">
-          <i class="fas fa-university"></i> <span>Ministères</span>
-        </a>
-      </li>
-      <li>
-        <a routerLink="/service" routerLinkActive="active">
-          <i class="fas fa-cogs"></i> <span>Service</span>
-        </a>
-      </li>
-      
-     
-    
-      <li>
-        <a routerLink="/schedule" routerLinkActive="active">
-          <i class="fas fa-clock"></i> <span>Horaires</span>
-        </a>
-      </li>
-      
+        </li>
+        <li>
+            <a routerLink="/dashboard" routerLinkActive="active">
+                <i class="fas fa-home"></i> <span>Dashboard</span>
+            </a>
+        </li>
+        <li>
+            <a routerLink="/product" routerLinkActive="active">
+                <i class="fas fa-box"></i> <span>Produits</span>
+            </a>
+        </li>
+        <li>
+            <a routerLink="/objet-reclamation" routerLinkActive="active">
+                <i class="fas fa-list"></i> <span>Objets Réclamation</span>
+            </a>
+        </li>
+        <li>
+            <a routerLink="/role" routerLinkActive="active">
+                <i class="fas fa-user-tag"></i> <span>Rôles</span>
+            </a>
+        </li>
+        <li>
+            <a routerLink="/ministere" routerLinkActive="active">
+                <i class="fas fa-university"></i> <span>Ministères</span>
+            </a>
+        </li>
+        <li>
+            <a routerLink="/service" routerLinkActive="active">
+                <i class="fas fa-cogs"></i> <span>Service</span>
+            </a>
+        </li>
+        <li>
+            <a routerLink="/schedule" routerLinkActive="active">
+                <i class="fas fa-clock"></i> <span>Horaires</span>
+            </a>
+        </li>
     </ul>
-  </nav>
-  
+</nav>

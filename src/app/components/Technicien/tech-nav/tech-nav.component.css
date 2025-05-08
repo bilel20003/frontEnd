@@ -1,26 +1,20 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap');
+
 /* Sidebar (Navbar verticale) */
 .sidebar {
-  position: fixed; /* Fixe la navbar */
-  top: 50px; /* Décale la navbar sous la bande en haut */
+  position: fixed;
+  top: 50px;
   left: 0;
-  width: 240px; /* Réduit la largeur de la sidebar */
-  height: calc(100vh - 50px); /* Hauteur ajustée pour prendre toute la fenêtre en dessous de la bande en haut */
-  background: linear-gradient(135deg, #1e3c72, #2a5298); /* Dégradé bleu foncé et bleu clair */
-  padding: 10px 20px; /* Réduit le padding pour un look plus compact */
-  box-shadow: 4px 0 15px rgba(0, 0, 0, 0.2);
+  width: 240px;
+  height: calc(100vh - 50px);
+  background: linear-gradient(135deg, #1e3c72, #2a5298);
+  padding: 10px 20px;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
   transition: background 0.5s ease;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   z-index: 999;
-}
-
-/* Logo */
-.logo {
-  margin-top: 50px; /* Ajuste la position verticale */
-  text-align: center; /* Centre le logo horizontalement */
-  width: 100%;
-  margin-bottom: 20px; /* Ajoute un espacement sous le logo */
 }
 
 /* Logo ajusté */
@@ -28,17 +22,16 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  width: 200px; /* Réduit la largeur du logo */
-  height: 200px; /* Ajuste la hauteur */
-  background: rgba(181, 203, 207, 0.7); /* Fond semi-transparent */
-  border-radius: 100px; /* Coins arrondis */
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); /* Ombre */
-  margin: 0px auto 50px; /* Espace ajusté sous le logo */
+  width: 200px;
+  height: 200px;
+  background: rgba(181, 203, 207, 0.7);
+  border-radius: 100px;
+  margin: 0px auto 70px;
   padding: 10px;
 }
 
 .logo-container img {
-  width: 150%; /* Ajuste l'image à la largeur du conteneur */
+  width: 150%;
   height: auto;
   transition: transform 0.3s ease-in-out;
 }
@@ -49,81 +42,116 @@
 
 /* Espacement des éléments de la navbar */
 .nav-links {
-  list-style-type: none; /* Supprime les puces */
+  list-style-type: none;
   padding-left: 0;
-  margin-top: 10px; /* Ajuste l'espacement des liens */
+  margin-top: 10px;
 }
 
 .nav-links li {
-  padding: 10px 0; /* Ajuste l'espacement entre les éléments */
+  padding: 10px 0;
 }
 
 /* Liens de la navbar */
 .nav-links a {
-  display: block;
-  padding: 10px 15px; /* Réduit le padding */
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 15px;
   margin: 6px 0;
-  font-size: 18px;
+  font-size: 17px;
   font-weight: 500;
+  font-family: 'Poppins', sans-serif;
   color: #ffffff;
   text-decoration: none;
   border-radius: 28px;
-  transition: .3s;
+  transition: all 0.3s ease;
   background: transparent;
 }
 
 /* Lien actif et hover */
 .nav-links a:hover,
 .nav-links a.active {
-  background: #ffcc00; /* Jaune doré pour l'élément actif et hover */
+  background: #ffcc00;
   color: #000;
   font-weight: bold;
   width: 180px;
-  border-radius: 12px; /* Bordure arrondie */
+  border-radius: 12px;
+  transform: scale(1.02);
+}
+
+/* Icônes dans la sidebar */
+.nav-links i {
+  font-size: 22px;
+  color: #ffcc00;
+  transition: color 0.3s ease-in-out;
+}
+
+.nav-links a:hover i,
+.nav-links a.active i {
+  color: #2a5298;
 }
 
 /* Ajustement du contenu principal */
 body {
-  margin-left: 240px; /* Ajuste le contenu à la nouvelle largeur de la sidebar */
-  margin-top: 50px; /* Ajuste sous la bande en haut */
-  font-family: Arial, sans-serif;
-}
-
-
-.sidebar .nav-links i {
-  font-size: 20px; /* Taille des icônes */
+  margin-left: 240px;
+  margin-top: 50px;
+  font-family: 'Poppins', sans-serif;
 }
 
 /* Bande en haut */
 .top-bar {
-  position: fixed; /* Fixe la bande en haut */
-  top: 0; /* Fixe la bande en haut de la page */
+  position: fixed;
+  top: 0;
   left: 0;
-  width: 100%; /* Prend toute la largeur de l'écran */
-  background: linear-gradient(135deg, #1e3c72, #2a5298);
-  padding: 10px;
-  display: flex;
-  justify-content: flex-end;
-  align-items: center;
-  z-index: 1000; /* Assure que la bande en haut est toujours au-dessus de la navbar */
-}
-
-/* Correction de la barre de recherche */
-.search-bar-container {
-  position: relative;
-  margin-top: 60px; /* Ajoute une marge pour éviter d'être masqué sous la top-bar */
   width: 100%;
+  background: linear-gradient(135deg, #1e3c72, #1f4c8a, #2a5298);
+  padding: 8px;
   display: flex;
-  justify-content: center;
+  align-items: center;
+  justify-content: flex-end;
+  z-index: 1000;
 }
 
-.search-bar {
-  width: 50%;
-  padding: 10px;
-  border-radius: 20px;
-  border: 1px solid #ccc;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+/* Welcome Message */
+.welcome-message {
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 500;
+  font-family: 'Poppins', sans-serif;
+  margin-right: 10px;
+  animation: fadeIn 1s ease-in;
 }
+
+/* Technicien Badge */
+.technicien-badge {
+  background-color: #f97316;
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: bold;
+  font-family: 'Poppins', sans-serif;
+  padding: 4px 8px;
+  border-radius: 12px;
+  margin-right: 10px;
+  animation: fadeIn 1s ease-in;
+}
+
+/* Fade-in animation */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Highlighted Text Colors */
+.name-highlight {
+  color: #ffcc00;
+}
+
 /* Bouton de l'icône */
 .icon-btn {
   background-color: #fff;
@@ -132,28 +160,39 @@ body {
   border-radius: 50%;
   cursor: pointer;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+  transition: all 0.3s ease;
+}
+
+.icon-btn:hover {
+  transform: scale(1.1);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
 }
 
 .icon-btn i {
   color: #2a5298;
-  font-size: 20px;
+  font-size: 24px;
 }
 
 /* Menu déroulant */
 .dropdown-menu {
-  display: none; /* Caché par défaut */
+  display: none;
   position: absolute;
-  right: 0;
+  right: 10px;
   top: 40px;
   background-color: #fff;
   border-radius: 5px;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
   width: 150px;
   z-index: 10;
+  opacity: 0;
+  transform: translateY(-10px);
+  transition: opacity 0.3s ease, transform 0.3s ease;
 }
 
 .dropdown-menu.show {
   display: block;
+  opacity: 1;
+  transform: translateY(0);
 }
 
 .dropdown-menu ul {
@@ -174,17 +213,19 @@ body {
 .dropdown-menu li a {
   text-decoration: none;
   color: #333;
-  display: block;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: 'Poppins', sans-serif;
+  transition: background 0.3s ease;
 }
 
 .dropdown-menu li a:hover {
-  background-color: #f1f1f1;
+  background: linear-gradient(135deg, #f1f1f1, #e0e0e0);
 }
 
-/* Ajout de la couleur rouge pour le bouton de déconnexion */
+/* Bouton de déconnexion */
 .dropdown-menu li.logout a {
   color: red;
   font-weight: bold;
 }
-
-
