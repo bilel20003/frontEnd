@@ -2,6 +2,7 @@ import { NgModule } from '@angular/core';
 import { HttpClientModule } from '@angular/common/http';
 import { ReactiveFormsModule } from '@angular/forms';
 import { BrowserModule } from '@angular/platform-browser';
+import { CommonModule } from '@angular/common';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { LoginComponent } from './components/login/login.component';
@@ -13,6 +14,9 @@ import { ProduitService } from './services/produit.service';
 import { ObjetService } from './services/objet.service';
 import { RoleService } from './services/role.service';
 import { RequeteService } from './services/requete.service';
+import { RendezvousService } from './services/rendez-vous.service';
+import { UserInfoService } from './services/user-info.service';
+import { DashboardService } from './services/dashboard.service';
 import { TechHomeComponent } from './components/Technicien/tech-home/tech-home.component';
 import { GuiHomeComponent } from './components/Guichetier/gui-home/gui-home.component';
 import { NgxPaginationModule } from 'ngx-pagination';
@@ -23,7 +27,6 @@ import { RendezVousComponent } from './components/Client/rendez-vous/rendez-vous
 import { NavbarComponent } from './components/Client/navbar/navbar.component';
 import { UtilisateursComponent } from './components/Admin/utilisateurs/utilisateurs.component';
 import { NavbarAdminComponent } from './components/Admin/navbar-admin/navbar-admin.component';
-import { DashboardComponent } from './components/Admin/dashboard/dashboard.component';
 import { ProductsComponent } from './components/Admin/product/product.component';
 import { ObjetReclamationComponent } from './components/Admin/objet-reclamation/objet-reclamation.component';
 import { GererRoleComponent } from './components/Admin/role/role.component';
@@ -40,6 +43,8 @@ import { ProfileAdminComponent } from './components/Admin/profile-admin/profile-
 import { TechRendezVousComponent } from './components/Technicien/tech-rendez-vous/tech-rendez-vous.component';
 import { ArchiveComponent } from './components/Admin/archive/archive.component';
 import { ResetPasswordComponent } from './components/reset-password/reset-password.component';
+import { NgChartsModule } from 'ng2-charts';
+import { DashboardComponent } from './components/Admin/dashboard/dashboard.component';
 
 @NgModule({
   declarations: [
@@ -49,14 +54,12 @@ import { ResetPasswordComponent } from './components/reset-password/reset-passwo
     GuiNavComponent,
     TechHomeComponent,
     GuiHomeComponent,
-    
     HomeComponent,
     ReclamationComponent,
     RendezVousComponent,
     NavbarComponent,
     UtilisateursComponent,
     NavbarAdminComponent,
-    DashboardComponent,
     ProductsComponent,
     ObjetReclamationComponent,
     GererRoleComponent,
@@ -69,7 +72,8 @@ import { ResetPasswordComponent } from './components/reset-password/reset-passwo
     ProfileAdminComponent,
     TechRendezVousComponent,
     ArchiveComponent,
-    ResetPasswordComponent
+    ResetPasswordComponent,
+    DashboardComponent
   ],
   imports: [
     BrowserModule,
@@ -80,7 +84,9 @@ import { ResetPasswordComponent } from './components/reset-password/reset-passwo
     BrowserAnimationsModule,
     HttpClientModule,
     NgbModule,
-    FullCalendarModule
+    FullCalendarModule,
+    NgChartsModule,
+    CommonModule
   ],
   providers: [
     MinistereService,
@@ -88,7 +94,10 @@ import { ResetPasswordComponent } from './components/reset-password/reset-passwo
     ObjetService,
     RoleService,
     ServiceService,
-    RequeteService
+    RequeteService,
+    RendezvousService,
+    UserInfoService,
+    DashboardService
   ],
   bootstrap: [AppComponent]
 })
