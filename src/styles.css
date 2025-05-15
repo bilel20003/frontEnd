@@ -27,3 +27,77 @@ body {
 @import '@angular/material/prebuilt-themes/indigo-pink.css';
 @import 'bootstrap/dist/css/bootstrap.min.css';
 @import 'font-awesome/css/font-awesome.min.css';
+html, body { height: 100%; }
+body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
+/* Style de base pour tous les snackbars */
+.mat-snack-bar-container {
+  border-radius: 0 12px 12px 0 !important; /* Coins gauches tranchants, coins droits arrondis */
+  padding: 14px 20px !important; /* Padding généreux */
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15) !important; /* Ombre marquée */
+  font-size: 15px !important; /* Taille de police */
+  font-family: 'Roboto', 'Helvetica Neue', sans-serif !important; /* Police moderne */
+  min-width: 320px !important; /* Largeur minimale */
+  max-width: 600px !important; /* Largeur maximale */
+  background-color: rgb(19, 11, 11) !important; /* Fond blanc */
+  animation: slideIn 0.3s ease-out !important; /* Animation d'entrée */
+  overflow: hidden !important; /* Pour gérer les bordures */
+}
+
+/* Style pour les messages de succès (vert) */
+.custom-success-snackbar {
+  border: 0 !important; /* Pas de bordure autour */
+  color: #28a745 !important; /* Texte vert */
+  border-left: 14px solid #28a745 !important; /* Bande verte épaisse */
+  border-radius: 10px 0 0 10px !important; /* Coins gauches arrondis, coins droits tranchants pour la bande */
+}
+
+/* Style pour les messages d'erreur (rouge) */
+.custom-error-snackbar {
+  border: 0 !important; /* Pas de bordure autour */
+  color: #dc3545 !important; /* Texte rouge */
+  border-left: 14px solid #dc3545 !important; /* Bande rouge épaisse */
+  border-radius: 10px 0 0 10px !important; /* Coins gauches arrondis, coins droits tranchants pour la bande */
+  background-color: rgb(255, 255, 255) !important; /* Forcer le fond blanc */
+}
+
+/* Style pour les notifications (jaune) */
+.custom-notification-snackbar {
+  border: 0 !important; /* Pas de bordure autour */
+  color: #ffc107 !important; /* Texte jaune */
+  border-left: 14px solid #ffc107 !important; /* Bande jaune épaisse */
+  border-radius: 10px 0 0 10px !important; /* Coins gauches arrondis, coins droits tranchants pour la bande */
+}
+
+/* Ajustements pour le mode nuit */
+body.night-mode .mat-snack-bar-container {
+  background-color: white !important; /* Fond blanc même en mode nuit */
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3) !important; /* Ombre plus prononcée */
+}
+
+body.night-mode .custom-success-snackbar {
+  color: #2ecc71 !important; /* Texte vert clair */
+  border-left-color: #2ecc71 !important; /* Bande verte claire */
+}
+
+body.night-mode .custom-error-snackbar {
+  color: #ff6b6b !important; /* Texte rouge clair */
+  border-left-color: #ff6b6b !important; /* Bande rouge claire */
+  background-color: white !important; /* Forcer le fond blanc */
+}
+
+body.night-mode .custom-notification-snackbar {
+  color: #ffca2c !important; /* Texte jaune clair */
+  border-left-color: #ffca2c !important; /* Bande jaune claire */
+}
+
+/* Animation d'entrée moderne */
+@keyframes slideIn {
+  0% {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

@@ -4,6 +4,7 @@ import { ArchiveService } from 'src/app/services/archive.service';
 import { UserInfoService } from 'src/app/services/user-info.service';
 import { HttpErrorResponse } from '@angular/common/http';
 import { jwtDecode } from 'jwt-decode';
+import { MatSnackBar } from '@angular/material/snack-bar'; // Importer MatSnackBar
 
 @Component({
   selector: 'app-archive',
@@ -36,7 +37,8 @@ export class ArchiveComponent implements OnInit {
   constructor(
     private archiveService: ArchiveService,
     private userInfoService: UserInfoService,
-    private router: Router
+    private router: Router,
+    private snackBar: MatSnackBar // Injecter MatSnackBar
   ) {}
 
   ngOnInit(): void {
@@ -49,6 +51,7 @@ export class ArchiveComponent implements OnInit {
   private checkAdminAccess(): void {
     const token = localStorage.getItem('token');
     if (!token) {
+      this.showError('Session invalide. Veuillez vous reconnecter.');
       this.redirectToLogin();
       return;
     }
@@ -56,7 +59,7 @@ export class ArchiveComponent implements OnInit {
     try {
       const decoded = jwtDecode<{ id: number; role: string }>(token);
       if (decoded.role !== 'ADMIN') {
-        alert('Accès réservé aux administrateurs.');
+        this.showError('Accès réservé aux administrateurs.');
         this.router.navigate(['/home']);
         return;
       }
@@ -66,17 +69,18 @@ export class ArchiveComponent implements OnInit {
         },
         error: (err: HttpErrorResponse) => {
           console.error('Error fetching user info:', err);
+          this.showError('Erreur lors de la récupération des informations utilisateur.');
           this.redirectToLogin();
         }
       });
     } catch (e) {
       console.error('Error decoding token:', e);
+      this.showError('Erreur lors de la lecture du token.');
       this.redirectToLogin();
     }
   }
 
   private redirectToLogin(): void {
-    alert('Session invalide. Veuillez vous reconnecter.');
     this.router.navigate(['/login']);
   }
 
@@ -97,9 +101,9 @@ export class ArchiveComponent implements OnInit {
         this.filteredData = [...data];
         this.updatePagination();
       },
-      error: (err: Error) => {
+      error: (err: HttpErrorResponse) => {
         console.error(`Error loading ${this.activeTab}:`, err.message);
-        alert(err.message);
+        this.showError(err.message);
       }
     });
   }
@@ -231,12 +235,31 @@ export class ArchiveComponent implements OnInit {
         this.data = this.data.filter(item => item.id !== id);
         this.filteredData = [...this.data];
         this.updatePagination();
-        alert('Instance désarchivée avec succès.');
+        this.showSuccess('Instance désarchivée avec succès.');
       },
-      error: (err: Error) => {
+      error: (err: HttpErrorResponse) => {
         console.error(`Error unarchiving ${this.activeTab} with ID ${id}:`, err.message);
-        alert(err.message);
+        this.showError(err.message);
       }
+    });
+  }
+
+  // Méthodes pour afficher les notifications
+  private showSuccess(message: string): void {
+    this.snackBar.open(message, 'Fermer', {
+      duration: 10000, // 10 secondes
+      panelClass: ['custom-success-snackbar'],
+      verticalPosition: 'top',
+      horizontalPosition: 'center'
+    });
+  }
+
+  private showError(message: string): void {
+    this.snackBar.open(message, 'Fermer', {
+      duration: 60000, // 6 secondes
+      panelClass: ['custom-error-snackbar'],
+      verticalPosition: 'top',
+      horizontalPosition: 'center'
     });
   }
 }

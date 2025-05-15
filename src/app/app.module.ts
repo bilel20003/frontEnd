@@ -1,5 +1,5 @@
 import { NgModule } from '@angular/core';
-import { HttpClientModule } from '@angular/common/http';
+import { HTTP_INTERCEPTORS, HttpClientModule } from '@angular/common/http';
 import { ReactiveFormsModule } from '@angular/forms';
 import { BrowserModule } from '@angular/platform-browser';
 import { CommonModule } from '@angular/common';
@@ -45,7 +45,8 @@ import { ArchiveComponent } from './components/Admin/archive/archive.component';
 import { ResetPasswordComponent } from './components/reset-password/reset-password.component';
 import { NgChartsModule } from 'ng2-charts';
 import { DashboardComponent } from './components/Admin/dashboard/dashboard.component';
-
+import { MatSnackBarModule } from '@angular/material/snack-bar';
+import { AuthInterceptor } from 'src/auth.interceptor';  // Import de l'intercepteur
 @NgModule({
   declarations: [
     AppComponent,
@@ -86,7 +87,8 @@ import { DashboardComponent } from './components/Admin/dashboard/dashboard.compo
     NgbModule,
     FullCalendarModule,
     NgChartsModule,
-    CommonModule
+    CommonModule,
+    MatSnackBarModule
   ],
   providers: [
     MinistereService,
@@ -97,7 +99,8 @@ import { DashboardComponent } from './components/Admin/dashboard/dashboard.compo
     RequeteService,
     RendezvousService,
     UserInfoService,
-    DashboardService
+    DashboardService,
+    { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true } // Enregistrement de l'intercepteur
   ],
   bootstrap: [AppComponent]
 })

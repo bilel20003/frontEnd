@@ -58,74 +58,6 @@ header h2 {
   background-color: #ff9900;
 }
 
-/* Boutons */
-.btn {
-  padding: 8px 16px;
-  border-radius: 6px;
-  font-size: 14px;
-  transition: all 0.3s ease;
-  margin-right: 10px;
-}
-
-.btn-primary {
-  background: linear-gradient(135deg, #1e3c72, #2a5298);
-  color: white;
-  border: none;
-}
-
-.btn-primary:hover {
-  background: linear-gradient(135deg, #2a5298, #1e3c72);
-  transform: translateY(-2px);
-}
-
-.btn-primary:disabled {
-  background: #6c757d;
-  cursor: not-allowed;
-}
-
-.btn-secondary {
-  background-color: #6c757d;
-  color: white;
-  border: none;
-}
-
-.btn-secondary:hover {
-  background-color: #5a6268;
-  transform: translateY(-2px);
-}
-
-.btn-info {
-  background-color: #17a2b8;
-  color: white;
-  padding: 6px 12px;
-}
-
-.btn-success {
-  background-color: #28a745;
-  color: white;
-  border: none;
-}
-
-.btn-success:hover {
-  background-color: #218838;
-  transform: translateY(-2px);
-}
-
-.btn-warning {
-  background-color: #ffc107;
-  color: #212529;
-  border: none;
-}
-
-.btn-warning:hover {
-  background-color: #e0a800;
-  transform: translateY(-2px);
-}
-
-.btn i {
-  margin-right: 5px;
-}
-
 /* Tableau amélioré */
 .table-responsive {
   margin-top: 20px;
@@ -151,9 +83,6 @@ header h2 {
 .table-header th {
   background: linear-gradient(135deg, #1e3c72, #2a5298);
   color: white;
-}
-
-.table-header th.sortable {
   cursor: pointer;
 }
 
@@ -165,11 +94,138 @@ header h2 {
   background-color: #f9f9f9;
 }
 
-/* Navbar */
-.header-actions {
-  display: flex;
+/* Badges pour les rôles */
+.role-badge {
+  display: inline-block;
+  padding: 5px 10px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.role-client {
+  background-color: #e6f3ff;
+  color: #007bff;
+}
+
+.role-guichetier {
+  background-color: #e6ffed;
+  color: #28a745;
+}
+
+.role-technicien {
+  background-color: #fff3e6;
+  color: #ff9900;
+}
+
+.role-admin {
+  background-color: #ffe6e6;
+  color: #dc3545;
+}
+
+/* Boutons */
+.btn {
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 14px;
+  transition: all 0.3s ease;
+  margin-right: 10px;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #1e3c72, #2a5298);
+  color: white;
+  border: none;
+}
+
+.btn-primary:hover {
+  background: linear-gradient(135deg, #2a5298, #1e3c72);
+  transform: translateY(-2px);
+}
+
+.btn-primary:disabled {
+  background: #6c757d;
+  cursor: not-allowed;
+}
+
+.btn-primary.active {
+  background: linear-gradient(135deg, #ffcc00, #ff9900);
+  color: #1e3c72;
+  font-weight: bold;
+  transform: translateY(0);
+}
+
+.btn-secondary {
+  background-color: #6c757d;
+  color: white;
+  border: none;
+}
+
+.btn-secondary:hover {
+  background-color: #5a6268;
+  transform: translateY(-2px);
+}
+
+/* Action Icons (Rounded Square with Gradient Fill) */
+.action-icon {
+  background: transparent;
+  border: 1px solid;
+  border-radius: 6px;
+  font-size: 1.1rem;
+  cursor: pointer;
+  padding: 6px;
+  margin: 0 6px;
+  position: relative;
+  transition: background 0.3s, border-color 0.3s, transform 0.2s;
+  width: 30px;
+  height: 30px;
+  display: inline-flex;
   align-items: center;
-  gap: 10px;
+  justify-content: center;
+}
+
+.edit-icon {
+  color: #007bff;
+  border-color: #007bff;
+}
+
+.edit-icon:hover {
+  background: linear-gradient(135deg, #007bff, #0056b3);
+  color: white;
+  border-color: transparent;
+  transform: scale(1.1);
+}
+
+.archive-icon {
+  color: #dc3545;
+  border-color: #dc3545;
+}
+
+.archive-icon:hover {
+  background: linear-gradient(135deg, #dc3545, #c82333);
+  color: white;
+  border-color: transparent;
+  transform: scale(1.1);
+}
+
+.action-icon:hover::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #333;
+  color: white;
+  padding: 5px 10px;
+  border-radius: 4px;
+  font-size: 12px;
+  white-space: nowrap;
+  z-index: 10;
+  opacity: 0;
+  pointer-events: none;
+  animation: fadeInTooltip 0.2s ease forwards;
+  margin-bottom: 8px;
 }
 
 /* Pagination */
@@ -213,10 +269,16 @@ header h2 {
   padding: 5px;
   font-size: 14px;
   border-radius: 5px;
-  border: 1px solid #ccc;
+  border: 1px solid #aa2727;
 }
 
 /* Icône de mode nuit/jour */
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
 .mode-toggle {
   background: none;
   border: none;
@@ -230,7 +292,183 @@ header h2 {
   color: #2a5298;
 }
 
-/* Modal */
+/* Interrupteur */
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 40px;
+  height: 20px;
+}
+
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  transition: .3s ease;
+  border-radius: 20px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 16px;
+  width: 16px;
+  left: 2px;
+  bottom: 2px;
+  background-color: white;
+  transition: .3s ease;
+  border-radius: 50%;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+input:checked + .slider {
+  background-color: #28a745;
+}
+
+input:checked + .slider:before {
+  transform: translateX(20px);
+}
+
+/* Mode nuit */
+body.night-mode {
+  background-color: #121212;
+  color: white;
+}
+
+.night-mode .container {
+  background-color: #121212;
+}
+
+.night-mode .table-responsive {
+  background-color: #1e1f1f;
+}
+
+.night-mode .table-header th {
+  background: linear-gradient(135deg, #333, #555);
+}
+
+.night-mode .table-hover tbody tr:hover {
+  background-color: #2a2a2a;
+}
+
+.night-mode .search-bar {
+  background-color: #333;
+  box-shadow: 0 2px 4px rgba(255, 255, 255, 0.1);
+}
+
+.night-mode .search-bar input {
+  background-color: #333;
+  color: white;
+}
+
+.night-mode .search-bar button {
+  background: linear-gradient(135deg, #333, #555);
+}
+
+.night-mode .search-bar button:hover {
+  background: linear-gradient(135deg, #555, #333);
+}
+
+.night-mode .pagination button {
+  background-color: #2ecc71;
+}
+
+.night-mode .pagination button.active {
+  background: linear-gradient(135deg, #ffca2c, #ff9900);
+  color: #121212;
+}
+
+.night-mode .pagination button:disabled {
+  background-color: #555;
+}
+
+.night-mode .page-options select {
+  background-color: #333;
+  color: #2ecc71;
+  border-color: #555;
+}
+
+.night-mode .mode-toggle {
+  color: #2ecc71;
+}
+
+.night-mode .mode-toggle:hover {
+  color: #27ae60;
+}
+
+.night-mode header h2 {
+  color: #2ecc71;
+}
+
+.night-mode .slider {
+  background-color: #666;
+}
+
+.night-mode input:checked + .slider {
+  background-color: #2ecc71;
+}
+
+/* Night mode for badges */
+.night-mode .role-client {
+  background-color: #2a4365;
+  color: #66b0ff;
+}
+
+.night-mode .role-guichetier {
+  background-color: #234d2e;
+  color: #66ff99;
+}
+
+.night-mode .role-technicien {
+  background-color: #4d3a1f;
+  color: #ffcc66;
+}
+
+.night-mode .role-admin {
+  background-color: #4d2a2a;
+  color: #ff6666;
+}
+
+/* Night mode for icons */
+.night-mode .edit-icon {
+  color: #2ecc71;
+  border-color: #2ecc71;
+}
+
+.night-mode .edit-icon:hover {
+  background: linear-gradient(135deg, #2ecc71, #27ae60);
+  color: white;
+  border-color: transparent;
+}
+
+.night-mode .archive-icon {
+  color: #ff6b6b;
+  border-color: #ff6b6b;
+}
+
+.night-mode .archive-icon:hover {
+  background: linear-gradient(135deg, #ff6b6b, #ff8787);
+  color: white;
+  border-color: transparent;
+}
+
+.night-mode .action-icon:hover::after {
+  background-color: #555;
+  color: #ddd;
+}
+
+/* Styles pour la popup */
 .modal-overlay {
   position: fixed;
   top: 0;
@@ -291,51 +529,23 @@ header h2 {
   padding: 20px;
 }
 
-.form-group {
+.info-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 15px;
+  margin-bottom: 20px;
+}
+
+.info-item {
   display: flex;
   flex-direction: column;
-  margin-bottom: 15px;
 }
 
-.form-group label {
-  margin-bottom: 8px;
-  color: #333;
-  font-weight: 500;
-  font-size: 0.95rem;
-}
-
-.form-group input,
-.form-group textarea,
-.form-group select {
-  padding: 10px;
-  border: 1px solid #ccc;
-  border-radius: 6px;
-  font-size: 0.95rem;
-  transition: border-color 0.3s;
-}
-
-.form-group select {
-  appearance: none;
-  background: url('data:image/svg+xml;utf8,<svg fill="%23333" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/></svg>') no-repeat right 10px center;
-  background-size: 12px;
-}
-
-.form-group input:focus,
-.form-group textarea:focus,
-.form-group select:focus {
-  border-color: #1e3c72;
-  outline: none;
-}
-
-.form-group textarea {
-  resize: vertical;
-  min-height: 100px;
-}
-
-.form-group input:required:invalid,
-.form-group textarea:required:invalid,
-.form-group select:required:invalid {
-  border-color: #dc3545;
+.label {
+  font-weight: 600;
+  margin-bottom: 6px;
+  font-size: 14px;
+  color: #1e3c72;
 }
 
 .form-actions {
@@ -347,81 +557,46 @@ header h2 {
   gap: 10px;
 }
 
-/* Mode nuit */
-body.night-mode {
-  background-color: #121212;
-  color: white;
+/* Styles pour les formulaires dans les modals */
+.form-group {
+  margin-bottom: 20px;
 }
 
-.night-mode .container {
-  background-color: #121212;
+.form-group label {
+  display: block;
+  margin-bottom: 6px;
+  font-weight: 600;
+  font-size: 15px;
 }
 
-.night-mode .table-responsive {
-  background-color: #1e1f1f;
+.form-control {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ced4da;
+  border-radius: 5px;
+  box-sizing: border-box;
+  font-size: 14px;
+  transition: border-color 0.2s ease;
 }
 
-.night-mode .table-header th {
-  background: linear-gradient(135deg, #333, #555);
+.form-control:focus {
+  border-color: #007bff;
+  outline: none;
+  box-shadow: 0 0 5px rgba(0, 123, 255, 0.3);
 }
 
-.night-mode .table-hover tbody tr:hover {
-  background-color: #2a2a2a;
+.form-control.ng-invalid.ng-touched {
+  border-color: #dc3545;
 }
 
-.night-mode .search-bar {
-  background-color: #333;
-  box-shadow: 0 2px 4px rgba(255, 255, 255, 0.1);
+/* Messages d'erreur */
+.error-message {
+  color: #dc3545;
+  font-size: 12px;
+  margin-top: 5px;
 }
 
-.night-mode .search-bar input {
-  background-color: #333;
-  color: white;
-}
-
-.night-mode .search-bar button {
-  background: linear-gradient(135deg, #333, #555);
-}
-
-.night-mode .search-bar button:hover {
-  background: linear-gradient(135deg, #555, #333);
-}
-
-.night-mode .btn-success {
-  background-color: #2ecc71;
-}
-
-.night-mode .btn-success:hover {
-  background-color: #27ae60;
-}
-
-.night-mode .btn-warning {
-  background-color: #ffca2c;
-}
-
-.night-mode .btn-warning:hover {
-  background-color: #e0a800;
-}
-
-.night-mode .pagination button {
-  background-color: #2ecc71;
-}
-
-.night-mode .pagination button.active {
-  background: linear-gradient(135deg, #ffca2c, #ff9900);
-  color: #121212;
-}
-
-.night-mode .pagination button:disabled {
-  background-color: #555;
-}
-
-.night-mode .page-options select {
-  background-color: #333;
-  color: #2ecc71;
-  border-color: #555;
-}
-
+/* Night mode for popup */
 .night-mode .modal-content {
   background-color: #1f1f1f;
   color: white;
@@ -431,43 +606,30 @@ body.night-mode {
   background: linear-gradient(135deg, #333, #555);
 }
 
+.night-mode .modal-body .label {
+  color: #2ecc71;
+}
+
 .night-mode .form-actions {
   background-color: #2a2a2a;
 }
 
-.night-mode .form-group label {
-  color: #ddd;
-}
-
-.night-mode .form-group input,
-.night-mode .form-group textarea,
-.night-mode .form-group select {
+.night-mode .form-control {
   background: #333;
   color: white;
   border-color: #555;
 }
 
-.night-mode .form-group select {
-  background: url('data:image/svg+xml;utf8,<svg fill="%23ddd" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/></svg>') no-repeat right 10px center;
-  background-size: 12px;
-}
-
-.night-mode .form-group input:focus,
-.night-mode .form-group textarea:focus,
-.night-mode .form-group select:focus {
+.night-mode .form-control:focus {
   border-color: #2ecc71;
 }
 
-.night-mode .mode-toggle {
-  color: #2ecc71;
+.night-mode .form-control.ng-invalid.ng-touched {
+  border-color: #ff6b6b;
 }
 
-.night-mode .mode-toggle:hover {
-  color: #27ae60;
-}
-
-.night-mode header h2 {
-  color: #2ecc71;
+.night-mode .error-message {
+  color: #ff6b6b;
 }
 
 /* Animations */
@@ -481,13 +643,42 @@ body.night-mode {
   to { transform: translateY(0); opacity: 1; }
 }
 
-/* Error message styling */
-.error-message {
-  color: #dc3545;
-  font-size: 0.85rem;
-  margin-top: 5px;
+@keyframes fadeInTooltip {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
-.night-mode .error-message {
-  color: #ff6b6b;
+/* Snackbar Styles */
+.custom-success-snackbar {
+  background-color: #28a745;
+  color: white;
+  border-radius: 6px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  font-size: 14px;
+  padding: 10px 20px;
+}
+
+.custom-error-snackbar {
+  background-color: #dc3545;
+  color: white;
+  border-radius: 6px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  font-size: 14px;
+  padding: 10px 20px;
+}
+
+.custom-success-snackbar .mat-snack-bar-action {
+  color: #ffcc00;
+}
+
+.custom-error-snackbar .mat-snack-bar-action {
+  color: #ffcc00;
+}
+
+.night-mode .custom-success-snackbar {
+  background-color: #2ecc71;
+}
+
+.night-mode .custom-error-snackbar {
+  background-color: #ff6b6b;
 }

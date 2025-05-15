@@ -4,6 +4,12 @@ import { Observable, throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { Objet } from '../models/objet.model';
 
+export enum ObjetType {
+  RENDEZVOUS = 'RENDEZVOUS',
+  RECLAMATION = 'RECLAMATION',
+  DEMANDE_TRAVAUX = 'DEMANDE_TRAVAUX'
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -44,6 +50,18 @@ export class ObjetService {
   archiveObjet(id: number): Observable<void> {
     console.log('archiveObjet called with id:', id);
     return this.http.put<void>(`${this.apiUrl}/archiveobjet/${id}`, {}, this.getHttpOptions()).pipe(
+      catchError(this.handleError)
+    );
+  }
+
+  getObjetsByProduitId(produitId: number): Observable<Objet[]> {
+    return this.http.get<Objet[]>(`${this.apiUrl}/getobjetsbyproduit/${produitId}`, this.getHttpOptions()).pipe(
+      catchError(this.handleError)
+    );
+  }
+
+  getObjetsByProduitIdAndType(produitId: number, type: ObjetType): Observable<Objet[]> {
+    return this.http.get<Objet[]>(`${this.apiUrl}/getobjetsbyproduit/${produitId}/${type}`, this.getHttpOptions()).pipe(
       catchError(this.handleError)
     );
   }

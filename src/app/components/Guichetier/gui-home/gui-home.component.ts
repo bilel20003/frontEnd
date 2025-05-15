@@ -8,6 +8,7 @@ import { UserInfo } from 'src/app/models/user-info.model';
 import { Requete } from 'src/app/models/requete.model';
 import { Objet } from 'src/app/models/objet.model';
 import { jwtDecode } from 'jwt-decode';
+import { MatSnackBar } from '@angular/material/snack-bar';
 
 @Component({
   selector: 'app-gui-home',
@@ -22,7 +23,7 @@ export class GuiHomeComponent implements OnInit {
   objetMap: { [key: number]: Objet } = {};
   techniciens: UserInfo[] = [];
   searchTerm: string = '';
-  sortDirection: { [key: string]: boolean } = {};
+  sortDirection: { [key: string]: boolean } = { id: true }; // Default to descending order by id (highest first)
   currentPage: number = 1;
   itemsPerPage: number = 5;
   totalPages: number = 1;
@@ -38,7 +39,8 @@ export class GuiHomeComponent implements OnInit {
     private router: Router,
     private requeteService: RequeteService,
     private objetService: ObjetService,
-    private userInfoService: UserInfoService
+    private userInfoService: UserInfoService,
+    private snackBar: MatSnackBar
   ) {}
 
   ngOnInit(): void {
@@ -48,7 +50,7 @@ export class GuiHomeComponent implements OnInit {
       this.loadReclamations(guichetierId);
       this.loadTechnicians();
     } else {
-      alert('Session invalide. Veuillez vous reconnecter.');
+      this.showError('Session invalide. Veuillez vous reconnecter.');
       this.router.navigate(['/login']);
     }
   }
@@ -84,7 +86,7 @@ export class GuiHomeComponent implements OnInit {
       },
       error: (err: HttpErrorResponse) => {
         console.error('Error loading objets:', err);
-        alert('Impossible de charger les objets.');
+        this.showError('Impossible de charger les objets.');
         this.isObjetsLoaded = true;
       }
     });
@@ -99,7 +101,7 @@ export class GuiHomeComponent implements OnInit {
       },
       error: (err: HttpErrorResponse) => {
         console.error('Error loading techniciens:', err);
-        alert('Impossible de charger la liste des techniciens.');
+        this.showError('Impossible de charger la liste des techniciens.');
       }
     });
   }
@@ -110,11 +112,17 @@ export class GuiHomeComponent implements OnInit {
         console.log('Reclamations received:', data);
         this.reclamations = data;
         this.filteredReclamations = [...this.reclamations];
+        // Log IDs before sorting
+        console.log('IDs before sorting:', this.filteredReclamations.map(r => r.id));
+        // Sort by id in descending order (highest IDs at the top)
+        this.filteredReclamations.sort((a, b) => b.id - a.id);
+        // Log IDs after sorting
+        console.log('IDs after sorting:', this.filteredReclamations.map(r => r.id));
         this.updatePagination();
       },
       error: (error: HttpErrorResponse) => {
         console.error('Erreur lors du chargement des réclamations', error);
-        alert('Impossible de charger les réclamations.');
+        this.showError('Impossible de charger les réclamations.');
       }
     });
   }
@@ -135,13 +143,23 @@ export class GuiHomeComponent implements OnInit {
         (reclamation.objet.produit?.nom?.toLowerCase()?.includes(term) ?? false)
       );
     });
+    // Log IDs before sorting (after filtering)
+    console.log('IDs before sorting (after filtering):', this.filteredReclamations.map(r => r.id));
+    // Sort by id in descending order (highest IDs at the top)
+    this.filteredReclamations.sort((a, b) => b.id - a.id);
+    // Log IDs after sorting (after filtering)
+    console.log('IDs after sorting (after filtering):', this.filteredReclamations.map(r => r.id));
     this.currentPage = 1;
     this.updatePagination();
   }
 
   sort(column: string): void {
-    this.sortDirection[column] = !this.sortDirection[column];
-    const direction = this.sortDirection[column] ? 1 : -1;
+    if (!this.sortDirection[column]) {
+      this.sortDirection = { [column]: true }; // Reset and set only the clicked column to descending
+    } else {
+      this.sortDirection[column] = !this.sortDirection[column];
+    }
+    const direction = this.sortDirection[column] ? -1 : 1; // Default to descending (-1) for id, toggle for others
 
     this.filteredReclamations.sort((a, b) => {
       let valA: any = a[column as keyof Requete];
@@ -246,7 +264,6 @@ export class GuiHomeComponent implements OnInit {
       case 'EN_COURS_DE_TRAITEMENT': return 'badge-warning';
       case 'TRAITEE': return 'badge-success';
       case 'REFUSEE': return 'badge-danger';
-      
       default: return 'badge-secondary';
     }
   }
@@ -262,7 +279,6 @@ export class GuiHomeComponent implements OnInit {
   formatDisplayText(text: string): string {
     if (!text) return '';
 
-    // Map database values to French display text
     const displayMap: { [key: string]: string } = {
       'DEMANDE_TRAVAUX': 'Demande de travaux',
       'RECLAMATION': 'Réclamation',
@@ -273,13 +289,11 @@ export class GuiHomeComponent implements OnInit {
       'BROUILLON': 'Brouillon'
     };
 
-    // Return mapped value if exists
     const upperText = text.toUpperCase();
     if (displayMap[upperText]) {
       return displayMap[upperText];
     }
 
-    // Fallback: Replace underscores and format to title case
     return text
       .replace(/_/g, ' ')
       .toLowerCase()
@@ -298,10 +312,11 @@ export class GuiHomeComponent implements OnInit {
           next: () => {
             console.log('Requête mise à jour');
             this.loadReclamations(this.getGuichetierIdFromToken()!);
+            this.showSuccess('Requête mise à jour avec succès !');
           },
           error: (error: HttpErrorResponse) => {
             console.error('Erreur lors de la mise à jour de la requête', error);
-            alert('Erreur lors de la mise à jour de la requête.');
+            this.showError('Erreur lors de la mise à jour de la requête.');
           }
         });
       }
@@ -312,7 +327,7 @@ export class GuiHomeComponent implements OnInit {
   }
 
   openTechnicienPopup(): void {
-    if (this.selectedRequete && !this.selectedRequete.technicien) {
+    if (this.selectedRequete && !this.selectedRequete.technicien && this.selectedRequete.etat !== 'TRAITEE' && this.selectedRequete.etat !== 'REFUSEE') {
       this.userInfoService.getAllTechniciens().subscribe({
         next: (techniciens) => {
           this.techniciens = techniciens;
@@ -323,7 +338,7 @@ export class GuiHomeComponent implements OnInit {
         },
         error: (err: HttpErrorResponse) => {
           console.error('Error refreshing technicians:', err);
-          alert('Erreur lors du chargement des techniciens.');
+          this.showError('Erreur lors du chargement des techniciens.');
         }
       });
     }
@@ -331,27 +346,21 @@ export class GuiHomeComponent implements OnInit {
 
   assignTechnicien(): void {
     if (!this.selectedRequete || !this.selectedTechnicienId) {
-      alert('Veuillez sélectionner un technicien.');
+      this.showWarning('Veuillez sélectionner un technicien.');
       return;
     }
-
-    console.log('Assigning technician. Selected ID:', this.selectedTechnicienId);
-    console.log('Selected ID type:', typeof this.selectedTechnicienId);
-    console.log('Technicians list:', this.techniciens);
-    console.log('Technician IDs:', this.techniciens.map(t => t.id));
-    console.log('Technician ID types:', this.techniciens.map(t => typeof t.id));
 
     const techId = +this.selectedTechnicienId;
 
     if (!this.techniciens.some(t => t.id === techId)) {
-      alert('ID de technicien invalide. Veuillez sélectionner un technicien valide.');
+      this.showWarning('ID de technicien invalide. Veuillez sélectionner un technicien valide.');
       console.error('Invalid technician ID:', techId);
       return;
     }
 
     const selectedTechnicien = this.techniciens.find(t => t.id === techId);
     if (!selectedTechnicien) {
-      alert('Technicien non trouvé. Veuillez réessayer.');
+      this.showWarning('Technicien non trouvé. Veuillez réessayer.');
       console.error('Technician not found for ID:', techId);
       return;
     }
@@ -364,17 +373,18 @@ export class GuiHomeComponent implements OnInit {
         console.log('Technicien affecté avec succès:', response);
         this.loadReclamations(this.getGuichetierIdFromToken()!);
         this.closePopup();
+        this.showSuccess('Technicien affecté avec succès !');
       },
       error: (error: HttpErrorResponse) => {
         console.error('Erreur lors de l\'affectation du technicien:', error);
-        alert('Erreur lors de l\'affectation du technicien: ' + (error.error?.message || error.message));
+        this.showError('Erreur lors de l\'affectation du technicien: ' + (error.error?.message || error.message));
       }
     });
   }
 
   confirmerTraitement(): void {
     if (!this.noteRetour) {
-      alert('Veuillez remplir la note de retour.');
+      this.showWarning('Veuillez remplir la note de retour.');
       return;
     }
 
@@ -388,10 +398,11 @@ export class GuiHomeComponent implements OnInit {
           this.loadReclamations(this.getGuichetierIdFromToken()!);
           this.noteRetour = '';
           this.closePopup();
+          this.showSuccess('Requête traitée avec succès !');
         },
         error: (error: HttpErrorResponse) => {
           console.error('Erreur lors du traitement de la requête', error);
-          alert('Erreur lors du traitement de la requête.');
+          this.showError('Erreur lors du traitement de la requête.');
         }
       });
     }
@@ -406,10 +417,11 @@ export class GuiHomeComponent implements OnInit {
         next: () => {
           console.log('Réclamation refusée');
           this.loadReclamations(this.getGuichetierIdFromToken()!);
+          this.showSuccess('Réclamation refusée avec succès !');
         },
         error: (error: HttpErrorResponse) => {
           console.error('Erreur lors du refus de la réclamation', error);
-          alert('Erreur lors du refus de la réclamation.');
+          this.showError('Erreur lors du refus de la réclamation.');
         }
       });
     }
@@ -421,5 +433,32 @@ export class GuiHomeComponent implements OnInit {
     this.selectedRequete = null;
     this.selectedTechnicienId = null;
     this.noteRetour = '';
+  }
+
+  private showSuccess(message: string): void {
+    this.snackBar.open(message, 'Fermer', {
+      duration: 10000,
+      panelClass: ['custom-success-snackbar'],
+      verticalPosition: 'top',
+      horizontalPosition: 'center'
+    });
+  }
+
+  private showError(message: string): void {
+    this.snackBar.open(message, 'Fermer', {
+      duration: 10000,
+      panelClass: ['custom-error-snackbar'],
+      verticalPosition: 'top',
+      horizontalPosition: 'center'
+    });
+  }
+
+  private showWarning(message: string): void {
+    this.snackBar.open(message, 'Fermer', {
+      duration: 10000,
+      panelClass: ['custom-warning-snackbar'],
+      verticalPosition: 'top',
+      horizontalPosition: 'center'
+    });
   }
 }

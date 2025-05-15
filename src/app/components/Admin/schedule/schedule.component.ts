@@ -36,6 +36,8 @@ export class ScheduleComponent implements OnInit {
     breakStart: false,
     breakEnd: false
   };
+  snackbarMessage: string | null = null;
+  snackbarType: 'success' | 'error' | null = null;
 
   constructor(private fb: FormBuilder, private scheduleService: ScheduleService) {
     this.scheduleForm = this.fb.group({
@@ -87,6 +89,7 @@ export class ScheduleComponent implements OnInit {
         error: (err) => {
           console.error('Erreur lors du chargement des horaires:', err);
           this.errorMessage = err.message;
+          this.showSnackbar('Erreur lors du chargement des horaires.', 'error');
         }
       });
     });
@@ -138,10 +141,12 @@ export class ScheduleComponent implements OnInit {
             this.loadSchedules();
             this.resetForm();
             this.errorMessage = null;
+            this.showSnackbar('Horaire modifié avec succès.', 'success');
           },
           error: (err) => {
             console.error('Erreur lors de la modification:', err);
             this.errorMessage = err.message || 'Erreur lors de la modification de l\'horaire.';
+            this.showSnackbar(this.errorMessage || 'Erreur lors de la modification.', 'error');
           }
         });
       } else {
@@ -150,15 +155,18 @@ export class ScheduleComponent implements OnInit {
             this.loadSchedules();
             this.resetForm();
             this.errorMessage = null;
+            this.showSnackbar('Horaire ajouté avec succès.', 'success');
           },
           error: (err) => {
             console.error('Erreur lors de l\'ajout:', err);
             this.errorMessage = err.message || 'Erreur lors de l\'ajout de l\'horaire.';
+            this.showSnackbar(this.errorMessage || 'Erreur lors de l\'ajout.', 'error');
           }
         });
       }
     } else {
       this.errorMessage = 'Veuillez remplir tous les champs requis correctement.';
+      this.showSnackbar(this.errorMessage, 'error');
     }
   }
 
@@ -178,6 +186,7 @@ export class ScheduleComponent implements OnInit {
   deleteSchedule(id: number | null): void {
     if (id == null) {
       this.errorMessage = 'Impossible de supprimer un horaire sans ID valide.';
+      this.showSnackbar(this.errorMessage, 'error');
       return;
     }
     if (confirm('Voulez-vous vraiment supprimer cet horaire ?')) {
@@ -185,10 +194,12 @@ export class ScheduleComponent implements OnInit {
         next: () => {
           this.loadSchedules();
           this.errorMessage = null;
+          this.showSnackbar('Horaire supprimé avec succès.', 'success');
         },
         error: (err) => {
           console.error('Erreur lors de la suppression:', err);
           this.errorMessage = err.message || 'Erreur lors de la suppression de l\'horaire.';
+          this.showSnackbar(this.errorMessage || 'Erreur lors de la suppression.', 'error');
         }
       });
     }
@@ -300,5 +311,19 @@ export class ScheduleComponent implements OnInit {
 
   private timeToString(time: string): string {
     return time ? `${time}:00` : '';
+  }
+
+  private showSnackbar(message: string, type: 'success' | 'error'): void {
+    this.snackbarMessage = message;
+    this.snackbarType = type;
+    const snackbar = document.getElementById('snackbar') as HTMLElement;
+    snackbar.classList.add('show');
+    setTimeout(() => {
+      snackbar.classList.remove('show');
+      setTimeout(() => {
+        this.snackbarMessage = null;
+        this.snackbarType = null;
+      }, 500);
+    }, 3000);
   }
 }

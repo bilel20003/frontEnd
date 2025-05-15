@@ -40,7 +40,7 @@
       <tbody>
         <tr *ngFor="let requete of paginatedRequetes">
           <td>{{ requete.id }}</td>
-          <td>{{ objetMap[requete.objet.id].name || 'N/A' }}</td>
+          <td>{{ (objetMap[requete.objet.id] || { name: 'N/A' }).name }}</td>
           <td>
             <span class="badge" [ngClass]="getTypeBadgeClass(requete.type)">
               {{ formatDisplayText(requete.type) }}
@@ -100,7 +100,7 @@
             </div>
             <div class="info-item">
               <span class="label">📌 Objet:</span>
-              <span class="value">{{ objetMap[selectedRequete.objet.id].name || 'N/A' }}</span>
+              <span class="value">{{ (objetMap[selectedRequete.objet.id] || { name: 'N/A' }).name }}</span>
             </div>
             <div class="info-item">
               <span class="label">📄 Type:</span>
@@ -134,6 +134,31 @@
               <span class="label">📋 Note de retour:</span>
               <span class="value">{{ selectedRequete.noteRetour || 'Aucune note' }}</span>
             </div>
+            <div class="info-item full-width">
+              <span class="label">📎 Pièces jointes:</span>
+              <div class="attachment-preview-list">
+                <div *ngIf="!selectedRequete.piecesJointes || selectedRequete.piecesJointes.length === 0" class="no-attachments">
+                  Aucune pièce jointe.
+                </div>
+                <div *ngFor="let attachment of selectedRequete.piecesJointes" class="attachment-preview-item">
+                  <div class="attachment-preview">
+                    <img *ngIf="isImageFile(attachment.name)" [src]="attachment.url" alt="{{ attachment.name }}" class="attachment-preview-image">
+                    <div *ngIf="!isImageFile(attachment.name)" class="attachment-preview-icon">
+                      <i [class]="getFileIcon(attachment.name)"></i>
+                      <span>{{ attachment.name }}</span>
+                    </div>
+                    <div class="attachment-actions">
+                      <button class="action-icon view-icon" (click)="previewAttachment(attachment)" data-tooltip="Visualiser">
+                        <i class="fas fa-eye"></i>
+                      </button>
+                      <button class="action-icon download-icon" (click)="downloadAttachment(attachment)" data-tooltip="Télécharger">
+                        <i class="fas fa-download"></i>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
         <div class="form-actions">
@@ -154,21 +179,9 @@
         <form #newRequeteForm="ngForm" (ngSubmit)="submitNewRequete()">
           <div class="modal-body">
             <div class="form-group">
-              <label for="objet">Objet</label>
-              <select id="objet" name="objet" [(ngModel)]="newRequete.objet.id" required #objet="ngModel">
-                <option value="0" disabled>Sélectionnez un objet</option>
-                <option *ngFor="let obj of objets" [value]="obj.id">
-                  {{ obj.name }}
-                </option>
-              </select>
-              <div *ngIf="objet.invalid && (objet.dirty || objet.touched)" class="error-message">
-                <div *ngIf="objet.errors?.['required']">L'objet est requis.</div>
-              </div>
-            </div>
-            <div class="form-group">
               <label for="type">Type de requête</label>
-              <select id="type" name="type" [(ngModel)]="newRequete.type" required #type="ngModel">
-                <option value="" disabled>Sélectionnez un type</option>
+              <select id="type" name="type" [(ngModel)]="newRequete.type" (change)="loadPopupObjets()" required #type="ngModel">
+                <option value="" disabled selected>Sélectionnez un type</option>
                 <option value="DEMANDE_DE_TRAVAUX">Demande de travaux</option>
                 <option value="RECLAMATION">Réclamation</option>
               </select>
@@ -177,11 +190,48 @@
               </div>
             </div>
             <div class="form-group">
+              <label for="objet">Objet</label>
+              <select id="objet" name="objet" [ngModel]="newRequete.objet.id" (ngModelChange)="newRequete.objet.id = +$event" required #objet="ngModel" [disabled]="!newRequete.type || isLoadingPopupObjets || popupObjets.length === 0">
+                <option value="0" disabled selected>Sélectionnez un objet</option>
+                <option *ngFor="let obj of popupObjets" [value]="obj.id">
+                  {{ obj.name }}
+                </option>
+              </select>
+              <div *ngIf="isLoadingPopupObjets" class="loading-message">
+                Chargement des objets...
+              </div>
+              <div *ngIf="newRequete.type && !isLoadingPopupObjets && popupObjets.length === 0" class="error-message">
+                Aucun objet disponible pour ce type de requête.
+              </div>
+              <div *ngIf="objet.invalid && (objet.dirty || objet.touched)" class="error-message">
+                <div *ngIf="objet.errors?.['required']">L'objet est requis.</div>
+              </div>
+            </div>
+            <div class="form-group">
               <label for="description">Description</label>
               <textarea id="description" name="description" [(ngModel)]="newRequete.description" required #description="ngModel" minlength="10"></textarea>
               <div *ngIf="description.invalid && (description.dirty || description.touched)" class="error-message">
                 <div *ngIf="description.errors?.['required']">La description est requise.</div>
                 <div *ngIf="description.errors?.['minlength']">La description doit contenir au moins 10 caractères.</div>
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="files">Pièces jointes (max 10 Mo par fichier)</label>
+              <input type="file" id="files" name="files" multiple (change)="onFileChange($event)" #fileInput accept=".pdf,.jpg,.jpeg,.png,.doc,.docx" />
+              <div *ngIf="fileError" class="error-message">{{ fileError }}</div>
+              <div class="attachment-preview-list" *ngIf="filePreviews.length > 0">
+                <div *ngFor="let preview of filePreviews; let i = index" class="attachment-preview-item">
+                  <div class="attachment-preview">
+                    <img *ngIf="preview.previewUrl" [src]="preview.previewUrl" alt="{{ preview.file.name }}" class="attachment-preview-image">
+                    <div *ngIf="!preview.previewUrl" class="attachment-preview-icon">
+                      <i [class]="getFileIcon(preview.file.name)"></i>
+                      <span>{{ preview.file.name }}</span>
+                    </div>
+                    <button type="button" class="remove-attachment-btn" (click)="removeFile(i)">
+                      <i class="fas fa-times"></i>
+                    </button>
+                  </div>
+                </div>
               </div>
             </div>
             <div class="form-group">
@@ -202,7 +252,7 @@
             </div>
           </div>
           <div class="form-actions">
-            <button type="submit" class="btn btn-primary" [disabled]="newRequeteForm.invalid || isAILoading">Créer</button>
+            <button type="submit" class="btn btn-primary" [disabled]="newRequeteForm.invalid || isAILoading || fileError">Créer</button>
             <button type="button" class="btn btn-secondary" (click)="closeCreatePopup()">Annuler</button>
           </div>
         </form>

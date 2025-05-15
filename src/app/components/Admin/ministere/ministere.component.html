@@ -1,6 +1,19 @@
 <app-navbar-admin></app-navbar-admin>
 
 <div class="container">
+  <!-- Header with Title and Actions -->
+  <header class="d-flex justify-content-between align-items-center">
+    <h2>Gérer les Ministères</h2>
+    <div class="header-actions">
+      <button class="mode-toggle" (click)="toggleMode()">
+        <i class="fas" [ngClass]="isNightMode ? 'fa-sun' : 'fa-moon'"></i>
+      </button>
+      <button class="btn btn-primary" (click)="openModal('add')">
+        <i class="fas fa-plus"></i> Ajouter Ministère
+      </button>
+    </div>
+  </header>
+
   <!-- Barre de recherche -->
   <div class="search-bar-container">
     <div class="search-bar">
@@ -9,34 +22,13 @@
     </div>
   </div>
 
-  <!-- Titre + actions -->
-  <header class="d-flex justify-content-between align-items-center">
-    <h2 style="margin-left: 250px">Gérer les Ministères</h2>
-    <div class="header-actions">
-      <button class="mode-toggle" (click)="toggleMode()">
-        <i class="fas" [ngClass]="isNightMode ? 'fa-sun' : 'fa-moon'"></i>
-      </button>
-      <button class="btn btn-primary" (click)="openModal('add')">+ Ajouter Ministère</button>
-    </div>
-  </header>
-
-  <!-- Liste des ministères -->
+  <!-- Tableau -->
   <div class="table-responsive">
     <table class="table table-hover shadow-sm rounded">
       <thead class="table-header">
         <tr>
-          <th (click)="sort('id')" class="sortable">
-            ID ministère
-            <span *ngIf="sortDirection['id'] !== undefined">
-              {{ sortDirection['id'] ? '▲' : '▼' }}
-            </span>
-          </th>
-          <th (click)="sort('nomMinistere')" class="sortable">
-            Nom du Ministère
-            <span *ngIf="sortDirection['nomMinistere'] !== undefined">
-              {{ sortDirection['nomMinistere'] ? '▲' : '▼' }}
-            </span>
-          </th>
+          <th (click)="sort('id')" class="sortable" [ngClass]="{'sorted': sortDirection['id'] !== undefined}">ID Ministère</th>
+          <th (click)="sort('nomMinistere')" class="sortable" [ngClass]="{'sorted': sortDirection['nomMinistere'] !== undefined}">Nom du Ministère</th>
           <th>Actions</th>
         </tr>
       </thead>
@@ -45,11 +37,11 @@
           <td>{{ ministry.id }}</td>
           <td>{{ ministry.nomMinistere }}</td>
           <td>
-            <button class="btn btn-info btn-sm me-2" (click)="openModal('edit', ministry)">
-              <i class="fas fa-edit"></i> Modifier
+            <button class="action-icon edit-icon" (click)="openModal('edit', ministry)" data-tooltip="Modifier">
+              <i class="fas fa-edit"></i>
             </button>
-            <button class="btn btn-warning btn-sm me-2" (click)="archiveMinistere(ministry.id)">
-              <i class="fas fa-archive"></i> Archiver
+            <button class="action-icon archive-icon" (click)="archiveMinistere(ministry.id)" data-tooltip="Archiver">
+              <i class="fas fa-archive"></i>
             </button>
           </td>
         </tr>
@@ -57,45 +49,59 @@
     </table>
 
     <!-- Pagination -->
-    <div class="pagination-container d-flex justify-content-between">
+    <div class="pagination-container d-flex justify-content-between align-items-center">
       <div class="page-options">
         <select [(ngModel)]="itemsPerPage" (change)="onItemsPerPageChange()">
           <option *ngFor="let option of [5, 10, 20]" [value]="option">{{ option }} ministères par page</option>
         </select>
       </div>
       <div class="pagination">
-        <button (click)="goToPreviousPage()" [disabled]="currentPage === 1">Précédent</button>
-        <span>Page {{ currentPage }} sur {{ totalPages }}</span>
-        <button (click)="goToNextPage()" [disabled]="currentPage === totalPages">Suivant</button>
+        <button class="btn btn-primary" (click)="goToPreviousPage()" [disabled]="currentPage === 1">
+          <i class="fas fa-chevron-left"></i>
+        </button>
+        <button *ngFor="let page of getPageNumbers()" class="btn btn-primary" [ngClass]="{'active': page === currentPage}" (click)="goToPage(page)">
+          {{ page }}
+        </button>
+        <button class="btn btn-primary" (click)="goToNextPage()" [disabled]="currentPage === totalPages">
+          <i class="fas fa-chevron-right"></i>
+        </button>
       </div>
     </div>
   </div>
-</div>
 
-<!-- Modal pour ajouter/éditer un ministère -->
-<div class="modal" [ngClass]="{'modal-open': showModal}">
-  <div class="modal-content">
-    <h4>{{ modalTitle }}</h4>
-    <form #ministereForm="ngForm" (ngSubmit)="saveMinistere()">
-      <div class="form-group">
-        <label for="ministryName">Nom du Ministère</label>
-        <input
-          type="text"
-          id="ministryName"
-          name="ministryName"
-          [(ngModel)]="ministereName"
-          required
-          minlength="3"
-          class="form-control"
-          #ministryNameInput="ngModel"
-        >
-        <div *ngIf="ministryNameInput.invalid && (ministryNameInput.dirty || ministryNameInput.touched)" class="error-message">
-          <div *ngIf="ministryNameInput.errors?.['required']">Le nom du ministère est requis.</div>
-          <div *ngIf="ministryNameInput.errors?.['minlength']">Le nom doit contenir au moins 3 caractères.</div>
-        </div>
+  <!-- Modal pour ajouter/éditer un ministère -->
+  <div *ngIf="showModal" class="modal-overlay" (click)="closeModal()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3>📌 {{ modalTitle }}</h3>
+        <button class="close-btn" (click)="closeModal()">✖</button>
       </div>
-      <button type="submit" class="btn btn-success" [disabled]="ministereForm.invalid">{{ modalButtonText }}</button>
-      <button type="button" class="btn btn-secondary" (click)="closeModal()">Annuler</button>
-    </form>
+      <div class="modal-body">
+        <form (ngSubmit)="saveMinistere()" #ministereForm="ngForm">
+          <div class="form-group">
+            <label for="ministryName" class="label">🏛️ Nom du Ministère:</label>
+            <input
+              type="text"
+              id="ministryName"
+              name="ministryName"
+              [(ngModel)]="ministereName"
+              required
+              minlength="3"
+              class="form-control"
+              #ministryNameInput="ngModel"
+              [class.is-invalid]="ministryNameInput.invalid && (ministryNameInput.dirty || ministereForm.submitted)"
+            >
+            <div class="error-message" *ngIf="ministryNameInput.invalid && (ministryNameInput.dirty || ministereForm.submitted)">
+              <small *ngIf="ministryNameInput.errors?.['required']">Le nom du ministère est requis.</small>
+              <small *ngIf="ministryNameInput.errors?.['minlength']">Le nom doit contenir au moins 3 caractères.</small>
+            </div>
+          </div>
+          <div class="form-actions">
+            <button type="submit" class="btn btn-primary" [disabled]="ministereForm.invalid">{{ modalButtonText }}</button>
+            <button type="button" class="btn btn-secondary" (click)="closeModal()">Annuler</button>
+          </div>
+        </form>
+      </div>
+    </div>
   </div>
 </div>

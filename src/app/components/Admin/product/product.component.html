@@ -3,7 +3,7 @@
   <!-- Search Bar -->
   <div class="search-bar-container">
     <div class="search-bar">
-      <input type="text" placeholder="Rechercher un produit..." [(ngModel)]="searchTerm" (input)="filterProducts()">
+      <input type="text" placeholder="Rechercher un produit..." [(ngModel)]="searchTerm" (input)="filterProducts()" />
       <button><i class="fas fa-search"></i></button>
     </div>
   </div>
@@ -21,13 +21,13 @@
 
   <!-- Table -->
   <div class="table-responsive">
-    <table class="table table-hover shadow-sm rounded">
+    <table class="table table-hover">
       <thead class="table-header">
         <tr>
           <th class="sortable" (click)="sort('id')">ID</th>
           <th class="sortable" (click)="sort('nom')">Nom</th>
           <th class="sortable" (click)="sort('description')">Description</th>
-          <th class="sortable" (click)="sort('prix')">Prix en DT</th>
+          <th class="sortable" (click)="sort('prix')">Prix (DT)</th>
           <th class="sortable" (click)="sort('topologie')">Topologie</th>
           <th>Actions</th>
         </tr>
@@ -40,11 +40,11 @@
           <td>{{ product.prix | number:'1.2-2' }}</td>
           <td>{{ product.topologie }}</td>
           <td>
-            <button class="btn btn-info btn-sm me-2" (click)="openModal(product)">
-              <i class="fas fa-edit"></i> Modifier
+            <button class="action-icon edit-icon" (click)="openModal(product)" data-tooltip="Modifier">
+              <i class="fas fa-edit"></i>
             </button>
-            <button class="btn btn-warning btn-sm" (click)="archiveProduct(product.id)">
-              <i class="fas fa-archive"></i> Archiver
+            <button class="action-icon archive-icon" (click)="archiveProduct(product.id)" data-tooltip="Archiver">
+              <i class="fas fa-archive"></i>
             </button>
           </td>
         </tr>
@@ -55,7 +55,7 @@
     <div class="pagination-container d-flex justify-content-between align-items-center">
       <div class="page-options">
         <select [(ngModel)]="itemsPerPage" (change)="onItemsPerPageChange($event)">
-          <option *ngFor="let option of [5, 10, 20]" [value]="option">{{ option }} lignes par page</option>
+          <option *ngFor="let option of [5, 10, 20]" [value]="option">{{ option }} par page</option>
         </select>
       </div>
       <div class="pagination">
@@ -74,47 +74,47 @@
 
   <!-- Modal -->
   <div *ngIf="isModalOpen" class="modal-overlay" (click)="closeModalOnOutsideClick($event)">
-    <div class="modal-content">
+    <div class="modal-content" (click)="$event.stopPropagation()">
       <div class="modal-header">
-        <h3>{{ editingProduct ? 'Modifier Produit' : 'Ajouter Produit' }}</h3>
+        <h3>{{ editingProduct ? 'Modifier le Produit' : 'Ajouter un Nouveau Produit' }}</h3>
         <button class="close-btn" (click)="closeModal()">
           <i class="fas fa-times"></i>
         </button>
       </div>
-      <form (ngSubmit)="editingProduct ? updateProduct() : addProduct()">
-        <div class="modal-body">
+      <div class="modal-body">
+        <form (ngSubmit)="editingProduct ? updateProduct() : addProduct()" #productFormElement>
           <div class="form-group">
-            <label for="name">Nom</label>
-            <input type="text" id="name" [(ngModel)]="productForm.nom" name="name" required (ngModelChange)="updateFormErrors()">
-            <div *ngIf="formErrors.nom" class="error-message">{{ formErrors.nom }}</div>
+            <label for="name">Nom du Produit *</label>
+            <input type="text" id="name" [(ngModel)]="productForm.nom" name="name" required (ngModelChange)="updateFormErrors()" class="form-control" #nameInput="ngModel" [class.ng-invalid]="nameInput.invalid && (nameInput.dirty || isSubmitted)" />
+            <div *ngIf="formErrors.nom || (nameInput.invalid && (nameInput.dirty || isSubmitted))" class="error-message">{{ formErrors.nom || 'Veuillez entrer un nom de produit.' }}</div>
           </div>
           <div class="form-group">
-            <label for="description">Description</label>
-            <textarea id="description" [(ngModel)]="productForm.description" name="description" required (ngModelChange)="updateFormErrors()"></textarea>
-            <div *ngIf="formErrors.description" class="error-message">{{ formErrors.description }}</div>
+            <label for="description">Description *</label>
+            <textarea id="description" [(ngModel)]="productForm.description" name="description" required (ngModelChange)="updateFormErrors()" class="form-control" #descriptionInput="ngModel" [class.ng-invalid]="descriptionInput.invalid && (descriptionInput.dirty || isSubmitted)"></textarea>
+            <div *ngIf="formErrors.description || (descriptionInput.invalid && (descriptionInput.dirty || isSubmitted))" class="error-message">{{ formErrors.description || 'Veuillez fournir une description.' }}</div>
           </div>
           <div class="form-group">
-            <label for="topologie">Topologie</label>
-            <select id="topologie" [(ngModel)]="productForm.topologie" name="topologie" required (ngModelChange)="updateFormErrors()">
+            <label for="topologie">Topologie *</label>
+            <select id="topologie" [(ngModel)]="productForm.topologie" name="topologie" required (ngModelChange)="updateFormErrors()" class="form-control" #topologieInput="ngModel" [class.ng-invalid]="topologieInput.invalid && (topologieInput.dirty || isSubmitted)">
               <option value="">Sélectionner une topologie</option>
               <option value="0-2 utilisateurs">0-2 utilisateurs</option>
               <option value="2-6 utilisateurs">2-6 utilisateurs</option>
               <option value="6-10 utilisateurs">6-10 utilisateurs</option>
               <option value="plus de 10 utilisateurs">Plus de 10 utilisateurs</option>
             </select>
-            <div *ngIf="formErrors.topologie" class="error-message">{{ formErrors.topologie }}</div>
+            <div *ngIf="formErrors.topologie || (topologieInput.invalid && (topologieInput.dirty || isSubmitted))" class="error-message">{{ formErrors.topologie || 'Veuillez sélectionner une topologie.' }}</div>
           </div>
           <div class="form-group">
-            <label for="prix">Prix (DT)</label>
-            <input type="number" id="prix" [(ngModel)]="productForm.prix" name="prix" min="0" step="0.01" required (ngModelChange)="updateFormErrors()">
-            <div *ngIf="formErrors.prix" class="error-message">{{ formErrors.prix }}</div>
+            <label for="prix">Prix (DT) *</label>
+            <input type="number" id="prix" [(ngModel)]="productForm.prix" name="prix" min="0" step="0.01" required (ngModelChange)="updateFormErrors()" class="form-control" #prixInput="ngModel" [class.ng-invalid]="prixInput.invalid && (prixInput.dirty || isSubmitted)" />
+            <div *ngIf="formErrors.prix || (prixInput.invalid && (prixInput.dirty || isSubmitted))" class="error-message">{{ formErrors.prix || 'Le prix doit être supérieur à 0 DT.' }}</div>
           </div>
-        </div>
-        <div class="form-actions">
-          <button type="submit" class="btn btn-success" [disabled]="!isFormValid()">{{ editingProduct ? 'Mettre à jour' : 'Ajouter' }}</button>
-          <button type="button" class="btn btn-secondary" (click)="closeModal()">Annuler</button>
-        </div>
-      </form>
+          <div class="form-actions">
+            <button type="submit" class="btn btn-primary" [disabled]="!isFormValid()">{{ editingProduct ? 'Mettre à Jour' : 'Ajouter' }}</button>
+            <button type="button" class="btn btn-secondary" (click)="closeModal()">Annuler</button>
+          </div>
+        </form>
+      </div>
     </div>
   </div>
 </div>

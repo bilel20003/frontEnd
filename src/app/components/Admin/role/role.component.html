@@ -11,12 +11,11 @@
 
   <!-- Titre + actions -->
   <header class="d-flex justify-content-between align-items-center">
-    <h2 style="margin-left: 250px">Gérer les Rôles</h2>
+    <h2>Gérer les Rôles</h2>
     <div class="header-actions">
       <button class="mode-toggle" (click)="toggleMode()">
         <i class="fas" [ngClass]="isNightMode ? 'fa-sun' : 'fa-moon'"></i>
       </button>
-     
     </div>
   </header>
 
@@ -33,12 +32,15 @@
       <tbody>
         <tr *ngFor="let role of paginatedRoles">
           <td>{{ role.id }}</td>
-          <td>{{ role.name }}</td>
           <td>
-            <button class="btn btn-info btn-sm me-2" (click)="openModal('edit', role)">
-              <i class="fas fa-edit"></i> Modifier
+            <span class="role-badge" [ngClass]="getRoleBadgeClass(role.id)">
+              {{ role.name }}
+            </span>
+          </td>
+          <td>
+            <button class="action-icon edit-icon" (click)="openModal('edit', role)" data-tooltip="Modifier">
+              <i class="fas fa-edit"></i>
             </button>
-          
           </td>
         </tr>
       </tbody>
@@ -52,9 +54,15 @@
         </select>
       </div>
       <div class="pagination">
-        <button (click)="goToPreviousPage()" [disabled]="currentPage === 1">Précédent</button>
-        <span>Page {{ currentPage }} sur {{ totalPages }}</span>
-        <button (click)="goToNextPage()" [disabled]="currentPage === totalPages">Suivant</button>
+        <button class="btn btn-primary" (click)="goToPreviousPage()" [disabled]="currentPage === 1">
+          <i class="fas fa-chevron-left"></i>
+        </button>
+        <button *ngFor="let page of getPageNumbers()" class="btn btn-primary" [ngClass]="{'active': page === currentPage}" (click)="goToPage(page)">
+          {{ page }}
+        </button>
+        <button class="btn btn-primary" (click)="goToNextPage()" [disabled]="currentPage === totalPages">
+          <i class="fas fa-chevron-right"></i>
+        </button>
       </div>
     </div>
   </div>
@@ -69,8 +77,10 @@
         <label for="roleName">Nom du Rôle</label>
         <input type="text" id="roleName" [(ngModel)]="roleName" name="roleName" required class="form-control">
       </div>
-      <button type="submit" class="btn btn-success">{{ modalButtonText }}</button>
-      <button type="button" class="btn btn-secondary" (click)="closeModal()">Annuler</button>
+      <div class="form-actions">
+        <button type="submit" class="btn btn-primary">{{ modalButtonText }}</button>
+        <button type="button" class="btn btn-secondary" (click)="closeModal()">Annuler</button>
+      </div>
     </form>
   </div>
 </div>

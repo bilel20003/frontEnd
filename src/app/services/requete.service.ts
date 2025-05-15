@@ -17,7 +17,6 @@ export class RequeteService {
     const token = localStorage.getItem('token');
     return {
       headers: new HttpHeaders({
-        'Content-Type': 'application/json',
         'Authorization': token ? `Bearer ${token}` : ''
       })
     };
@@ -43,9 +42,15 @@ export class RequeteService {
       .pipe(catchError(this.handleError));
   }
 
-  createRequete(requete: Omit<Requete, 'id'>): Observable<Requete> {
-    console.log('Creating requete with payload:', requete);
-    return this.http.post<Requete>(`${this.apiUrl}/addrequete`, requete, this.getHttpOptions())
+  createRequete(requete: Omit<Requete, 'id'>, files?: File[]): Observable<Requete> {
+    const formData = new FormData();
+    formData.append('requete', new Blob([JSON.stringify(requete)], { type: 'application/json' }));
+    if (files && files.length > 0) {
+      files.forEach((file, index) => {
+        formData.append(`files`, file);
+      });
+    }
+    return this.http.post<Requete>(`${this.apiUrl}/addrequete`, formData, this.getHttpOptions())
       .pipe(catchError(this.handleError));
   }
 
@@ -63,5 +68,4 @@ export class RequeteService {
     console.error('Erreur lors de la requête:', error);
     return throwError(() => new Error('Une erreur est survenue, veuillez réessayer.'));
   }
-  
 }

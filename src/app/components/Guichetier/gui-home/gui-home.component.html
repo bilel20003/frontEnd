@@ -5,7 +5,7 @@
 <div class="container">
   <!-- Header with Title and Actions -->
   <header class="d-flex justify-content-between align-items-center">
-    <h2>Gestion des Réclamations</h2>
+    <h2>Gestion des Requetes</h2>
     <div class="header-actions">
       <button class="mode-toggle" (click)="toggleMode()">
         <i class="fas" [ngClass]="isNightMode ? 'fa-sun' : 'fa-moon'"></i>
@@ -75,6 +75,7 @@
               class="action-icon refuse-icon"
               (click)="refuserReclamation(reclamation.id)"
               data-tooltip="Refuser"
+              [disabled]="reclamation.etat === 'TRAITEE' || reclamation.etat === 'REFUSEE'"
             >
               <i class="fas fa-xmark"></i>
             </button>
@@ -149,11 +150,11 @@
           </div>
           <div class="info-item">
             <span class="label">📅 Date d'envoi:</span>
-            <span class="value">{{ selectedRequete.date ? (selectedRequete.date | date:'dd/MM/yyyy') : 'Non spécifié' }}</span>
+            <span class="value">{{ selectedRequete.date ? (selectedRequete.date | date:'dd/MM/yyyy HH:mm') : 'Non spécifié' }}</span>
           </div>
           <div class="info-item">
             <span class="label">📅 Date de traitement:</span>
-            <span class="value">{{ selectedRequete.dateTraitement ? (selectedRequete.dateTraitement | date:'dd/MM/yyyy') : 'Non traité' }}</span>
+            <span class="value">{{ selectedRequete.dateTraitement ? (selectedRequete.dateTraitement | date:'dd/MM/yyyy HH:mm') : 'Non traité' }}</span>
           </div>
           <div class="info-item">
             <span class="label">👷 Technicien:</span>
@@ -170,7 +171,9 @@
         </div>
       </div>
       <div class="form-actions">
-        <button class="btn btn-primary" (click)="confirmerTraitement()">Traiter</button>
+        <button class="btn btn-primary" (click)="confirmerTraitement()" [disabled]="selectedRequete.etat === 'TRAITEE' || selectedRequete.etat === 'REFUSEE'">
+          Traiter
+        </button>
         <button class="btn btn-primary" (click)="openTechnicienPopup()" [disabled]="selectedRequete.technicien || selectedRequete.etat === 'TRAITEE' || selectedRequete.etat === 'REFUSEE'">
           <i class="fas fa-user-cog"></i> Affecter Technicien
         </button>

@@ -1,6 +1,19 @@
 <app-navbar-admin></app-navbar-admin>
 
 <div class="container">
+  <!-- Header with Title and Actions -->
+  <header class="d-flex justify-content-between align-items-center">
+    <h2>Gérer les Services</h2>
+    <div class="header-actions">
+      <button class="mode-toggle" (click)="toggleMode()">
+        <i class="fas" [ngClass]="isNightMode ? 'fa-sun' : 'fa-moon'"></i>
+      </button>
+      <button class="btn btn-primary" (click)="openServiceModal()">
+        <i class="fas fa-plus"></i> Ajouter Service
+      </button>
+    </div>
+  </header>
+
   <!-- Barre de recherche -->
   <div class="search-bar-container">
     <div class="search-bar">
@@ -9,40 +22,14 @@
     </div>
   </div>
 
-  <!-- Titre + actions -->
-  <header class="d-flex justify-content-between align-items-center">
-    <h2 style="margin-left: 250px">Gérer les Services</h2>
-    <div class="header-actions">
-      <button class="mode-toggle" (click)="toggleMode()">
-        <i class="fas" [ngClass]="isNightMode ? 'fa-sun' : 'fa-moon'"></i>
-      </button>
-      <button class="btn btn-primary" (click)="openServiceModal()">+ Ajouter Service</button>
-    </div>
-  </header>
-
-  <!-- Liste des services -->
+  <!-- Tableau -->
   <div class="table-responsive">
     <table class="table table-hover shadow-sm rounded">
       <thead class="table-header">
         <tr>
-          <th (click)="sort('id')" class="sortable">
-            ID Service
-            <span *ngIf="sortDirection['id'] !== undefined">
-              {{ sortDirection['id'] ? '▲' : '▼' }}
-            </span>
-          </th>
-          <th (click)="sort('nomService')" class="sortable">
-            Nom du Service
-            <span *ngIf="sortDirection['nomService'] !== undefined">
-              {{ sortDirection['nomService'] ? '▲' : '▼' }}
-            </span>
-          </th>
-          <th (click)="sort('ministere')" class="sortable">
-            Ministère
-            <span *ngIf="sortDirection['ministere'] !== undefined">
-              {{ sortDirection['ministere'] ? '▲' : '▼' }}
-            </span>
-          </th>
+          <th (click)="sort('id')" class="sortable" [ngClass]="{'sorted': sortDirection['id'] !== undefined}">ID Service</th>
+          <th (click)="sort('nomService')" class="sortable" [ngClass]="{'sorted': sortDirection['nomService'] !== undefined}">Nom du Service</th>
+          <th (click)="sort('ministere')" class="sortable" [ngClass]="{'sorted': sortDirection['ministere'] !== undefined}">Ministère</th>
           <th>Actions</th>
         </tr>
       </thead>
@@ -52,11 +39,11 @@
           <td>{{ service.nomService }}</td>
           <td>{{ service.ministere ? getMinistereName(service.ministere.id) : 'Inconnu' }}</td>
           <td>
-            <button class="btn btn-info btn-sm me-2" (click)="editService(service)">
-              <i class="fas fa-edit"></i> Modifier
+            <button class="action-icon edit-icon" (click)="editService(service)" data-tooltip="Modifier">
+              <i class="fas fa-edit"></i>
             </button>
-            <button class="btn btn-warning btn-sm" (click)="archiveService(service.id)">
-              <i class="fas fa-archive"></i> Archiver
+            <button class="action-icon archive-icon" (click)="archiveService(service.id)" data-tooltip="Archiver">
+              <i class="fas fa-archive"></i>
             </button>
           </td>
         </tr>
@@ -71,70 +58,54 @@
         </select>
       </div>
       <div class="pagination">
-        <button class="btn btn-pagination" (click)="goToPreviousPage()" [disabled]="currentPage === 1">
+        <button class="btn btn-primary" (click)="goToPreviousPage()" [disabled]="currentPage === 1">
           <i class="fas fa-chevron-left"></i>
         </button>
-        <button *ngFor="let page of getPageNumbers()"
-                class="btn btn-pagination"
-                [ngClass]="{'active': page === currentPage}"
-                (click)="goToPage(page)">
+        <button *ngFor="let page of getPageNumbers()" class="btn btn-primary" [ngClass]="{'active': page === currentPage}" (click)="goToPage(page)">
           {{ page }}
         </button>
-        <button class="btn btn-pagination" (click)="goToNextPage()" [disabled]="currentPage === totalPages">
+        <button class="btn btn-primary" (click)="goToNextPage()" [disabled]="currentPage === totalPages">
           <i class="fas fa-chevron-right"></i>
         </button>
       </div>
     </div>
   </div>
-</div>
 
-<!-- Popup pour Ajouter ou Modifier un Service -->
-<div class="modal-overlay" *ngIf="isModalOpen">
-  <div class="modal-content">
-    <h3>{{ isEditMode ? 'Modifier un Service' : 'Ajouter un Service' }}</h3>
-    <form #serviceForm="ngForm" (ngSubmit)="saveService()">
-      <div class="info-grid">
-        <div class="info-item">
-          <span class="label">Nom du Service</span>
-          <input
-            type="text"
-            class="form-control"
-            [(ngModel)]="currentService.nomService"
-            name="nomService"
-            required
-            #nomService="ngModel"
-          />
-          <div *ngIf="nomService.invalid && (nomService.dirty || nomService.touched)" class="text-danger mt-1">
-            <small>Le nom du service est requis.</small>
-          </div>
-        </div>
-        <div class="info-item">
-          <span class="label">Ministère</span>
-          <select
-            class="form-control"
-            [(ngModel)]="currentService.ministere.id"
-            name="ministereId"
-            required
-            #ministereId="ngModel"
-            *ngIf="currentService.ministere"
-          >
-            <option value="" disabled>-- Sélectionner un ministère --</option>
-            <option *ngFor="let min of ministeres" [value]="min.id">{{ min.nomMinistere }}</option>
-          </select>
-          <div *ngIf="serviceForm.submitted && serviceForm.controls['ministereId']?.invalid" class="text-danger mt-1">
-            <small>Le ministère est requis.</small>
-          </div>
-          <div *ngIf="!currentService.ministere" class="text-danger mt-1">
-            <small>Erreur: Ministère non chargé.</small>
-          </div>
-        </div>
+  <!-- Modale pour Ajouter ou Modifier un Service -->
+  <div *ngIf="isModalOpen" class="modal-overlay" (click)="closeModal()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3>📌 {{ isEditMode ? 'Modifier un Service' : 'Ajouter un Service' }}</h3>
+        <button class="close-btn" (click)="closeModal()">✖</button>
       </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" (click)="closeModal()">Annuler</button>
-        <button type="submit" class="btn btn-primary" [disabled]="serviceForm.invalid || !currentService.ministere">
-          {{ isEditMode ? 'Enregistrer' : 'Ajouter' }}
-        </button>
+      <div class="modal-body">
+        <form (ngSubmit)="saveService()" #serviceForm="ngForm">
+          <div class="form-group">
+            <label for="nomService" class="label">👤 Nom du Service:</label>
+            <input id="nomService" class="form-control" [(ngModel)]="currentService.nomService" name="nomService" required #nomService="ngModel" [class.is-invalid]="nomService.invalid && (nomService.dirty || nomService.touched)">
+            <div class="error-message" *ngIf="nomService.invalid && (nomService.dirty || nomService.touched)">
+              <small *ngIf="nomService.errors?.['required']">Veuillez entrer un nom de service.</small>
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="ministereId" class="label">🏛️ Ministère:</label>
+            <select id="ministereId" class="form-control" [(ngModel)]="currentService.ministere.id" name="ministereId" required #ministereId="ngModel" [class.is-invalid]="ministereId.invalid && (serviceForm.submitted || ministereId.touched)">
+              <option value="" disabled>-- Sélectionner un ministère --</option>
+              <option *ngFor="let min of ministeres" [value]="min.id">{{ min.nomMinistere }}</option>
+            </select>
+            <div class="error-message" *ngIf="ministereId.invalid && (serviceForm.submitted || ministereId.touched)">
+              <small>Veuillez sélectionner un ministère valide.</small>
+            </div>
+            <div class="error-message" *ngIf="!currentService.ministere">
+              <small>Erreur: Les ministères ne sont pas disponibles. Veuillez réessayer.</small>
+            </div>
+          </div>
+          <div class="form-actions">
+            <button type="submit" class="btn btn-primary" [disabled]="serviceForm.invalid || !currentService.ministere">Confirmer</button>
+            <button type="button" class="btn btn-secondary" (click)="closeModal()">Annuler</button>
+          </div>
+        </form>
       </div>
-    </form>
+    </div>
   </div>
 </div>

@@ -1,10 +1,12 @@
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
 import { ProduitService } from 'src/app/services/produit.service';
 import { UserInfoService } from 'src/app/services/user-info.service';
 import { Produit, CreateProduit } from 'src/app/models/produit.model';
 import { HttpErrorResponse } from '@angular/common/http';
 import { jwtDecode } from 'jwt-decode';
+import { NgForm } from '@angular/forms';
+import { MatSnackBar } from '@angular/material/snack-bar';
 
 interface FormErrors {
   nom?: string;
@@ -27,17 +29,21 @@ export class ProductsComponent implements OnInit {
   editingProduct: Produit | null = null;
   isModalOpen: boolean = false;
   searchTerm: string = '';
-  sortDirection: { [key: string]: boolean } = { id: false }; // Default to descending for id
+  sortDirection: { [key: string]: boolean } = { id: false };
   itemsPerPage: number = 5;
   currentPage: number = 1;
   totalPages: number = 1;
   isNightMode: boolean = false;
+  isSubmitted: boolean = false;
+
+  @ViewChild('productFormElement') productFormElement!: NgForm;
 
   constructor(
     private productService: ProduitService,
     private userInfoService: UserInfoService,
     private router: Router,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private snackBar: MatSnackBar
   ) {}
 
   ngOnInit(): void {
@@ -80,7 +86,7 @@ export class ProductsComponent implements OnInit {
   }
 
   private redirectToLogin(): void {
-    alert('Session invalide. Veuillez vous reconnecter.');
+    alert('Votre session a expiré. Veuillez vous reconnecter.');
     localStorage.removeItem('token');
     this.router.navigate(['/login']);
   }
@@ -90,12 +96,12 @@ export class ProductsComponent implements OnInit {
       next: (data) => {
         this.products = data;
         this.filteredProducts = [...data];
-        this.filteredProducts.sort((a, b) => b.id - a.id); // Sort by id descending
+        this.filteredProducts.sort((a, b) => b.id - a.id);
         this.updatePagination();
       },
-      error: (err: Error) => {
-        console.error('Error loading products:', err.message);
-        alert(err.message);
+      error: (err: HttpErrorResponse) => {
+        console.error('Erreur lors du chargement des produits :', err.message);
+        this.showError('Erreur: Impossible de charger les produits. Vérifiez votre connexion.');
       }
     });
   }
@@ -104,27 +110,27 @@ export class ProductsComponent implements OnInit {
     this.formErrors = {};
 
     if (!this.productForm.nom) {
-      this.formErrors.nom = 'Le nom est requis.';
+      this.formErrors.nom = 'Veuillez entrer un nom de produit.';
     }
     if (!this.productForm.description) {
-      this.formErrors.description = 'La description est requise.';
+      this.formErrors.description = 'Veuillez fournir une description.';
     }
     if (!this.productForm.topologie) {
-      this.formErrors.topologie = 'La topologie est requise.';
+      this.formErrors.topologie = 'Veuillez sélectionner une topologie.';
     }
     if (this.productForm.prix === null || this.productForm.prix <= 0) {
-      this.formErrors.prix = 'Le prix doit être supérieur à 0.';
+      this.formErrors.prix = 'Le prix doit être supérieur à 0 DT.';
     }
 
-    this.cdr.detectChanges(); // Avoid NG0100
+    this.cdr.detectChanges();
     return Object.keys(this.formErrors).length === 0;
   }
 
   isFormValid(): boolean {
     return Object.keys(this.formErrors).length === 0 &&
-           this.productForm.nom !== '' &&
-           this.productForm.description !== '' &&
-           this.productForm.topologie !== '' &&
+           this.productForm.nom.trim() !== '' &&
+           this.productForm.description.trim() !== '' &&
+           this.productForm.topologie.trim() !== '' &&
            this.productForm.prix > 0;
   }
 
@@ -133,6 +139,7 @@ export class ProductsComponent implements OnInit {
   }
 
   addProduct(): void {
+    this.isSubmitted = true;
     if (!this.validateForm()) return;
 
     const createProduit: CreateProduit = {
@@ -146,66 +153,83 @@ export class ProductsComponent implements OnInit {
       next: () => {
         this.getProducts();
         this.closeModal();
-        alert('Produit ajouté avec succès.');
+        this.showSuccess('Produit ajouté avec succès !');
       },
-      error: (err: Error) => {
-        console.error('Error adding product:', err.message);
-        alert(err.message);
+      error: (err: HttpErrorResponse) => {
+        console.error('Erreur lors de l\'ajout du produit :', err.message);
+        this.showError('Erreur: Échec de l\'ajout du produit. Veuillez réessayer.');
       }
     });
   }
 
   updateProduct(): void {
+    this.isSubmitted = true;
     if (!this.validateForm() || !this.editingProduct) return;
 
     this.productService.updateProduit(this.editingProduct.id, this.productForm).subscribe({
       next: () => {
         this.getProducts();
         this.closeModal();
-        alert('Produit mis à jour avec succès.');
+        this.showSuccess('Produit mis à jour avec succès !');
       },
-      error: (err: Error) => {
-        console.error('Error updating product:', err.message);
-        alert(err.message);
+      error: (err: HttpErrorResponse) => {
+        console.error('Erreur lors de la mise à jour du produit :', err.message);
+        this.showError('Erreur: Échec de la mise à jour du produit. Veuillez réessayer.');
       }
     });
   }
 
   archiveProduct(id: number): void {
-    if (!confirm('Voulez-vous vraiment archiver ce produit ?')) return;
-
-    const token = localStorage.getItem('token');
-    if (!token) {
-      this.redirectToLogin();
-      return;
-    }
-
-    this.productService.archiveProduit(id).subscribe({
-      next: () => {
-        this.getProducts();
-        alert('Produit archivé avec succès.');
-      },
-      error: (err: Error) => {
-        console.error('Error archiving product:', err.message);
-        alert(err.message);
+    const snackBarRef = this.snackBar.open(
+      'Voulez-vous vraiment archiver ce produit ? Cette action est irréversible.',
+      'Confirmer',
+      {
+        duration: 10000,
+        panelClass: ['custom-error-snackbar'],
+        verticalPosition: 'top',
+        horizontalPosition: 'center'
       }
+    );
+
+    snackBarRef.onAction().subscribe(() => {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        this.redirectToLogin();
+        return;
+      }
+
+      this.productService.archiveProduit(id).subscribe({
+        next: () => {
+          this.getProducts();
+          this.showSuccess('Produit archivé avec succès !');
+        },
+        error: (err: HttpErrorResponse) => {
+          console.error('Erreur lors de l\'archivage du produit :', err.message);
+          this.showError('Erreur: Échec de l\'archivage du produit. Veuillez réessayer.');
+        }
+      });
     });
   }
 
   openModal(product: Produit | null = null): void {
     this.isModalOpen = true;
+    this.isSubmitted = false;
     this.productForm = product ? { ...product } : { id: 0, nom: '', description: '', topologie: '', prix: 0 };
     this.editingProduct = product;
     this.formErrors = {};
-    this.validateForm(); // Set initial errors
-    this.cdr.detectChanges(); // Avoid NG0100
+    this.validateForm();
+    this.cdr.detectChanges();
   }
 
   closeModal(): void {
     this.isModalOpen = false;
+    this.isSubmitted = false;
     this.productForm = { id: 0, nom: '', description: '', topologie: '', prix: 0 };
     this.editingProduct = null;
     this.formErrors = {};
+    if (this.productFormElement) {
+      this.productFormElement.resetForm();
+    }
   }
 
   closeModalOnOutsideClick(event: MouseEvent): void {
@@ -227,7 +251,7 @@ export class ProductsComponent implements OnInit {
 
   sort(field: string): void {
     if (this.sortDirection[field] === undefined) {
-      this.sortDirection[field] = field === 'id' ? false : true; // id defaults to descending
+      this.sortDirection[field] = field === 'id' ? false : true;
     } else {
       this.sortDirection[field] = !this.sortDirection[field];
     }
@@ -316,5 +340,23 @@ export class ProductsComponent implements OnInit {
     document.body.classList.remove('night-mode');
     localStorage.setItem('mode', 'day');
     this.isNightMode = false;
+  }
+
+  private showSuccess(message: string): void {
+    this.snackBar.open(message, 'Fermer', {
+      duration: 10000,
+      panelClass: ['custom-success-snackbar'],
+      verticalPosition: 'top',
+      horizontalPosition: 'center'
+    });
+  }
+
+  private showError(message: string): void {
+    this.snackBar.open(message, 'Fermer', {
+      duration: 10000,
+      panelClass: ['custom-error-snackbar'],
+      verticalPosition: 'top',
+      horizontalPosition: 'center'
+    });
   }
 }

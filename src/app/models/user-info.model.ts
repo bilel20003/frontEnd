@@ -11,7 +11,5 @@ export interface UserInfo {
     nomService?: string;
     ministere?: { id: number; nomMinistere: string };
   };
-  produit: { id: number
-    
-   };
+  produit: { id: number; nom?: string }; // Added optional nom field
 }

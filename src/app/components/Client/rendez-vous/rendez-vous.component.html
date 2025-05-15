@@ -1,10 +1,5 @@
 <app-navbar></app-navbar>
 <div class="container">
-  <!-- Error Message -->
-  <div *ngIf="errorMessage" class="alert alert-danger" role="alert">
-    {{ errorMessage }}
-  </div>
-
   <!-- Titre + actions -->
   <header class="d-flex justify-content-between align-items-center">
     <h2>Mes Rendez-vous</h2>
@@ -33,7 +28,7 @@
       <form [formGroup]="rendezvousForm" (ngSubmit)="addRendezvous()">
         <div class="form-group">
           <label for="dateSouhaitee"><i class="fas fa-calendar-alt"></i> Date souhaitée</label>
-          <input type="date" formControlName="dateSouhaitee" id="dateSouhaitee" (change)="loadAvailableSlots()" required>
+          <input type="date" formControlName="dateSouhaitee" id="dateSouhaitee" (change)="loadAvailableSlots()" [min]="minDate" required>
           <div *ngIf="rendezvousForm.get('dateSouhaitee')?.touched && rendezvousForm.get('dateSouhaitee')?.invalid" class="error-message">
             La date souhaitée est requise
           </div>
@@ -50,9 +45,14 @@
         </div>
         <div class="form-group">
           <label for="typeProbleme"><i class="fas fa-exclamation-circle"></i> Type de problème</label>
-          <input type="text" formControlName="typeProbleme" id="typeProbleme" required>
+          <select formControlName="typeProbleme" id="typeProbleme" required>
+            <option value="" disabled>Sélectionner un type de problème</option>
+            <option *ngFor="let type of typesProblemes" [value]="type.id">
+              {{ type.name }}
+            </option>
+          </select>
           <div *ngIf="rendezvousForm.get('typeProbleme')?.touched && rendezvousForm.get('typeProbleme')?.invalid" class="error-message">
-            Le type de problème est requis (minimum 3 caractères)
+            Le type de problème est requis
           </div>
         </div>
         <div class="form-group">
@@ -80,7 +80,7 @@
         </button>
       </div>
       <div class="modal-body" *ngIf="selectedRdv">
-        <p><strong>ID:</strong> {{ selectedRdv.id }}</p>
+        
         <p><strong>Technicien:</strong> {{ selectedRdv.technicien?.name || 'Non assigné' }}</p>
         <p><strong>Type de problème:</strong> {{ selectedRdv.typeProbleme }}</p>
         <p><strong>Date du Rendez-vous:</strong> {{ selectedRdv.dateSouhaitee | date:'medium':'fr-FR' }}</p>

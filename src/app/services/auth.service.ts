@@ -13,7 +13,6 @@ export class AuthService {
 
   constructor(private http: HttpClient, private router: Router) {}
 
-  // Méthode de connexion
   login(email: string, password: string): Observable<any> {
     const headers = new HttpHeaders({ 'Content-Type': 'application/json' });
     return this.http.post(`${this.apiUrl}/login`, { email: email.toLowerCase(), password }, { headers })
@@ -25,29 +24,35 @@ export class AuthService {
       }));
   }
 
-  // Méthode pour mot de passe oublié
   forgotPassword(email: string): Observable<any> {
-    const headers = new HttpHeaders({ 'Content-Type': 'application/json' });
+    const headers = new HttpHeaders({
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${this.getToken() || ''}`
+    });
     return this.http.post(`${this.apiUrl}/forgot-password`, { email: email.toLowerCase() }, { headers });
   }
 
-  // Méthode de déconnexion
+  sendWelcomeEmail(email: string): Observable<any> {
+    const headers = new HttpHeaders({
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${this.getToken() || ''}`
+    });
+    return this.http.post(`${this.apiUrl}/welcome-email`, { email: email.toLowerCase() }, { headers });
+  }
+
   logout() {
     localStorage.removeItem('token');
     this.router.navigate(['/login']);
   }
 
-  // Obtenir le token actuel
   getToken(): string | null {
     return localStorage.getItem('token');
   }
 
-  // Vérifier si l'utilisateur est connecté
   isLoggedIn(): boolean {
     return this.getToken() !== null;
   }
 
-  // Récupérer le rôle de l'utilisateur à partir du token
   getRole(): string | null {
     const token = this.getToken();
     if (token) {
@@ -57,7 +62,6 @@ export class AuthService {
     return null;
   }
 
-  // Décoder le token JWT
   decodeToken(): any {
     const token = this.getToken();
     if (token) {
@@ -66,7 +70,6 @@ export class AuthService {
     return null;
   }
 
-  // Méthode pour réinitialiser le mot de passe
   resetPassword(token: string, password: string): Observable<any> {
     const headers = new HttpHeaders({ 'Content-Type': 'application/json' });
     return this.http.post(`${this.apiUrl}/reset-password`, { token, password }, { headers });

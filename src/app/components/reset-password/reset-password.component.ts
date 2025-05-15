@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { FormGroup, FormControl, Validators, ValidatorFn, AbstractControl } from '@angular/forms';
 import { AuthService } from 'src/app/services/auth.service';
 import { Router, ActivatedRoute } from '@angular/router';
+import { MatSnackBar } from '@angular/material/snack-bar';
 
 @Component({
   selector: 'app-reset-password',
@@ -17,7 +18,8 @@ export class ResetPasswordComponent implements OnInit {
   constructor(
     private authService: AuthService,
     private router: Router,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private snackBar: MatSnackBar
   ) {
     this.resetForm = new FormGroup({
       password: new FormControl('', [Validators.required, Validators.minLength(8)]),
@@ -28,7 +30,7 @@ export class ResetPasswordComponent implements OnInit {
   ngOnInit(): void {
     this.token = this.route.snapshot.queryParamMap.get('token');
     if (!this.token) {
-      alert('Jeton de réinitialisation invalide.');
+      this.showError('Jeton de réinitialisation invalide.');
       this.router.navigate(['/login']);
     }
   }
@@ -50,15 +52,33 @@ export class ResetPasswordComponent implements OnInit {
     this.authService.resetPassword(this.token, newPassword)
       .subscribe({
         next: (response: any) => {
-          alert('Mot de passe réinitialisé avec succès. Veuillez vous connecter.');
+          this.showSuccess('Mot de passe réinitialisé avec succès. Veuillez vous connecter.');
           this.router.navigate(['/login']);
           this.loading = false;
         },
         error: (error: any) => {
           const message = error.error?.message || 'Erreur lors de la réinitialisation du mot de passe';
-          alert(message);
+          this.showError(message);
           this.loading = false;
         }
       });
+  }
+
+  private showSuccess(message: string): void {
+    this.snackBar.open(message, 'Fermer', {
+      duration: 10000,
+      panelClass: ['custom-success-snackbar'],
+      verticalPosition: 'top',
+      horizontalPosition: 'center'
+    });
+  }
+
+  private showError(message: string): void {
+    this.snackBar.open(message, 'Fermer', {
+      duration: 10000,
+      panelClass: ['custom-error-snackbar'],
+      verticalPosition: 'top',
+      horizontalPosition: 'center'
+    });
   }
 }

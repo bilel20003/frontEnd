@@ -1,109 +1,167 @@
-<app-navbar-admin></app-navbar-admin>
+  <!-- Navbar -->
+  <app-navbar-admin></app-navbar-admin>
 
-<div class="container">
-  <!-- Barre de recherche -->
-  <div class="search-bar-container">
-    <div class="search-bar">
-      <input type="text" placeholder="Rechercher un objet..." [(ngModel)]="searchTerm" (input)="filterObjects()">
-      <button><i class="fas fa-search"></i></button>
-    </div>
-  </div>
-
-  <!-- Titre + actions -->
-  <header class="d-flex justify-content-between align-items-center">
-    <h2 style="margin-left: 250px">Gérer les objets par réclamation</h2>
-    <div class="header-actions">
-      <button class="mode-toggle" (click)="toggleMode()">
-        <i class="fas" [ngClass]="isNightMode ? 'fa-sun' : 'fa-moon'"></i>
-      </button>
-      <button class="btn btn-primary" (click)="addObject()">+ Ajouter Objet</button>
-    </div>
-  </header>
-
-  <!-- Tableau -->
-  <div class="table-responsive">
-    <table class="table table-hover shadow-sm rounded">
-      <thead class="table-header">
-        <tr>
-          <th (click)="sort('id')" class="sortable" [ngClass]="{'sorted': sortDirection['id'] !== undefined}">ID</th>
-          <th (click)="sort('name')" class="sortable" [ngClass]="{'sorted': sortDirection['name'] !== undefined}">Nom de l'objet</th>
-          <th>Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let objet of paginatedObjects">
-          <td>{{ objet.id }}</td>
-          <td>{{ objet.name }}</td>
-          <td>
-            <button class="btn btn-info btn-sm me-2" (click)="editObject(objet)">
-              <i class="fas fa-edit"></i> Modifier
-            </button>
-            <button class="btn btn-warning btn-sm me-2" (click)="archiveObject(objet.id)">
-              <i class="fas fa-archive"></i> Archiver
-            </button>
-            <button class="btn btn-primary btn-sm" (click)="viewObject(objet)">
-              <i class="fas fa-eye"></i> Voir
-            </button>
-          </td>
-        </tr>
-      </tbody>
-    </table>
-
-    <!-- Pagination -->
-    <div class="pagination-container">
-      <div class="page-options">
-        <select [(ngModel)]="itemsPerPage" (change)="onItemsPerPageChange()">
-          <option *ngFor="let option of [5, 10, 20]" [value]="option">{{ option }} lignes par page</option>
-        </select>
+  <!-- Contenu principal -->
+  <div class="container">
+    <!-- Header with Title and Actions -->
+    <header class="d-flex justify-content-between align-items-center">
+      <h2>Gestion des Objets</h2>
+      <div class="header-actions">
+        <button class="mode-toggle" (click)="toggleMode()">
+          <i class="fas" [ngClass]="isNightMode ? 'fa-sun' : 'fa-moon'"></i>
+        </button>
+        <button class="btn btn-primary" (click)="addObject()">
+          <i class="fas fa-plus"></i> Ajouter Objet
+        </button>
       </div>
-      <div class="pagination">
-        <button (click)="goToPreviousPage()" [disabled]="currentPage === 1">Précédent</button>
-        <span>Page {{ currentPage }} sur {{ totalPages }}</span>
-        <button (click)="goToNextPage()" [disabled]="currentPage === totalPages">Suivant</button>
+    </header>
+
+    <!-- Barre de recherche -->
+    <div class="search-bar-container">
+      <div class="search-bar">
+        <input
+          type="text"
+          placeholder="Rechercher un objet..."
+          [(ngModel)]="searchTerm"
+          (input)="filterObjects()"
+        />
+        <button><i class="fas fa-search"></i></button>
       </div>
     </div>
-  </div>
 
-  <!-- Modal Ajouter / Modifier -->
-  <div class="modal" *ngIf="showModal">
-    <div class="modal-content">
-      <h2>{{ editingObject ? 'Modifier l\'objet' : 'Ajouter un objet' }}</h2>
-      <form (ngSubmit)="saveObject()">
-        <div class="form-group">
-          <label for="name">Nom</label>
-          <input id="name" [(ngModel)]="newObject.name" name="name" class="form-control" required>
-        </div>
-        <div class="form-group">
-          <label for="produit">Produit</label>
-          <select id="produit" [(ngModel)]="newObject.produit.id" name="produit" class="form-control" required>
-            <option *ngFor="let produit of availableProducts" [ngValue]="produit.id">{{ produit.nom }}</option>
+    <!-- Tableau -->
+    <div class="table-responsive">
+      <table class="table table-hover shadow-sm rounded">
+        <thead class="table-header">
+          <tr>
+            <th (click)="sort('id')" class="sortable">ID</th>
+            <th (click)="sort('name')" class="sortable">Nom de l'objet</th>
+            <th (click)="sort('type')" class="sortable">Type</th>
+            <th (click)="sort('produit')" class="sortable">Produit</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let objet of paginatedObjects">
+            <td>{{ objet.id }}</td>
+            <td>{{ objet.name }}</td>
+            <td>{{ formatDisplayText(objet.type) }}</td>
+            <td>{{ getProduitName(objet.produit.id) }}</td>
+            <td>
+              <button
+                class="action-icon consult-icon"
+                (click)="consulterObject(objet)"
+                data-tooltip="Consulter"
+              >
+                <i class="fas fa-eye default-icon closed-eye"></i>
+                <i class="fas fa-eye hover-icon"></i>
+              </button>
+              <button
+                class="action-icon edit-icon"
+                (click)="editObject(objet)"
+                data-tooltip="Modifier"
+              >
+                <i class="fas fa-edit"></i>
+              </button>
+              <button
+                class="action-icon refuse-icon"
+                (click)="archiveObject(objet.id)"
+                data-tooltip="Archiver"
+              >
+                <i class="fas fa-archive"></i>
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <!-- Pagination -->
+      <div class="pagination-container d-flex justify-content-between align-items-center">
+        <div class="page-options">
+          <select [(ngModel)]="itemsPerPage" (change)="onItemsPerPageChange()">
+            <option *ngFor="let option of [5, 10, 20]" [value]="option">{{ option }} lignes par page</option>
           </select>
         </div>
-        <button type="submit" class="btn btn-success" [disabled]="!newObject.name || !newObject.produit.id">Enregistrer</button>
-        <button type="button" class="btn btn-secondary" (click)="closeModal()">Annuler</button>
-      </form>
+        <div class="pagination">
+          <button class="btn btn-primary" (click)="goToPreviousPage()" [disabled]="currentPage === 1">
+            <i class="fas fa-chevron-left"></i>
+          </button>
+          <button *ngFor="let page of getPageNumbers()" class="btn btn-primary" [ngClass]="{'active': page === currentPage}" (click)="goToPage(page)">
+            {{ page }}
+          </button>
+          <button class="btn btn-primary" (click)="goToNextPage()" [disabled]="currentPage === totalPages">
+            <i class="fas fa-chevron-right"></i>
+          </button>
+        </div>
+      </div>
     </div>
-  </div>
 
-  <!-- Modal Consultation -->
-  <div class="modal-overlay" *ngIf="showViewModal">
-    <div class="modal-content">
-      <h3>Détails de l'Objet</h3>
-      <div class="form-group">
-        <label>ID de l'objet</label>
-        <p>{{ selectedObject?.id }}</p>
+    <!-- Modal Ajouter / Modifier -->
+    <div class="modal-overlay" *ngIf="showModal" (click)="closeModal()">
+      <div class="modal-content" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h3>{{ editingObject ? "Modifier l'objet" : "Ajouter un objet" }}</h3>
+          <button class="close-btn" (click)="closeModal()">✖</button>
+        </div>
+        <div class="modal-body">
+          <form (ngSubmit)="saveObject()">
+            <div class="form-group">
+              <label for="name" class="label">Nom de l'objet</label>
+              <input id="name" [(ngModel)]="newObject.name" name="name" class="form-control" required>
+            </div>
+            <div class="form-group">
+              <label for="produit" class="label">Produit</label>
+              <select id="produit" [(ngModel)]="newObject.produit.id" name="produit" class="form-control" required>
+                <option *ngFor="let produit of availableProducts" [ngValue]="produit.id">{{ produit.nom }}</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="type" class="label">Type d'objet</label>
+              <select id="type" [(ngModel)]="newObject.type" name="type" class="form-control" required>
+                <option value="RENDEZVOUS">Rendez-vous</option>
+                <option value="RECLAMATION">Réclamation</option>
+                <option value="DEMANDE_TRAVAUX">Demande de travaux</option>
+              </select>
+            </div>
+            <div class="form-actions">
+              <button type="submit" class="btn btn-primary" [disabled]="!newObject.name || !newObject.produit.id || !newObject.type">Enregistrer</button>
+              <button type="button" class="btn btn-secondary" (click)="closeModal()">Annuler</button>
+            </div>
+          </form>
+        </div>
       </div>
-      <div class="form-group">
-        <label>Nom de l'objet</label>
-        <p>{{ selectedObject?.name }}</p>
-      </div>
-      <div class="form-group">
-        <label>Produit associé</label>
-        <p>{{ selectedObject?.produit?.id || 'Aucun' }}</p>
-      </div>
-      <div class="form-actions">
-        <button type="button" class="btn btn-secondary" (click)="closeViewModal()">Fermer</button>
+    </div>
+
+    <!-- Modal Consultation -->
+    <div class="modal-overlay" *ngIf="showViewModal" (click)="closeViewModal()">
+      <div class="modal-content" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h3>📌 Détails de l'Objet</h3>
+          <button class="close-btn" (click)="closeViewModal()">✖</button>
+        </div>
+        <div class="modal-body">
+          <div class="info-grid">
+            <div class="info-item">
+              <span class="label">📄 ID:</span>
+              <span class="value">{{ selectedObject?.id ?? 'Non spécifié' }}</span>
+            </div>
+            <div class="info-item">
+              <span class="label">📌 Nom:</span>
+              <span class="value">{{ selectedObject?.name ?? 'Non spécifié' }}</span>
+            </div>
+            <div class="info-item">
+              <span class="label">📦 Produit:</span>
+              <span class="value">{{ getSelectedProduitName() }}</span>
+            </div>
+            <div class="info-item">
+              <span class="label">⚡ Type:</span>
+              <span class="value">{{ formatDisplayText(selectedObject?.type) }}</span>
+            </div>
+          </div>
+        </div>
+        <div class="form-actions">
+          <button type="button" class="btn btn-secondary" (click)="closeViewModal()">Fermer</button>
+        </div>
       </div>
     </div>
   </div>
-</div>

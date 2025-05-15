@@ -3,7 +3,7 @@
 <div class="container">
   <!-- Header -->
   <header class="d-flex justify-content-between align-items-center">
-    <h2 style="margin-left: 250px;">Gestion des Horaires</h2>
+    <h2>Gestion des Horaires</h2>
     <div class="header-actions">
       <button class="mode-toggle" (click)="toggleNightMode()">
         <i class="fas" [ngClass]="isNightMode ? 'fa-sun' : 'fa-moon'"></i>
@@ -43,6 +43,7 @@
       </div>
       <div class="row g-3">
         <div class="col-md-3 col-12 form-group">
+          <p class="field-description">Heure de début de la journée</p>
           <div class="input-group">
             <label for="startTime">Début</label>
             <div class="input-wrapper">
@@ -60,6 +61,7 @@
           </div>
         </div>
         <div class="col-md-3 col-12 form-group">
+          <p class="field-description">Heure de fin de la journée</p>
           <div class="input-group">
             <label for="endTime">Fin</label>
             <div class="input-wrapper">
@@ -77,6 +79,7 @@
           </div>
         </div>
         <div class="col-md-3 col-12 form-group">
+          <p class="field-description">Heure de début de la pause</p>
           <div class="input-group">
             <label for="breakStart">Pause Début</label>
             <div class="input-wrapper">
@@ -94,6 +97,7 @@
           </div>
         </div>
         <div class="col-md-3 col-12 form-group">
+          <p class="field-description">Heure de fin de la pause</p>
           <div class="input-group">
             <label for="breakEnd">Pause Fin</label>
             <div class="input-wrapper">
@@ -149,12 +153,12 @@
           <td>{{ schedule.startTime.slice(0, 5) }} - {{ schedule.endTime.slice(0, 5) }}</td>
           <td>{{ schedule.breakStart && schedule.breakEnd ? schedule.breakStart.slice(0, 5) + ' - ' + schedule.breakEnd.slice(0, 5) : 'Aucune' }}</td>
           <td>
-            <button class="btn btn-info btn-sm me-2" (click)="editSchedule(schedule)">
-              <i class="fas fa-edit"></i> Modifier
-            </button>
-            <button class="btn btn-danger btn-sm" (click)="deleteSchedule(schedule.id)">
-              <i class="fas fa-trash"></i> Supprimer
-            </button>
+            <span class="action-icon edit-icon" data-tooltip="Modifier" (click)="editSchedule(schedule)">
+              <i class="fas fa-edit"></i>
+            </span>
+            <span class="action-icon archive-icon" data-tooltip="Supprimer" (click)="deleteSchedule(schedule.id)">
+              <i class="fas fa-trash"></i>
+            </span>
           </td>
         </tr>
       </tbody>
@@ -183,4 +187,7 @@
       </button>
     </div>
   </div>
+
+  <!-- Snackbar -->
+  <div id="snackbar" class="snackbar" [ngClass]="{'success': snackbarType === 'success', 'error': snackbarType === 'error'}" [innerHTML]="snackbarMessage"></div>
 </div>

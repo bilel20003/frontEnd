@@ -2,11 +2,13 @@ import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { RendezvousService } from 'src/app/services/rendez-vous.service';
 import { Rdv } from 'src/app/models/rendez-vous.model';
 import { jwtDecode } from 'jwt-decode';
-import { CalendarOptions, EventInput } from '@fullcalendar/core';
+import { CalendarOptions, EventInput, EventContentArg } from '@fullcalendar/core';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
 import listPlugin from '@fullcalendar/list';
+import interactionPlugin from '@fullcalendar/interaction'; // Add interaction for modern features
 import { HttpErrorResponse } from '@angular/common/http';
+import { MatSnackBar } from '@angular/material/snack-bar';
 
 declare const google: any;
 declare const gapi: any;
@@ -30,9 +32,10 @@ export class TechRendezVousComponent implements OnInit {
   selectedRdv: Rdv | null = null;
   accessToken: string | null = null;
   noteRetour: string = '';
+  showNoteWarning: boolean = false;
   calendarOptions: CalendarOptions = {
+    plugins: [dayGridPlugin, timeGridPlugin, listPlugin, interactionPlugin],
     initialView: 'dayGridMonth',
-    plugins: [dayGridPlugin, timeGridPlugin, listPlugin],
     headerToolbar: {
       left: 'prev,next today',
       center: 'title',
@@ -41,12 +44,24 @@ export class TechRendezVousComponent implements OnInit {
     events: [],
     eventClick: this.handleEventClick.bind(this),
     height: 'auto',
-    locale: 'fr'
+    locale: 'fr',
+    eventContent: this.renderEventContent.bind(this),
+    dayMaxEvents: true, // Limits events per day for a cleaner look
+    moreLinkClick: 'popover', // Modern popover for additional events
+    eventDisplay: 'block', // Ensures events are displayed as blocks
+    eventTimeFormat: { hour: '2-digit', minute: '2-digit', meridiem: false }, // Clean time format
+    slotDuration: '00:30:00', // 30-minute slots for time views
+    slotLabelInterval: '01:00', // Hourly labels
+    editable: false, // Disable drag unless needed
+    selectable: true, // Enable selection for modern interaction
+    dayCellClassNames: 'modern-day-cell', // Custom class for styling
+    eventClassNames: 'modern-event' // Custom class for event styling
   };
 
   constructor(
     private rendezvousService: RendezvousService,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private snackBar: MatSnackBar
   ) {}
 
   ngOnInit(): void {
@@ -170,7 +185,7 @@ export class TechRendezVousComponent implements OnInit {
 
   loadCalendarEvents(): void {
     const events: EventInput[] = this.filteredRendezvous.map(rdv => ({
-      title: `${rdv.typeProbleme} (${rdv.status})`,
+      title: rdv.typeProbleme,
       start: rdv.dateSouhaitee,
       extendedProps: {
         id: rdv.id,
@@ -181,7 +196,8 @@ export class TechRendezVousComponent implements OnInit {
         noteRetour: rdv.noteRetour
       },
       backgroundColor: this.getEventColor(rdv.status),
-      borderColor: this.getEventColor(rdv.status)
+      borderColor: this.getEventColor(rdv.status),
+      textColor: this.getTextColor(rdv.status) // Dynamic text color
     }));
     this.calendarOptions = {
       ...this.calendarOptions,
@@ -192,14 +208,22 @@ export class TechRendezVousComponent implements OnInit {
   getEventColor(status: string): string {
     switch (status) {
       case 'EN_ATTENTE':
-        return '#ffc107';
+        return '#ffca2c';
       case 'TERMINE':
-        return '#28a745';
+        return '#2ecc71';
       case 'REFUSE':
-        return '#dc3545';
+        return '#ff6b6b';
       default:
         return '#6c757d';
     }
+  }
+
+  getTextColor(status: string): string {
+    return status === 'EN_ATTENTE' ? '#212529' : 'white'; // Dark text for yellow, white for others
+  }
+
+  renderEventContent(eventInfo: EventContentArg): any {
+    return { html: `<div>${eventInfo.event.title}</div>` };
   }
 
   handleEventClick(info: any): void {
@@ -214,29 +238,40 @@ export class TechRendezVousComponent implements OnInit {
     this.selectedRdv = rdv;
     this.noteRetour = rdv.noteRetour || '';
     this.isModalOpen = true;
+    this.showNoteWarning = false;
   }
 
   closeModal(): void {
     this.isModalOpen = false;
     this.selectedRdv = null;
     this.noteRetour = '';
+    this.showNoteWarning = false;
+  }
+
+  onOverlayClick(event: MouseEvent): void {
+    if ((event.target as HTMLElement).classList.contains('modal-overlay')) {
+      this.closeModal();
+    }
   }
 
   refuseRendezvous(): void {
     if (this.selectedRdv && this.selectedRdv.id && this.technicienId) {
       if (!this.noteRetour.trim()) {
-        alert('Veuillez fournir une note de retour pour refuser le rendez-vous.');
+        this.showWarning('Veuillez fournir une note de retour pour refuser le rendez-vous.');
+        this.showNoteWarning = true;
         return;
       }
       this.rendezvousService.refuseRdv(this.selectedRdv.id, this.technicienId, this.noteRetour).subscribe({
         next: () => {
           this.getRendezvous();
           this.closeModal();
+          this.showSuccess('Rendez-vous refusé avec succès !');
           this.errorMessage = null;
         },
         error: (err: HttpErrorResponse) => {
           console.error('Erreur lors du refus du rendez-vous:', err);
           this.errorMessage = err.message;
+          this.showError('Erreur lors du refus du rendez-vous.');
         }
       });
     }
@@ -244,17 +279,23 @@ export class TechRendezVousComponent implements OnInit {
 
   completeRendezvous(): void {
     if (this.selectedRdv && this.selectedRdv.id && this.technicienId) {
-      console.log('JWT Token:', localStorage.getItem('token')); // Log pour déboguer le token
-      this.rendezvousService.updateRdv(this.selectedRdv.id, { status: 'TERMINE' }).subscribe({
+      if (!this.noteRetour.trim()) {
+        this.showWarning('Veuillez fournir une note de retour pour terminer le rendez-vous.');
+        this.showNoteWarning = true;
+        return;
+      }
+      this.rendezvousService.updateRdv(this.selectedRdv.id, { status: 'TERMINE', noteRetour: this.noteRetour }).subscribe({
         next: (updatedRdv) => {
           console.log('Rendez-vous terminé:', updatedRdv);
           this.getRendezvous();
           this.closeModal();
+          this.showSuccess('Rendez-vous terminé avec succès !');
           this.errorMessage = null;
         },
         error: (err: HttpErrorResponse) => {
           console.error('Erreur lors de la complétion du rendez-vous:', err);
           this.errorMessage = err.message;
+          this.showError('Erreur lors de la complétion du rendez-vous.');
         }
       });
     }
@@ -386,5 +427,32 @@ export class TechRendezVousComponent implements OnInit {
     this.isNightMode = !this.isNightMode;
     document.body.classList.toggle('night-mode', this.isNightMode);
     localStorage.setItem('mode', this.isNightMode ? 'night' : 'day');
+  }
+
+  private showSuccess(message: string): void {
+    this.snackBar.open(message, 'Fermer', {
+      duration: 10000,
+      panelClass: ['custom-success-snackbar'],
+      verticalPosition: 'top',
+      horizontalPosition: 'center'
+    });
+  }
+
+  private showError(message: string): void {
+    this.snackBar.open(message, 'Fermer', {
+      duration: 10000,
+      panelClass: ['custom-error-snackbar'],
+      verticalPosition: 'top',
+      horizontalPosition: 'center'
+    });
+  }
+
+  private showWarning(message: string): void {
+    this.snackBar.open(message, 'Fermer', {
+      duration: 10000,
+      panelClass: ['custom-warning-snackbar'],
+      verticalPosition: 'top',
+      horizontalPosition: 'center'
+    });
   }
 }

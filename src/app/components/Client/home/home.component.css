@@ -6,6 +6,7 @@
   padding-top: 80px;
   min-height: calc(100vh - 70px);
   box-sizing: border-box;
+  transition: filter 0.3s ease;
 }
 
 /* Welcome Message */
@@ -181,6 +182,30 @@ header h2 {
 
 .consult-icon:hover .hover-icon {
   display: block;
+}
+
+.view-icon {
+  color: #17a2b8;
+  border-color: #17a2b8;
+}
+
+.view-icon:hover {
+  background: linear-gradient(135deg, #17a2b8, #138496);
+  color: white;
+  border-color: transparent;
+  transform: scale(1.1);
+}
+
+.download-icon {
+  color: #1e3c72;
+  border-color: #1e3c72;
+}
+
+.download-icon:hover {
+  background: linear-gradient(135deg, #1e3c72, #2a5298);
+  color: white;
+  border-color: transparent;
+  transform: scale(1.1);
 }
 
 .action-icon:hover::after {
@@ -403,6 +428,28 @@ body.night-mode {
   border-color: transparent;
 }
 
+.night-mode .view-icon {
+  color: #20c997;
+  border-color: #20c997;
+}
+
+.night-mode .view-icon:hover {
+  background: linear-gradient(135deg, #20c997, #17a2b8);
+  color: white;
+  border-color: transparent;
+}
+
+.night-mode .download-icon {
+  color: #2ecc71;
+  border-color: #2ecc71;
+}
+
+.night-mode .download-icon:hover {
+  background: linear-gradient(135deg, #2ecc71, #27ae60);
+  color: white;
+  border-color: transparent;
+}
+
 .night-mode .action-icon:hover::after {
   background-color: #555;
   color: #ddd;
@@ -502,6 +549,98 @@ body.night-mode {
   line-height: 1.6;
 }
 
+/* Styles pour la liste des pièces jointes */
+.attachment-preview-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+  margin-top: 10px;
+}
+
+.attachment-preview-item {
+  position: relative;
+}
+
+.attachment-preview {
+  display: flex;
+  align-items: center;
+  padding: 5px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  background-color: #f9f9f9;
+  text-decoration: none;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.attachment-preview:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.attachment-preview-image {
+  width: 60px;
+  height: 60px;
+  object-fit: cover;
+  border-radius: 4px;
+}
+
+.attachment-preview-icon {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px;
+}
+
+.attachment-preview-icon i {
+  font-size: 24px;
+  color: #1e3c72;
+}
+
+.attachment-preview-icon span {
+  font-size: 14px;
+  color: #333;
+  max-width: 150px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.attachment-actions {
+  display: flex;
+  gap: 5px;
+  margin-left: 10px;
+}
+
+.remove-attachment-btn {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  background-color: #dc3545;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.remove-attachment-btn:hover {
+  background-color: #c82333;
+}
+
+.remove-attachment-btn i {
+  font-size: 12px;
+}
+
+.no-attachments {
+  font-size: 14px;
+  color: #666;
+}
+
 .modal-content textarea {
   width: 100%;
   padding: 10px;
@@ -553,6 +692,12 @@ body.night-mode {
   outline: none;
 }
 
+.form-group select:disabled {
+  background-color: #f0f0f0;
+  color: #888;
+  cursor: not-allowed;
+}
+
 .form-group textarea {
   resize: vertical;
   min-height: 100px;
@@ -570,6 +715,12 @@ body.night-mode {
 
 .error-message {
   color: #dc3545;
+  font-size: 12px;
+  margin-top: 5px;
+}
+
+.loading-message {
+  color: #1e3c72;
   font-size: 12px;
   margin-top: 5px;
 }
@@ -608,12 +759,43 @@ body.night-mode {
   border-color: #2ecc71;
 }
 
+.night-mode .form-group select:disabled {
+  background-color: #444;
+  color: #888;
+}
+
 .night-mode .form-group label {
   color: #2ecc71;
 }
 
 .night-mode .error-message {
   color: #ff6b6b;
+}
+
+.night-mode .loading-message {
+  color: #2ecc71;
+}
+
+/* Night mode pour les pièces jointes */
+.night-mode .attachment-preview {
+  background-color: #2a2a2a;
+  border-color: #444;
+}
+
+.night-mode .attachment-preview-icon i {
+  color: #2ecc71;
+}
+
+.night-mode .attachment-preview-icon span {
+  color: #ddd;
+}
+
+.night-mode .attachment-preview:hover {
+  box-shadow: 0 2px 8px rgba(255, 255, 255, 0.1);
+}
+
+.night-mode .no-attachments {
+  color: #aaa;
 }
 
 /* Animations */

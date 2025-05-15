@@ -4,217 +4,487 @@
     margin: auto;
     padding: 20px;
     padding-top: 80px;
-  }
-  
-  /* Barre de recherche */
-  .search-bar-container {
+    min-height: calc(100vh - 70px);
+    box-sizing: border-box;
+}
+
+/* Header */
+header h2 {
+    color: #1e3c72;
+    font-size: 2rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    margin-left: 250px;
+    padding: 20px 0;
+}
+
+/* Barre de recherche */
+.search-bar-container {
     display: flex;
     justify-content: flex-end;
     margin-bottom: 15px;
     background-color: white;
     padding: 10px 0;
-  }
-  
-  .search-bar {
+}
+
+.search-bar {
     display: flex;
     align-items: center;
     background-color: #fff;
     border-radius: 25px;
     padding: 8px 15px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 2px 4px rgba(24, 23, 23, 0.15);
     width: 350px;
-  }
-  
-  .search-bar input {
+}
+
+.search-bar input {
     flex: 1;
     border: none;
     outline: none;
     padding: 8px 12px;
     font-size: 14px;
-  }
-  
-  .search-bar button {
+}
+
+.search-bar button {
     background-color: #ffcc00;
     border: none;
     border-radius: 50%;
     padding: 8px;
     cursor: pointer;
     transition: 0.3s;
-  }
-  
-  .search-bar button:hover {
+}
+
+.search-bar button:hover {
     background-color: #ff9900;
-  }
-  
-  /* Tableau */
-  .table-responsive {
+}
+
+/* Tableau amélioré */
+.table-responsive {
     margin-top: 20px;
     margin-left: 250px;
     border-radius: 15px;
     overflow: hidden;
     background-color: white;
-  }
-  
-  .table {
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.table {
     width: 100%;
     border-radius: 10px;
     border-collapse: separate;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-  }
-  
-  .table th,
-  .table td {
+}
+
+.table th,
+.table td {
     padding: 12px 15px;
     text-align: left;
-  }
-  
-  .table-header th {
+}
+
+.table-header th {
     background: linear-gradient(135deg, #1e3c72, #2a5298);
     color: white;
     cursor: pointer;
-  }
-  
-  .table-hover tbody tr:hover {
+}
+
+.table-header th.sortable:hover {
+    background: linear-gradient(135deg, #2a5298, #1e3c72);
+}
+
+.table-hover tbody tr:hover {
     background-color: #f9f9f9;
-  }
-  
-  /* Boutons */
-  td:last-child {
-    white-space: nowrap;
-  }
-  
-  .btn {
-    padding: 6px 12px;
-    border-radius: 5px;
+}
+
+/* Boutons */
+.btn {
+    padding: 8px 16px;
+    border-radius: 6px;
     font-size: 14px;
-    margin-right: 5px;
-  }
-  
-  .btn-info { background-color: #17a2b8; color: white; }
-  .btn-danger { background-color: #dc3545; color: white; }
-  .btn-primary { background-color: #007bff; color: white; }
-  
-  .btn i {
-    margin-right: 5px;
-  }
-  
-  /* Navbar */
-  .header-actions {
-    display: flex;
-    align-items: center;
-  }
-  
-  .header-actions button {
-    margin-right: 20px;
-  }
-  
-  .header-actions i {
+    transition: all 0.3s ease;
+    margin-right: 10px;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #1e3c72, #2a5298);
+    color: white;
+    border: none;
+}
+
+.btn-primary:hover {
+    background: linear-gradient(135deg, #2a5298, #1e3c72);
+    transform: translateY(-2px);
+}
+
+.btn-primary:disabled {
+    background: #6c757d;
+    cursor: not-allowed;
+}
+
+.btn-secondary {
+    background-color: #6c757d;
+    color: white;
+    border: none;
+}
+
+.btn-secondary:hover {
+    background-color: #5a6268;
+    transform: translateY(-2px);
+}
+
+/* Action Icons (Rounded Square with Gradient Fill) */
+.action-icon {
+    background: transparent;
+    border: 1px solid;
+    border-radius: 6px;
+    font-size: 1.1rem;
     cursor: pointer;
-    font-size: 1.5rem;
+    padding: 6px;
+    margin: 0 6px;
+    position: relative;
+    transition: background 0.3s, border-color 0.3s, transform 0.2s;
+    width: 30px;
+    height: 30px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.edit-icon {
     color: #007bff;
-    transition: 0.3s;
-  }
-  
-  .header-actions i:hover {
-    color: #0056b3;
-  }
-  
-  /* Pagination */
-  .pagination-container {
+    border-color: #007bff;
+}
+
+.edit-icon:hover {
+    background: linear-gradient(135deg, #007bff, #0056b3);
+    color: white;
+    border-color: transparent;
+    transform: scale(1.1);
+}
+
+.action-icon:hover::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: #333;
+    color: white;
+    padding: 5px 10px;
+    border-radius: 4px;
+    font-size: 12px;
+    white-space: nowrap;
+    z-index: 10;
+    opacity: 0;
+    pointer-events: none;
+    animation: fadeInTooltip 0.2s ease forwards;
+    margin-bottom: 8px;
+}
+
+/* Badges pour les rôles (Copied from User Interface) */
+.role-badge {
+    display: inline-block;
+    padding: 5px 10px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.role-client {
+    background-color: #e6f3ff;
+    color: #007bff;
+}
+
+.role-guichetier {
+    background-color: #e6ffed;
+    color: #28a745;
+}
+
+.role-technicien {
+    background-color: #fff3e6;
+    color: #ff9900;
+}
+
+.role-admin {
+    background-color: #ffe6e6;
+    color: #dc3545;
+}
+
+/* Pagination */
+.pagination-container {
     margin-top: 20px;
     display: flex;
     justify-content: space-between;
     align-items: center;
-  }
-  
-  .pagination button {
+}
+
+.pagination {
+    display: flex;
+    gap: 5px;
+}
+
+.pagination button {
     padding: 8px 12px;
     font-size: 14px;
-    margin: 5px;
     border-radius: 5px;
     background-color: #007bff;
     color: white;
     cursor: pointer;
     transition: 0.3s;
-  }
-  
-  .pagination button:disabled {
+    border: none;
+    min-width: 36px;
+    text-align: center;
+}
+
+.pagination button:disabled {
     background-color: #6c757d;
     cursor: not-allowed;
-  }
-  
-  .pagination span {
-    font-size: 14px;
-  }
-  
-  /* Choix du nombre de lignes par page */
-  .page-options select {
+}
+
+.pagination button.active {
+    background: linear-gradient(135deg, #ffcc00, #ff9900);
+    color: #1e3c72;
+    font-weight: bold;
+}
+
+.page-options select {
     padding: 5px;
     font-size: 14px;
     border-radius: 5px;
     border: 1px solid #aa2727;
-  }
-  
-  /* Mode nuit */
-  body.night-mode {
-    background-color: #121212;
-    color: white;
-  }
-  
-  .night-mode .navbar {
-    background-color: #333;
-  }
-  
-  .night-mode .table {
-    background-color: #1f1f1f;
-  }
-  
-  .night-mode .table th, .night-mode .table td {
-    color: white;
-  }
-  
-  .mode-toggle {
+}
+
+/* Icône de mode nuit/jour */
+.header-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.mode-toggle {
     background: none;
     border: none;
-    color: #007bff;
+    color: #1e3c72;
     font-size: 1.5rem;
     cursor: pointer;
     transition: color 0.3s;
-  }
-  
-  .mode-toggle:hover {
-    color: #0056b3;
-  }
-  
-  
-  /* Modal Styles */
+}
+
+.mode-toggle:hover {
+    color: #2a5298;
+}
+
+/* Mode nuit */
+body.night-mode {
+    background-color: #121212;
+    color: white;
+}
+
+.night-mode .container {
+    background-color: #121212;
+}
+
+.night-mode .table-responsive {
+    background-color: #1e1f1f;
+}
+
+.night-mode .table-header th {
+    background: linear-gradient(135deg, #333, #555);
+}
+
+.night-mode .table-hover tbody tr:hover {
+    background-color: #2a2a2a;
+}
+
+.night-mode .search-bar {
+    background-color: #333;
+    box-shadow: 0 2px 4px rgba(255, 255, 255, 0.1);
+}
+
+.night-mode .search-bar input {
+    background-color: #333;
+    color: white;
+}
+
+.night-mode .search-bar button {
+    background: linear-gradient(135deg, #333, #555);
+}
+
+.night-mode .search-bar button:hover {
+    background: linear-gradient(135deg, #555, #333);
+}
+
+.night-mode .pagination button {
+    background-color: #2ecc71;
+}
+
+.night-mode .pagination button.active {
+    background: linear-gradient(135deg, #ffca2c, #ff9900);
+    color: #121212;
+}
+
+.night-mode .pagination button:disabled {
+    background-color: #555;
+}
+
+.night-mode .page-options select {
+    background-color: #333;
+    color: #2ecc71;
+    border-color: #555;
+}
+
+.night-mode .mode-toggle {
+    color: #2ecc71;
+}
+
+.night-mode .mode-toggle:hover {
+    color: #27ae60;
+}
+
+.night-mode header h2 {
+    color: #2ecc71;
+}
+
+/* Night mode for icons */
+.night-mode .edit-icon {
+    color: #2ecc71;
+    border-color: #2ecc71;
+}
+
+.night-mode .edit-icon:hover {
+    background: linear-gradient(135deg, #2ecc71, #27ae60);
+    color: white;
+    border-color: transparent;
+}
+
+.night-mode .action-icon:hover::after {
+    background-color: #555;
+    color: #ddd;
+}
+
+/* Night mode for badges (Copied from User Interface) */
+.night-mode .role-client {
+    background-color: #2a4365;
+    color: #66b0ff;
+}
+
+.night-mode .role-guichetier {
+    background-color: #234d2e;
+    color: #66ff99;
+}
+
+.night-mode .role-technicien {
+    background-color: #4d3a1f;
+    color: #ffcc66;
+}
+
+.night-mode .role-admin {
+    background-color: #4d2a2a;
+    color: #ff6666;
+}
+
+/* Styles pour la popup */
 .modal {
     display: none;
     position: fixed;
-    z-index: 1;
+    z-index: 1000;
     left: 0;
     top: 0;
     width: 100%;
     height: 100%;
     overflow: auto;
-    background-color: rgba(0, 0, 0, 0.4);
+    background-color: rgba(0, 0, 0, 0.6);
     justify-content: center;
     align-items: center;
-  }
-  
-  .modal-open {
+    animation: fadeIn 0.3s ease-in;
+}
+
+.modal-open {
     display: flex;
-  }
-  
-  .modal-content {
-    background-color: white;
+}
+
+.modal-content {
+    background-color: #fff;
+    border-radius: 12px;
+    max-width: 500px;
+    width: 100%;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+    animation: slideIn 0.3s ease-out;
     padding: 20px;
+}
+
+.modal-content h4 {
+    margin: 0 0 20px;
+    color: #1e3c72;
+    font-size: 1.5rem;
+    font-weight: 600;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 6px;
+    font-weight: 600;
+    font-size: 15px;
+    color: #1e3c72;
+}
+
+.form-control {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ced4da;
     border-radius: 5px;
-    width: 300px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  }
-  
-  button {
-    margin-top: 10px;
-  }
-  
+    box-sizing: border-box;
+    font-size: 14px;
+    transition: border-color 0.2s ease;
+}
+
+.form-control:focus {
+    border-color: #007bff;
+    outline: none;
+    box-shadow: 0 0 5px rgba(0, 123, 255, 0.3);
+}
+
+/* Night mode for popup */
+.night-mode .modal-content {
+    background-color: #1f1f1f;
+    color: white;
+}
+
+.night-mode .modal-content h4 {
+    color: #2ecc71;
+}
+
+.night-mode .form-group label {
+    color: #2ecc71;
+}
+
+.night-mode .form-control {
+    background: #333;
+    color: white;
+    border-color: #555;
+}
+
+.night-mode .form-control:focus {
+    border-color: #2ecc71;
+}
+
+/* Animations */
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes slideIn {
+    from { transform: translateY(-20px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes fadeInTooltip {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}

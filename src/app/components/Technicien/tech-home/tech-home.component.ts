@@ -10,6 +10,7 @@ import { Objet } from 'src/app/models/objet.model';
 import { Servicee } from 'src/app/models/service.model';
 import { Ministere } from 'src/app/models/ministere.model';
 import { jwtDecode } from 'jwt-decode';
+import { MatSnackBar } from '@angular/material/snack-bar';
 
 @Component({
   selector: 'app-tech-home',
@@ -25,7 +26,7 @@ export class TechHomeComponent implements OnInit {
   serviceMap: { [key: number]: Servicee } = {};
   ministereMap: { [key: number]: string } = {};
   searchTerm: string = '';
-  sortDirection: { [key: string]: boolean } = {};
+  sortDirection: { [key: string]: boolean } = { id: true }; // Default to descending order by id
   currentPage: number = 1;
   itemsPerPage: number = 5;
   totalPages: number = 1;
@@ -40,7 +41,8 @@ export class TechHomeComponent implements OnInit {
     private requeteService: RequeteService,
     private objetService: ObjetService,
     private serviceService: ServiceService,
-    private ministereService: MinistereService
+    private ministereService: MinistereService,
+    private snackBar: MatSnackBar
   ) {}
 
   ngOnInit(): void {
@@ -52,7 +54,7 @@ export class TechHomeComponent implements OnInit {
       this.loadReclamations(technicienId);
     } else {
       console.error('No technician ID found in token');
-      alert('Session invalide. Veuillez vous reconnecter.');
+      this.showError('Session invalide. Veuillez vous reconnecter.');
       this.router.navigate(['/login']);
     }
   }
@@ -90,13 +92,13 @@ export class TechHomeComponent implements OnInit {
           },
           error: (err: HttpErrorResponse) => {
             console.error('Error loading ministeres:', err);
-            alert('Impossible de charger les ministères.');
+            this.showError('Impossible de charger les ministères.');
           }
         });
       },
       error: (err: HttpErrorResponse) => {
         console.error('Error loading services:', err);
-        alert('Impossible de charger les services.');
+        this.showError('Impossible de charger les services.');
       }
     });
   }
@@ -114,7 +116,7 @@ export class TechHomeComponent implements OnInit {
       },
       error: (err: HttpErrorResponse) => {
         console.error('Error loading objets:', err);
-        alert('Impossible de charger les objets.');
+        this.showError('Impossible de charger les objets.');
         this.isObjetsLoaded = true;
       }
     });
@@ -127,11 +129,17 @@ export class TechHomeComponent implements OnInit {
         console.log('Reclamations received:', data);
         this.reclamations = data;
         this.filteredReclamations = [...this.reclamations];
+        // Log IDs before sorting
+        console.log('IDs before sorting:', this.filteredReclamations.map(r => r.id));
+        // Sort by id in descending order (highest IDs at the top)
+        this.filteredReclamations.sort((a, b) => b.id - a.id);
+        // Log IDs after sorting
+        console.log('IDs after sorting:', this.filteredReclamations.map(r => r.id));
         this.updatePagination();
       },
       error: (error: HttpErrorResponse) => {
         console.error('Erreur lors du chargement des réclamations:', error);
-        alert('Impossible de charger les réclamations. Vérifiez votre connexion ou reconnectez-vous.');
+        this.showError('Impossible de charger les réclamations. Vérifiez votre connexion ou reconnectez-vous.');
       }
     });
   }
@@ -152,13 +160,23 @@ export class TechHomeComponent implements OnInit {
         (reclamation.objet?.produit?.nom?.toLowerCase()?.includes(term) ?? false)
       );
     });
+    // Log IDs before sorting (after filtering)
+    console.log('IDs before sorting (after filtering):', this.filteredReclamations.map(r => r.id));
+    // Sort by id in descending order (highest IDs at the top)
+    this.filteredReclamations.sort((a, b) => b.id - a.id);
+    // Log IDs after sorting (after filtering)
+    console.log('IDs after sorting (after filtering):', this.filteredReclamations.map(r => r.id));
     this.currentPage = 1;
     this.updatePagination();
   }
 
   sort(column: string): void {
-    this.sortDirection[column] = !this.sortDirection[column];
-    const direction = this.sortDirection[column] ? 1 : -1;
+    if (!this.sortDirection[column]) {
+      this.sortDirection = { [column]: true }; // Reset and set only the clicked column to descending
+    } else {
+      this.sortDirection[column] = !this.sortDirection[column];
+    }
+    const direction = this.sortDirection[column] ? -1 : 1; // Default to descending (-1) for id, toggle for others
 
     this.filteredReclamations.sort((a, b) => {
       let valA: any = a[column as keyof Requete];
@@ -280,7 +298,7 @@ export class TechHomeComponent implements OnInit {
     if (!text) return '';
 
     const displayMap: { [key: string]: string } = {
-      'DEMANDE_DE_TRAVAUX': 'Demande de travaux',
+      'DEMANDE_TRAVAUX': 'Demande de travaux',
       'RECLAMATION': 'Réclamation',
       'NOUVEAU': 'Nouveau',
       'EN_COURS_DE_TRAITEMENT': 'En cours de traitement',
@@ -320,11 +338,17 @@ export class TechHomeComponent implements OnInit {
 
   confirmerTraitement(): void {
     if (!this.noteRetour) {
-      alert('Veuillez remplir la note de retour.');
+      this.showWarning('Veuillez remplir la note de retour.');
       return;
     }
 
     if (this.selectedReclamation) {
+      // Prevent state change if already TRAITEE or REFUSEE
+      if (this.isReclamationProcessedOrRefused(this.selectedReclamation)) {
+        this.showWarning('Cette requête est déjà traitée ou refusée.');
+        return;
+      }
+
       this.selectedReclamation.etat = 'TRAITEE';
       this.selectedReclamation.noteRetour = this.noteRetour;
       this.selectedReclamation.dateTraitement = new Date();
@@ -333,10 +357,11 @@ export class TechHomeComponent implements OnInit {
           console.log('Requête traitée');
           this.loadReclamations(this.getTechnicienIdFromToken()!);
           this.closePopup();
+          this.showSuccess('Requête traitée avec succès !');
         },
         error: (error: HttpErrorResponse) => {
           console.error('Erreur lors du traitement de la requête', error);
-          alert('Erreur lors du traitement de la requête.');
+          this.showError('Erreur lors du traitement de la requête.');
         }
       });
     }
@@ -345,16 +370,23 @@ export class TechHomeComponent implements OnInit {
   refuserReclamation(id: number): void {
     const reclamation = this.reclamations.find(r => r.id === id);
     if (reclamation) {
+      // Prevent state change if already TRAITEE or REFUSEE
+      if (this.isReclamationProcessedOrRefused(reclamation)) {
+        this.showWarning('Cette requête est déjà traitée ou refusée.');
+        return;
+      }
+
       reclamation.etat = 'REFUSEE';
       reclamation.dateTraitement = new Date();
       this.requeteService.updateRequete(id, reclamation).subscribe({
         next: () => {
           console.log('Réclamation refusée');
           this.loadReclamations(this.getTechnicienIdFromToken()!);
+          this.showSuccess('Réclamation refusée avec succès !');
         },
         error: (error: HttpErrorResponse) => {
           console.error('Erreur lors du refus de la réclamation', error);
-          alert('Erreur lors du refus de la réclamation.');
+          this.showError('Erreur lors du refus de la réclamation.');
         }
       });
     }
@@ -363,5 +395,36 @@ export class TechHomeComponent implements OnInit {
   toggleMode(): void {
     this.isNightMode = !this.isNightMode;
     document.body.classList.toggle('night-mode', this.isNightMode);
+  }
+
+  isReclamationProcessedOrRefused(reclamation: Requete): boolean {
+    return reclamation.etat === 'TRAITEE' || reclamation.etat === 'REFUSEE';
+  }
+
+  private showSuccess(message: string): void {
+    this.snackBar.open(message, 'Fermer', {
+      duration: 10000,
+      panelClass: ['custom-success-snackbar'],
+      verticalPosition: 'top',
+      horizontalPosition: 'center'
+    });
+  }
+
+  private showError(message: string): void {
+    this.snackBar.open(message, 'Fermer', {
+      duration: 10000,
+      panelClass: ['custom-error-snackbar'],
+      verticalPosition: 'top',
+      horizontalPosition: 'center'
+    });
+  }
+
+  private showWarning(message: string): void {
+    this.snackBar.open(message, 'Fermer', {
+      duration: 10000,
+      panelClass: ['custom-warning-snackbar'],
+      verticalPosition: 'top',
+      horizontalPosition: 'center'
+    });
   }
 }

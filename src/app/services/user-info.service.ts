@@ -10,6 +10,7 @@ import { Produit } from '../models/produit.model';
 import { RoleService } from './role.service';
 import { MinistereService } from './ministere.service';
 import { ServiceService } from './service.service';
+import { ProduitService } from './produit.service';
 
 export interface UserDisplay {
   id: number;
@@ -19,6 +20,7 @@ export interface UserDisplay {
   ministere: string;
   service: string;
   produitId?: number;
+  produitNom?: string;
   serviceId?: number;
   password?: string;
   status: string;
@@ -36,7 +38,8 @@ export class UserInfoService {
     private http: HttpClient,
     private roleService: RoleService,
     private ministereService: MinistereService,
-    private serviceService: ServiceService
+    private serviceService: ServiceService,
+    private produitService: ProduitService
   ) {}
 
   private getHttpOptions(): { headers: HttpHeaders } {
@@ -66,10 +69,12 @@ export class UserInfoService {
       users: this.http.get<UserInfo[]>(`${this.apiUrl}/getallappuser`, this.getHttpOptions()),
       roles: this.roleService.getAllRoles(),
       services: this.serviceService.getAllServices(),
-      ministeres: this.ministereService.getAllMinisteres()
+      ministeres: this.ministereService.getAllMinisteres(),
+      produits: this.produitService.getAllProduits()
     }).pipe(
-      map(({ users, roles, services, ministeres }) => {
-        console.log('getAllUsers API Responses:', { users, roles, services, ministeres });
+      map(({ users, roles, services, ministeres, produits }) => {
+        console.log('getAllUsers API Responses:', { users, roles, services, ministeres, produits });
+
         const roleMap = roles.reduce((map, role) => {
           map[role.id] = role.name;
           return map;
@@ -85,13 +90,36 @@ export class UserInfoService {
           return map;
         }, {} as { [key: number]: string });
 
+        const produitMap = produits.reduce((map, produit) => {
+          map[produit.id] = produit.nom;
+          return map;
+        }, {} as { [key: number]: string });
+
         return users.map(user => {
+          console.log(`Mapping user ID ${user.id}: Raw produit data:`, user.produit); // Enhanced logging
+
           const roleName = user.role && user.role.id ? roleMap[user.role.id] || 'N/A' : 'N/A';
           const service = user.service && user.service.id && serviceMap[user.service.id] ? serviceMap[user.service.id] : null;
           let ministereName = 'N/A';
           if (service && service.ministere && service.ministere.id) {
             ministereName = ministereMap[service.ministere.id] || 'N/A';
           }
+
+          let produitId: number | undefined = undefined;
+          let produitNom: string = 'N/A';
+
+          if (user.produit && typeof user.produit === 'object' && 'id' in user.produit && user.produit.id != null) {
+            produitId = user.produit.id;
+            produitNom = user.produit.nom ?? (produitId && produitMap[produitId] ? produitMap[produitId] : 'N/A');
+          } else {
+            console.warn(`Produit is missing or invalid for user ID ${user.id}:`, user.produit);
+            // Default to 'Any' (id: 1) as a temporary workaround
+            produitId = 1; // Assuming 'Any' is the default product with id: 1
+            produitNom = produitMap[1] || 'N/A';
+          }
+
+          console.log(`User ID ${user.id} - produitId: ${produitId}, produitNom: ${produitNom}`); // Debug log for mapping result
+
           return {
             id: user.id || 0,
             nom: user.name || 'N/A',
@@ -99,7 +127,8 @@ export class UserInfoService {
             role: roleName,
             ministere: ministereName,
             service: service ? service.nomService || 'N/A' : 'N/A',
-            produitId: user.produit && user.produit.id ? user.produit.id : undefined,
+            produitId: produitId,
+            produitNom: produitNom,
             serviceId: user.service && user.service.id ? user.service.id : undefined,
             password: '',
             status: user.status || 'false'
@@ -162,11 +191,9 @@ export class UserInfoService {
     console.log('updateUser called with id:', id, 'user:', user);
     return this.serviceService.getAllServices().pipe(
       mergeMap(services => {
-        // Rendre serviceId et produitId optionnels
         let serviceId: number | undefined = user.serviceId;
         let produitId: number | undefined = user.produitId;
 
-        // Si serviceId est fourni, vérifier qu’il existe
         if (serviceId) {
           const service = services.find(s => s.id === serviceId);
           if (!service) {
@@ -177,7 +204,6 @@ export class UserInfoService {
           serviceId = undefined;
         }
 
-        // Si produitId n’est pas fourni, ne pas inclure produit
         if (!produitId) {
           console.warn('No produitId provided, proceeding without produit update');
           produitId = undefined;

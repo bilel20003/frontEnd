@@ -12,7 +12,7 @@ import { Rdv } from '../models/rendez-vous.model';
 import { Produit } from '../models/produit.model';
 import { Ministere } from '../models/ministere.model';
 import { Servicee } from '../models/service.model';
-import { format, eachDayOfInterval, differenceInDays, startOfDay } from 'date-fns';
+import { format, eachDayOfInterval, differenceInDays, startOfDay, endOfDay } from 'date-fns';
 
 export interface DashboardUserInfo {
   id: number;
@@ -45,6 +45,12 @@ export interface DashboardData {
   refusedRequests: number;
   inProgressRequests: number;
   avgProcessingTime: { days: number; hours: number; minutes: number };
+  avgProcessingTimePerStatus: {
+    nouveau: number;
+    enCours: number;
+    traitee: number;
+    refusee: number;
+  };
   totalMinisteres: number;
   totalServices: number;
   totalProduits: number;
@@ -135,31 +141,43 @@ export class DashboardService {
             type: 'DEMANDE_DE_TRAVAUX',
             description: 'Demande de travaux pour produit A',
             guichetier: { id: 0 },
-            technicien: null
+            technicien: { id: 0 }
           },
           { 
             id: 2, 
             client: { id: 2, name: 'Client 2' }, 
             objet: { id: 2, produit: { id: 2 } }, 
-            etat: 'TRAITEE', 
+            etat: 'EN_COURS_DE_TRAITEMENT', 
             date: new Date('2025-05-06T09:00:00Z'), 
             dateTraitement: new Date('2025-05-08T10:00:00Z'),
             type: 'RECLAMATION',
             description: 'Réclamation pour produit B',
             guichetier: { id: 0 },
-            technicien: null
+            technicien: { id: 0 }
           },
           { 
             id: 3, 
             client: { id: 3, name: 'Client 3' }, 
             objet: { id: 3, produit: { id: 1 } }, 
-            etat: 'TRAITEE', 
+            etat: 'NOUVEAU', 
             date: new Date('2025-05-05T10:00:00Z'), 
             dateTraitement: new Date('2025-05-09T12:00:00Z'),
             type: 'DEMANDE_DE_TRAVAUX',
             description: 'Demande de travaux pour produit C',
             guichetier: { id: 0 },
-            technicien: null
+            technicien: { id: 0 }
+          },
+          { 
+            id: 4, 
+            client: { id: 4, name: 'Client 4' }, 
+            objet: { id: 4, produit: { id: 2 } }, 
+            etat: 'REFUSEE', 
+            date: new Date('2025-05-04T11:00:00Z'), 
+            dateTraitement: new Date('2025-05-06T12:00:00Z'),
+            type: 'RECLAMATION',
+            description: 'Réclamation refusée pour produit B',
+            guichetier: { id: 0 },
+            technicien: { id: 0 }
           }
         ];
         // Use mock data if API returns empty
@@ -189,15 +207,20 @@ export class DashboardService {
           status: r.status
         }));
 
+        // Adjust endDate to include the full day
+        const adjustedEndDate = endOfDay(endDate);
+
         const filteredRequetes = dashboardRequetes.filter(r => {
           const reqDate = r.date ? new Date(r.date) : null;
-          return reqDate && reqDate >= startDate && reqDate <= endDate;
+          return reqDate && reqDate >= startOfDay(startDate) && reqDate <= adjustedEndDate;
         });
 
         const filteredRdvs = dashboardRdvs.filter(r => {
           const rdvDate = r.dateSouhaitee ? new Date(r.dateSouhaitee) : null;
-          return rdvDate && rdvDate >= startDate && rdvDate <= endDate;
+          return rdvDate && rdvDate >= startOfDay(startDate) && rdvDate <= adjustedEndDate;
         });
+
+        console.log('Filtered RDVs:', filteredRdvs, 'Start:', startOfDay(startDate), 'End:', adjustedEndDate);
 
         const totalUsers = dashboardUsers.filter(u =>
           ['CLIENT', 'GUICHETIER', 'TECHNICIEN'].includes(u.role)
@@ -228,6 +251,53 @@ export class DashboardService {
           hours: Math.floor((avgProcessingTimeMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)),
           minutes: Math.floor((avgProcessingTimeMs % (1000 * 60 * 60)) / (1000 * 60))
         };
+
+        // Calculate average processing time per status
+        const avgProcessingTimePerStatus = {
+          nouveau: 0,
+          enCours: 0,
+          traitee: 0,
+          refusee: 0
+        };
+        const statusProcessingTimes: { [key: string]: number[] } = {
+          ['nouveau']: [],
+          ['enCours']: [],
+          ['traitee']: [],
+          ['refusee']: []
+        };
+        filteredRequetes.forEach(r => {
+          if (r.date && r.dateTraitement) {
+            const start = new Date(r.date);
+            const end = new Date(r.dateTraitement);
+            const diffMs = end.getTime() - start.getTime();
+            switch (r.etat) {
+              case 'NOUVEAU':
+                statusProcessingTimes['nouveau'].push(diffMs);
+                break;
+              case 'EN_COURS_DE_TRAITEMENT':
+                statusProcessingTimes['enCours'].push(diffMs);
+                break;
+              case 'TRAITEE':
+                statusProcessingTimes['traitee'].push(diffMs);
+                break;
+              case 'REFUSEE':
+                statusProcessingTimes['refusee'].push(diffMs);
+                break;
+            }
+          }
+        });
+        avgProcessingTimePerStatus.nouveau = statusProcessingTimes['nouveau'].length
+          ? Math.floor(statusProcessingTimes['nouveau'].reduce((a, b) => a + b, 0) / statusProcessingTimes['nouveau'].length / (1000 * 60)) // Convert to minutes
+          : 0;
+        avgProcessingTimePerStatus.enCours = statusProcessingTimes['enCours'].length
+          ? Math.floor(statusProcessingTimes['enCours'].reduce((a, b) => a + b, 0) / statusProcessingTimes['enCours'].length / (1000 * 60))
+          : 0;
+        avgProcessingTimePerStatus.traitee = statusProcessingTimes['traitee'].length
+          ? Math.floor(statusProcessingTimes['traitee'].reduce((a, b) => a + b, 0) / statusProcessingTimes['traitee'].length / (1000 * 60))
+          : 0;
+        avgProcessingTimePerStatus.refusee = statusProcessingTimes['refusee'].length
+          ? Math.floor(statusProcessingTimes['refusee'].reduce((a, b) => a + b, 0) / statusProcessingTimes['refusee'].length / (1000 * 60))
+          : 0;
 
         // Calculate Quality KPIs
         const qualityMetrics = completedRequetes.reduce(
@@ -313,6 +383,7 @@ export class DashboardService {
           refusedRequests,
           inProgressRequests,
           avgProcessingTime,
+          avgProcessingTimePerStatus,
           totalMinisteres: ministeres.length,
           totalServices: services.length,
           totalProduits: produits.length,

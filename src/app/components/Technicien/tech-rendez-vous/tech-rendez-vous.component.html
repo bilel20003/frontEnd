@@ -29,48 +29,76 @@
   </div>
 
   <!-- Modal for Appointment Details -->
-  <div *ngIf="isModalOpen" class="modal-overlay">
+  <div *ngIf="isModalOpen" class="modal-overlay" (click)="onOverlayClick($event)">
     <div class="modal-content">
       <div class="modal-header">
-        <h3>Détails du Rendez-vous</h3>
+        <h3>📅 Détails du Rendez-vous</h3>
         <button class="close-btn" (click)="closeModal()">
           <i class="fas fa-times"></i>
         </button>
       </div>
       <div class="modal-body" *ngIf="selectedRdv">
-        <p><strong>ID:</strong> {{ selectedRdv.id }}</p>
-        <p><strong>Client ID:</strong> {{ selectedRdv.client.id }}</p>
-        <p><strong>Type de Problème:</strong> {{ selectedRdv.typeProbleme }}</p>
-        <p><strong>Date:</strong> {{ selectedRdv.dateSouhaitee | date:'medium':'fr-FR' }}</p>
-        <p><strong>Description:</strong> {{ selectedRdv.description }}</p>
-        <p><strong>Statut:</strong> 
-          <span class="badge" [ngClass]="{
-            'badge-warning': selectedRdv.status === 'EN_ATTENTE',
-            'badge-success': selectedRdv.status === 'TERMINE',
-            'badge-danger': selectedRdv.status === 'REFUSE'
-          }">{{ selectedRdv.status }}</span>
-        </p>
-        <p *ngIf="selectedRdv.meetLink"><strong>Lien Google Meet:</strong> 
-          <a [href]="selectedRdv.meetLink" target="_blank" class="meet-link">{{ selectedRdv.meetLink }}</a>
-        </p>
-        <p *ngIf="!selectedRdv.meetLink"><strong>Lien Google Meet:</strong> Aucun lien généré</p>
-        <p><strong>Note de retour:</strong> {{ selectedRdv.noteRetour || 'Aucune' }}</p>
-        <div class="form-group" *ngIf="selectedRdv.status === 'EN_ATTENTE'">
-          <label for="noteRetour">Note de retour (requis pour refuser)</label>
-          <textarea id="noteRetour" [(ngModel)]="noteRetour" placeholder="Entrez une note de retour si vous refusez..." rows="4"></textarea>
+        <div class="info-grid">
+          <div class="info-item">
+            <span class="label">📌 ID:</span>
+            <span class="value">{{ selectedRdv.id }}</span>
+          </div>
+          <div class="info-item">
+            <span class="label">👤 Client ID:</span>
+            <span class="value">{{ selectedRdv.client.id }}</span>
+          </div>
+          <div class="info-item">
+            <span class="label">🔧 Type de Problème:</span>
+            <span class="value">{{ selectedRdv.typeProbleme }}</span>
+          </div>
+          <div class="info-item">
+            <span class="label">📅 Date:</span>
+            <span class="value">{{ selectedRdv.dateSouhaitee | date:'medium':'fr-FR' }}</span>
+          </div>
+          <div class="info-item">
+            <span class="label">📝 Description:</span>
+            <p class="value description">{{ selectedRdv.description }}</p>
+          </div>
+          <div class="info-item">
+            <span class="label">⚡ Statut:</span>
+            <span class="badge" [ngClass]="{
+              'badge-warning': selectedRdv.status === 'EN_ATTENTE',
+              'badge-success': selectedRdv.status === 'TERMINE',
+              'badge-danger': selectedRdv.status === 'REFUSE'
+            }">{{ selectedRdv.status }}</span>
+          </div>
+          <div class="info-item" *ngIf="selectedRdv.meetLink">
+            <span class="label">🎥 Lien Google Meet:</span>
+            <span class="value"><a [href]="selectedRdv.meetLink" target="_blank" class="meet-link">{{ selectedRdv.meetLink }}</a></span>
+          </div>
+          <div class="info-item" *ngIf="!selectedRdv.meetLink">
+            <span class="label">🎥 Lien Google Meet:</span>
+            <span class="value">Aucun lien généré</span>
+          </div>
+          <div class="info-item">
+            <span class="label">📋 Note de retour:</span>
+            <span class="value">{{ selectedRdv.noteRetour || 'Aucune' }}</span>
+          </div>
+          <div class="info-item full-width" *ngIf="selectedRdv.status === 'EN_ATTENTE'">
+            <label for="noteRetour" class="label">📋 Note de Retour (requis pour traiter):</label>
+            <textarea id="noteRetour" [(ngModel)]="noteRetour" placeholder="Entrez une note de retour..." rows="4"></textarea>
+            <p *ngIf="!noteRetour.trim() && (showNoteWarning)" class="alert alert-danger" style="margin-top: 5px;">
+              La note de retour est requise pour traiter le rendez-vous.
+            </p>
+          </div>
         </div>
       </div>
       <div class="form-actions">
-        <button class="btn btn-primary" (click)="generateMeetLink()" 
+        <button class="btn btn-primary" (click)="generateMeetLink()"
                 [disabled]="selectedRdv?.meetLink || selectedRdv?.status !== 'EN_ATTENTE'">
           Générer Lien Meet
         </button>
-        <button class="btn btn-danger" (click)="refuseRendezvous()" 
-                [disabled]="selectedRdv?.status !== 'EN_ATTENTE'">
+        <button class="btn btn-danger" (click)="refuseRendezvous()"
+                [disabled]="selectedRdv?.status !== 'EN_ATTENTE' || !noteRetour.trim()">
           Refuser
         </button>
-        <button class="btn btn-success" (click)="completeRendezvous()" 
-                [disabled]="selectedRdv?.status !== 'EN_ATTENTE'">
+        <button class="btn btn-primary" (click)="completeRendezvous()"
+                [disabled]="selectedRdv?.status !== 'EN_ATTENTE' || !noteRetour.trim()">
           Terminer
         </button>
         <button class="btn btn-secondary" (click)="closeModal()">Fermer</button>

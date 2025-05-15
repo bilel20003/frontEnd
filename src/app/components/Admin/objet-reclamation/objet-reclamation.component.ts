@@ -1,8 +1,10 @@
-import { Component, OnInit } from '@angular/core';
-import { Objet } from 'src/app/models/objet.model';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { ObjetType } from 'src/app/services/objet.service';
 import { Produit } from 'src/app/models/produit.model';
 import { ObjetService } from 'src/app/services/objet.service';
 import { ProduitService } from 'src/app/services/produit.service';
+import { Objet } from 'src/app/models/objet.model';
+import { MatSnackBar } from '@angular/material/snack-bar';
 
 @Component({
   selector: 'app-objet-reclamation',
@@ -25,7 +27,8 @@ export class ObjetReclamationComponent implements OnInit {
   editingObjectId: number | null = null;
   newObject: Omit<Objet, 'id'> = {
     name: '',
-    produit: { id: 0 }
+    produit: { id: 0 },
+    type: ObjetType.RECLAMATION // Default to RECLAMATION since this component manages reclamation objects
   };
   selectedObject?: Objet;
   isNightMode = false;
@@ -33,7 +36,9 @@ export class ObjetReclamationComponent implements OnInit {
 
   constructor(
     private objetService: ObjetService,
-    private produitService: ProduitService
+    private produitService: ProduitService,
+    private snackBar: MatSnackBar,
+    private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
@@ -46,14 +51,13 @@ export class ObjetReclamationComponent implements OnInit {
       next: (data) => {
         this.objets = data; // Backend excludes archived objects
         this.filteredObjets = [...this.objets];
-        // Sort by id in descending order
         this.filteredObjets.sort((a, b) => b.id - a.id);
         console.log('Sorted objets (descending by id):', this.filteredObjets);
         this.updatePagination();
       },
       error: (err) => {
         console.error('Erreur lors du chargement des objets:', err);
-        alert('Erreur lors du chargement des objets. Veuillez réessayer.');
+        this.showError('Erreur lors du chargement des objets. Veuillez réessayer.');
       }
     });
   }
@@ -67,13 +71,13 @@ export class ObjetReclamationComponent implements OnInit {
         console.log('Produits chargés:', JSON.stringify(this.availableProducts, null, 2));
         if (this.availableProducts.length === 0) {
           console.warn('Aucun produit disponible.');
-          alert('Aucun produit disponible. Veuillez vérifier l\'endpoint des produits.');
+          this.showError('Aucun produit disponible. Veuillez vérifier l\'endpoint des produits.');
         }
       },
       error: (err) => {
         this.isLoadingProducts = false;
         console.error('Erreur lors du chargement des produits:', err);
-        alert('Erreur lors du chargement des produits: ' + err.message);
+        this.showError('Erreur lors du chargement des produits: ' + err.message);
       }
     });
   }
@@ -109,6 +113,38 @@ export class ObjetReclamationComponent implements OnInit {
     }
   }
 
+  goToPage(page: number): void {
+    if (page >= 1 && page <= this.totalPages && page !== this.currentPage) {
+      this.currentPage = page;
+      this.paginate();
+    }
+  }
+
+  getPageNumbers(): number[] {
+    const maxPagesToShow = 5;
+    const pages: number[] = [];
+    let startPage: number, endPage: number;
+
+    if (this.totalPages <= maxPagesToShow) {
+      startPage = 1;
+      endPage = this.totalPages;
+    } else {
+      const half = Math.floor(maxPagesToShow / 2);
+      startPage = Math.max(1, this.currentPage - half);
+      endPage = Math.min(this.totalPages, startPage + maxPagesToShow - 1);
+
+      if (endPage - startPage + 1 < maxPagesToShow) {
+        startPage = endPage - maxPagesToShow + 1;
+      }
+    }
+
+    for (let i = startPage; i <= endPage; i++) {
+      pages.push(i);
+    }
+
+    return pages;
+  }
+
   filterObjects(): void {
     this.filteredObjets = this.objets.filter(objet =>
       objet.name.toLowerCase().includes(this.searchTerm.toLowerCase())
@@ -132,6 +168,10 @@ export class ObjetReclamationComponent implements OnInit {
         valB = Number(b.id) || 0;
         return dir * (valA - valB);
       }
+      if (column === 'produit') {
+        valA = this.getProduitName(a.produit.id) || 'N/A';
+        valB = this.getProduitName(b.produit.id) || 'N/A';
+      }
       const strA = valA.toString();
       const strB = valB.toString();
       return dir * strA.localeCompare(strB, 'fr', { numeric: true });
@@ -142,16 +182,16 @@ export class ObjetReclamationComponent implements OnInit {
 
   toggleMode(): void {
     this.isNightMode = !this.isNightMode;
-    document.body.classList.toggle('dark-mode', this.isNightMode);
+    document.body.classList.toggle('night-mode', this.isNightMode);
   }
 
   addObject(): void {
     if (this.isLoadingProducts) {
-      alert('Les produits sont encore en cours de chargement. Veuillez attendre.');
+      this.showError('Les produits sont encore en cours de chargement. Veuillez attendre.');
       return;
     }
     if (this.availableProducts.length === 0) {
-      alert('Aucun produit disponible. Veuillez vérifier les produits.');
+      this.showError('Aucun produit disponible. Veuillez vérifier les produits.');
       return;
     }
     this.editingObject = false;
@@ -159,7 +199,8 @@ export class ObjetReclamationComponent implements OnInit {
     const defaultProduitId = this.availableProducts[0].id;
     this.newObject = {
       name: '',
-      produit: { id: defaultProduitId }
+      produit: { id: defaultProduitId },
+      type: ObjetType.RECLAMATION
     };
     this.showModal = true;
   }
@@ -169,7 +210,8 @@ export class ObjetReclamationComponent implements OnInit {
     this.editingObjectId = objet.id;
     this.newObject = {
       name: objet.name,
-      produit: { id: objet.produit.id }
+      produit: { id: objet.produit.id },
+      type: objet.type as ObjetType
     };
     this.showModal = true;
   }
@@ -177,75 +219,86 @@ export class ObjetReclamationComponent implements OnInit {
   saveObject(): void {
     if (this.editingObject) {
       if (!this.editingObjectId) {
-        alert('Erreur: ID de l\'objet à modifier manquant.');
+        this.showError('Erreur: ID de l\'objet à modifier manquant.');
         return;
       }
       const objetToUpdate: Objet = {
         id: this.editingObjectId,
         name: this.newObject.name,
-        produit: this.newObject.produit
+        produit: this.newObject.produit,
+        type: this.newObject.type
       };
       this.objetService.updateObjet(objetToUpdate.id, objetToUpdate).subscribe({
         next: () => {
           this.loadObjects();
           this.closeModal();
+          this.showSuccess('Objet mis à jour avec succès !');
         },
         error: (err) => {
           console.error('Erreur lors de la mise à jour:', err);
-          alert('Erreur lors de la mise à jour de l\'objet: ' + err.message);
+          this.showError('Erreur lors de la mise à jour de l\'objet: ' + err.message);
         }
       });
     } else {
-      if (!this.newObject.name || !this.newObject.produit.id) {
-        alert('Veuillez entrer un nom et sélectionner un produit valide.');
+      if (!this.newObject.name || !this.newObject.produit.id || !this.newObject.type) {
+        this.showError('Veuillez entrer un nom, sélectionner un produit valide et spécifier un type.');
         return;
       }
       const selectedProductId = Number(this.newObject.produit.id);
       const isValidProduit = this.availableProducts.some(p => p.id === selectedProductId);
       if (!isValidProduit) {
-        alert('Le produit sélectionné est invalide ou n\'existe pas.');
+        this.showError('Le produit sélectionné est invalide ou n\'existe pas.');
         return;
       }
       this.objetService.addObjet(this.newObject).subscribe({
         next: (created) => {
-          // Update objets list
-          this.objets = [created, ...this.objets]; // Add to start for newest first
-          // Update filteredObjets, respecting search term
+          this.objets = [created, ...this.objets];
           this.filteredObjets = this.objets.filter(objet =>
             objet.name.toLowerCase().includes(this.searchTerm.toLowerCase())
           );
-          // Reapply sorting (descending by id)
           this.filteredObjets.sort((a, b) => b.id - a.id);
           console.log('New objet added, sorted filteredObjets:', this.filteredObjets);
-          // Go to first page to show newest object
           this.currentPage = 1;
           this.updatePagination();
           this.closeModal();
+          this.showSuccess('Objet ajouté avec succès !');
         },
         error: (err) => {
           console.error('Erreur lors de l\'ajout:', err);
-          alert('Erreur lors de l\'ajout de l\'objet: ' + err.message);
+          this.showError('Erreur lors de l\'ajout de l\'objet: ' + err.message);
         }
       });
     }
   }
 
   archiveObject(id: number): void {
-    if (confirm('Voulez-vous vraiment archiver cet objet ? Il ne sera plus visible dans la liste active.')) {
+    const snackBarRef = this.snackBar.open(
+      'Voulez-vous vraiment archiver cet objet ? Il ne sera plus visible dans la liste active.',
+      'Confirmer',
+      {
+        duration: 10000,
+        panelClass: ['custom-error-snackbar'],
+        verticalPosition: 'top',
+        horizontalPosition: 'center'
+      }
+    );
+
+    snackBarRef.onAction().subscribe(() => {
       this.objetService.archiveObjet(id).subscribe({
         next: () => {
           console.log('Objet archivé avec succès');
           this.loadObjects();
+          this.showSuccess('Objet archivé avec succès !');
         },
         error: (err) => {
           console.error('Erreur lors de l\'archivage:', err);
-          alert('Erreur lors de l\'archivage de l\'objet: ' + err.message);
+          this.showError('Erreur lors de l\'archivage de l\'objet: ' + err.message);
         }
       });
-    }
+    });
   }
 
-  viewObject(objet: Objet): void {
+  consulterObject(objet: Objet): void {
     this.selectedObject = objet;
     this.showViewModal = true;
   }
@@ -257,5 +310,60 @@ export class ObjetReclamationComponent implements OnInit {
 
   closeViewModal(): void {
     this.showViewModal = false;
+    this.selectedObject = undefined;
+  }
+
+  formatDisplayText(text: string | undefined): string {
+    if (!text) return 'Non spécifié';
+
+    const displayMap: { [key: string]: string } = {
+      'RENDEZVOUS': 'Rendez-vous',
+      'RECLAMATION': 'Réclamation',
+      'DEMANDE_TRAVAUX': 'Demande de travaux'
+    };
+
+    const upperText = text.toUpperCase();
+    if (displayMap[upperText]) {
+      return displayMap[upperText];
+    }
+
+    return text
+      .replace(/_/g, ' ')
+      .toLowerCase()
+      .replace(/(^|\s)\w/g, char => char.toUpperCase());
+  }
+
+  getProduitName(produitId: number): string {
+    const produit = this.availableProducts.find(p => p.id === produitId);
+    return produit ? produit.nom : 'N/A';
+  }
+
+  getSelectedProduitName(): string {
+    if (!this.selectedObject || !this.selectedObject.produit || !this.selectedObject.produit.id) {
+      return 'Non spécifié';
+    }
+    return this.getProduitName(this.selectedObject.produit.id);
+  }
+
+  private showSuccess(message: string): void {
+    console.log('Showing success snackbar:', message);
+    this.snackBar.open(message, 'Fermer', {
+      duration: 10000,
+      panelClass: ['custom-success-snackbar'],
+      verticalPosition: 'top',
+      horizontalPosition: 'center'
+    });
+    this.cdr.detectChanges();
+  }
+
+  private showError(message: string): void {
+    console.log('Showing error snackbar:', message);
+    this.snackBar.open(message, 'Fermer', {
+      duration: 10000,
+      panelClass: ['custom-error-snackbar'],
+      verticalPosition: 'top',
+      horizontalPosition: 'center'
+    });
+    this.cdr.detectChanges();
   }
 }

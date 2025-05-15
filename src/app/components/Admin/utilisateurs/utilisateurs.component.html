@@ -1,10 +1,18 @@
 <app-navbar-admin></app-navbar-admin>
 
 <div class="container">
-  <!-- Error Message -->
-  <div *ngIf="errorMessage" class="alert alert-danger" role="alert">
-    {{ errorMessage }}
-  </div>
+  <!-- Header with Title and Actions -->
+  <header class="d-flex justify-content-between align-items-center">
+    <h2>Gestion des Utilisateurs</h2>
+    <div class="header-actions">
+      <button class="mode-toggle" (click)="toggleMode()">
+        <i class="fas" [ngClass]="isNightMode ? 'fa-sun' : 'fa-moon'"></i>
+      </button>
+      <button class="btn btn-primary" (click)="openModal()">
+        <i class="fas fa-plus"></i> Ajouter Utilisateur
+      </button>
+    </div>
+  </header>
 
   <!-- Barre de recherche -->
   <div class="search-bar-container">
@@ -13,17 +21,6 @@
       <button><i class="fas fa-search"></i></button>
     </div>
   </div>
-
-  <!-- Titre + actions -->
-  <header class="d-flex justify-content-between align-items-center">
-    <h2 style="margin-left: 250px;">Gestion des Utilisateurs</h2>
-    <div class="header-actions">
-      <button class="mode-toggle" (click)="toggleMode()">
-        <i class="fas" [ngClass]="isNightMode ? 'fa-sun' : 'fa-moon'"></i>
-      </button>
-      <button class="btn btn-primary" (click)="openModal()">+ Ajouter Utilisateur</button>
-    </div>
-  </header>
 
   <!-- Tableau -->
   <div class="table-responsive">
@@ -45,7 +42,16 @@
           <td>{{ utilisateur.id }}</td>
           <td>{{ utilisateur.nom }}</td>
           <td>{{ utilisateur.email }}</td>
-          <td>{{ utilisateur.role }}</td>
+          <td>
+            <span class="role-badge" [ngClass]="{
+              'role-client': utilisateur.role === 'CLIENT',
+              'role-guichetier': utilisateur.role === 'GUICHETIER',
+              'role-technicien': utilisateur.role === 'TECHNICIEN',
+              'role-admin': utilisateur.role === 'ADMIN'
+            }">
+              {{ utilisateur.role }}
+            </span>
+          </td>
           <td>{{ utilisateur.ministere }}</td>
           <td>{{ utilisateur.service }}</td>
           <td>
@@ -55,11 +61,14 @@
             </label>
           </td>
           <td>
-            <button class="btn btn-info btn-sm me-2" (click)="openModal(utilisateur)">
-              <i class="fas fa-edit"></i> Modifier
+            <button class="action-icon edit-icon" (click)="openModal(utilisateur)" data-tooltip="Modifier">
+              <i class="fas fa-edit"></i>
             </button>
-            <button class="btn btn-warning btn-sm" (click)="archiverUtilisateur(utilisateur)">
-              <i class="fas fa-archive"></i> Archiver
+            <button class="action-icon archive-icon" (click)="archiverUtilisateur(utilisateur)" data-tooltip="Archiver">
+              <i class="fas fa-archive"></i>
+            </button>
+            <button class="action-icon detail-icon" (click)="openDetailModal(utilisateur)" data-tooltip="Consulter">
+              <i class="fas fa-eye"></i>
             </button>
           </td>
         </tr>
@@ -74,16 +83,13 @@
         </select>
       </div>
       <div class="pagination">
-        <button class="btn btn-pagination" (click)="goToPreviousPage()" [disabled]="currentPage === 1">
+        <button class="btn btn-primary" (click)="goToPreviousPage()" [disabled]="currentPage === 1">
           <i class="fas fa-chevron-left"></i>
         </button>
-        <button *ngFor="let page of getPageNumbers()"
-                class="btn btn-pagination"
-                [ngClass]="{'active': page === currentPage}"
-                (click)="goToPage(page)">
+        <button *ngFor="let page of getPageNumbers()" class="btn btn-primary" [ngClass]="{'active': page === currentPage}" (click)="goToPage(page)">
           {{ page }}
         </button>
-        <button class="btn btn-pagination" (click)="goToNextPage()" [disabled]="currentPage === totalPages">
+        <button class="btn btn-primary" (click)="goToNextPage()" [disabled]="currentPage === totalPages">
           <i class="fas fa-chevron-right"></i>
         </button>
       </div>
@@ -91,51 +97,130 @@
   </div>
 
   <!-- Modale pour ajouter/modifier utilisateur -->
-  <div *ngIf="isModalOpen" class="modal-overlay">
-    <div class="modal-content">
-      <h3>📌 {{ editingUtilisateur ? 'Modifier Utilisateur' : 'Ajouter Utilisateur' }}</h3>
-      <div class="info-grid">
-        <div class="info-item">
-          <span class="label">👤 Nom:</span>
-          <input type="text" [(ngModel)]="utilisateurForm.nom" placeholder="Entrez le nom" required>
-        </div>
-        <div class="info-item">
-          <span class="label">📧 Email:</span>
-          <input type="email" [(ngModel)]="utilisateurForm.email" placeholder="Entrez l'email" required>
-        </div>
-        <div class="info-item" *ngIf="editingUtilisateur">
-          <span class="label">🔒 Mot de passe:</span>
-          <div>
-            <button class="btn btn-warning btn-sm" (click)="generateNewPassword()">Générer un nouveau mot de passe</button>
-            <input *ngIf="generatedPassword" type="text" [(ngModel)]="utilisateurForm.password" readonly>
-            <small *ngIf="generatedPassword" class="text-muted">Nouveau mot de passe: {{ generatedPassword }}. Notez-le pour l'utilisateur.</small>
-            <small *ngIf="!generatedPassword" class="text-muted">Le mot de passe actuel est chiffré et ne peut pas être affiché.</small>
+  <div *ngIf="isModalOpen" class="modal-overlay" (click)="closeModal()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3>📌 {{ editingUtilisateur ? 'Modifier Utilisateur' : 'Ajouter Utilisateur' }}</h3>
+        <button class="close-btn" (click)="closeModal()">✖</button>
+      </div>
+      <div class="modal-body">
+        <form (ngSubmit)="editingUtilisateur ? updateUtilisateur() : addUtilisateur()" [formGroup]="utilisateurForm">
+          <div class="form-group">
+            <label for="nom" class="label">👤 Nom:</label>
+            <input id="nom" formControlName="nom" class="form-control" placeholder="Entrez le nom" required>
+            <div class="error-message" *ngIf="utilisateurForm.get('nom')?.invalid && utilisateurForm.get('nom')?.touched">
+              Le nom est requis.
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="email" class="label">📧 Email:</label>
+            <input id="email" type="email" formControlName="email" class="form-control" placeholder="Entrez l'email" required>
+            <div class="error-message" *ngIf="utilisateurForm.get('email')?.invalid && utilisateurForm.get('email')?.touched">
+              <div *ngIf="utilisateurForm.get('email')?.errors?.['required']">L'email est requis.</div>
+              <div *ngIf="utilisateurForm.get('email')?.errors?.['email']">Veuillez entrer un email valide (ex: exemple&#64;domaine.com).</div>
+            </div>
+          </div>
+          <div class="form-group" *ngIf="editingUtilisateur">
+            <label for="password" class="label">🔒 Mot de passe:</label>
+            <div>
+              <button type="button" class="btn btn-primary" (click)="generateNewPassword()">Générer un nouveau mot de passe</button>
+              <small class="text-muted">Un lien de réinitialisation sera envoyé à l'utilisateur.</small>
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="role" class="label">🎭 Rôle:</label>
+            <select id="role" formControlName="role" class="form-control" required>
+              <option value="" disabled>Sélectionnez un rôle</option>
+              <option *ngFor="let option of getSortedRoleOptions()" [ngValue]="option.value">{{ option.label }}</option>
+            </select>
+            <div class="error-message" *ngIf="utilisateurForm.get('role')?.invalid && utilisateurForm.get('role')?.touched">
+              Le rôle est requis.
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="service" class="label">🛠️ Service:</label>
+            <select id="service" formControlName="serviceId" (change)="updateServiceName()" class="form-control" required>
+              <option value="" disabled>Sélectionnez un service</option>
+              <option *ngFor="let service of services" [ngValue]="service.id">{{ service.nomService }}</option>
+            </select>
+            <div class="error-message" *ngIf="utilisateurForm.get('serviceId')?.invalid && utilisateurForm.get('serviceId')?.touched">
+              Le service est requis.
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="produit" class="label">📦 Produit:</label>
+            <select id="produit" formControlName="produitId" class="form-control" required>
+              <option value="" disabled>Sélectionnez un produit</option>
+              <option *ngFor="let produit of produits" [ngValue]="produit.id">{{ produit.nom }}</option>
+            </select>
+            <div class="error-message" *ngIf="utilisateurForm.get('produitId')?.invalid && utilisateurForm.get('produitId')?.touched">
+              Le produit est requis.
+            </div>
+          </div>
+          <div class="form-actions">
+            <button type="submit" class="btn btn-primary" [disabled]="utilisateurForm.invalid">Confirmer</button>
+            <button type="button" class="btn btn-secondary" (click)="closeModal()">Annuler</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modale pour les détails de l'utilisateur -->
+  <div *ngIf="isDetailModalOpen" class="modal-overlay" (click)="closeDetailModal()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3>📋 Détails de l'Utilisateur</h3>
+        <button class="close-btn" (click)="closeDetailModal()">✖</button>
+      </div>
+      <div class="modal-body">
+        <div class="info-grid" *ngIf="selectedUtilisateur">
+          <div class="info-item">
+            <span class="label">📌 ID:</span>
+            <span class="value">{{ selectedUtilisateur.id }}</span>
+          </div>
+          <div class="info-item">
+            <span class="label">👤 Nom:</span>
+            <span class="value">{{ selectedUtilisateur.nom }}</span>
+          </div>
+          <div class="info-item">
+            <span class="label">📧 Email:</span>
+            <span class="value">{{ selectedUtilisateur.email }}</span>
+          </div>
+          <div class="info-item">
+            <span class="label">🎭 Rôle:</span>
+            <span class="value">
+              <span class="role-badge" [ngClass]="{
+                'role-client': selectedUtilisateur.role === 'CLIENT',
+                'role-guichetier': selectedUtilisateur.role === 'GUICHETIER',
+                'role-technicien': selectedUtilisateur.role === 'TECHNICIEN',
+                'role-admin': selectedUtilisateur.role === 'ADMIN'
+              }">
+                {{ selectedUtilisateur.role }}
+              </span>
+            </span>
+          </div>
+          <div class="info-item">
+            <span class="label">🏛️ Ministère:</span>
+            <span class="value">{{ selectedUtilisateur.ministere }}</span>
+          </div>
+          <div class="info-item">
+            <span class="label">🛠️ Service:</span>
+            <span class="value">{{ selectedUtilisateur.service }}</span>
+          </div>
+          <div class="info-item">
+            <span class="label">📦 Produit:</span>
+            <span class="value">{{ selectedUtilisateur.produitNom || 'N/A' }}</span>
+          </div>
+          <div class="info-item">
+            <span class="label">⚡ Statut:</span>
+            <span class="value">{{ selectedUtilisateur.status === 'true' ? 'Actif' : 'Inactif' }}</span>
           </div>
         </div>
-        <div class="info-item">
-          <span class="label">🎭 Rôle:</span>
-          <select [(ngModel)]="utilisateurForm.role" required>
-            <option value="" disabled>Sélectionnez un rôle</option>
-            <option *ngFor="let option of getSortedRoleOptions()" [ngValue]="option.value">{{ option.label }}</option>
-          </select>
-        </div>
-        <div class="info-item">
-          <span class="label">🛠️ Service:</span>
-          <select [(ngModel)]="utilisateurForm.serviceId" (change)="updateServiceName()" required>
-            <option value="" disabled>Sélectionnez un service</option>
-            <option *ngFor="let service of services" [ngValue]="service.id">{{ service.nomService }}</option>
-          </select>
-        </div>
-        <div class="info-item">
-          <span class="label">📦 Produit:</span>
-          <select [(ngModel)]="utilisateurForm.produitId" required>
-            <option value="" disabled>Sélectionnez un produit</option>
-            <option *ngFor="let produit of produits" [ngValue]="produit.id">{{ produit.nom }}</option>
-          </select>
-        </div>
       </div>
-      <button class="btn btn-success" (click)="editingUtilisateur ? updateUtilisateur() : addUtilisateur()">Confirmer</button>
-      <button class="btn btn-secondary" (click)="closeModal()">Annuler</button>
+      <div class="form-actions">
+        <button type="button" class="btn btn-secondary" (click)="closeDetailModal()">Fermer</button>
+      </div>
     </div>
   </div>
 </div>

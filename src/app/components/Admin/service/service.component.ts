@@ -1,10 +1,12 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild, ChangeDetectorRef } from '@angular/core';
 import { Servicee } from 'src/app/models/service.model';
 import { Ministere } from 'src/app/models/ministere.model';
 import { ServiceService } from 'src/app/services/service.service';
 import { MinistereService } from 'src/app/services/ministere.service';
 import { Observable, of } from 'rxjs';
 import { tap, catchError } from 'rxjs/operators';
+import { NgForm } from '@angular/forms';
+import { MatSnackBar } from '@angular/material/snack-bar';
 
 @Component({
   selector: 'app-service',
@@ -25,18 +27,25 @@ export class ServiceComponent implements OnInit {
   currentPage = 1;
   itemsPerPage = 5;
   isNightMode = false;
-  sortDirection: { [key: string]: boolean } = { id: false }; // Default to descending for id
+  sortDirection: { [key: string]: boolean } = { id: false };
+
+  @ViewChild('serviceForm') serviceForm!: NgForm;
 
   constructor(
     private serviceService: ServiceService,
-    private ministereService: MinistereService
+    private ministereService: MinistereService,
+    private snackBar: MatSnackBar,
+    private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
-    if (localStorage.getItem('mode') === 'night') this.toggleMode();
+    if (localStorage.getItem('mode') === 'night') {
+      this.isNightMode = true;
+      document.body.classList.add('night-mode');
+    }
     this.loadMinisteres().subscribe({
       next: () => this.loadServices(),
-      error: (err: Error) => console.error('Échec du chargement des ministères:', err)
+      error: (err: Error) => this.showError(`Échec du chargement des ministères: ${err.message}`)
     });
   }
 
@@ -54,38 +63,29 @@ export class ServiceComponent implements OnInit {
   loadServices(): void {
     this.serviceService.getAllServices().subscribe({
       next: (services: Servicee[]) => {
-        console.log('Services chargés:', services);
         this.services = services;
         this.filteredServices = [...this.services];
-        this.filteredServices.sort((a, b) => b.id - a.id); // Sort by id descending
-        console.log('Sorted services (descending by id):', this.filteredServices);
+        this.filteredServices.sort((a, b) => b.id - a.id);
         this.updatePaginatedServices();
       },
-      error: (err: Error) => {
-        console.error('Erreur lors du chargement des services:', err);
-        alert(`Erreur: ${err.message}`);
-      }
+      error: (err: Error) => this.showError(`Erreur lors du chargement des services: ${err.message}`)
     });
   }
 
   loadMinisteres(): Observable<Ministere[]> {
     return this.ministereService.getAllMinisteres().pipe(
       tap((ministeres: Ministere[]) => {
-        console.log('Ministères chargés:', ministeres);
         this.ministeres = ministeres;
       }),
       catchError((err: Error) => {
-        console.error('Erreur lors du chargement des ministères:', err);
-        alert(`Erreur: ${err.message}`);
+        this.showError(`Erreur lors du chargement des ministères: ${err.message}`);
         return of([]);
       })
     );
   }
 
   getMinistereName(ministereId: number | undefined): string {
-    if (!ministereId || ministereId <= 0) {
-      return 'Inconnu';
-    }
+    if (!ministereId || ministereId <= 0) return 'Inconnu';
     const ministere = this.ministeres.find(min => min.id === ministereId);
     return ministere ? ministere.nomMinistere : 'Inconnu';
   }
@@ -94,19 +94,16 @@ export class ServiceComponent implements OnInit {
     const term = this.searchTerm.toLowerCase();
     this.filteredServices = this.services.filter(service => {
       const ministereName = service.ministere ? this.getMinistereName(service.ministere.id) : 'Inconnu';
-      return (
-        service.nomService.toLowerCase().includes(term) ||
-        ministereName.toLowerCase().includes(term)
-      );
+      return service.nomService.toLowerCase().includes(term) || ministereName.toLowerCase().includes(term);
     });
-    this.filteredServices.sort((a, b) => b.id - a.id); // Reapply descending id sort
+    this.filteredServices.sort((a, b) => b.id - a.id);
     this.currentPage = 1;
     this.updatePaginatedServices();
   }
 
   sort(column: 'id' | 'nomService' | 'ministere'): void {
     if (this.sortDirection[column] === undefined) {
-      this.sortDirection[column] = column === 'id' ? false : true; // id defaults to descending, others to ascending
+      this.sortDirection[column] = column === 'id' ? false : true;
     } else {
       this.sortDirection[column] = !this.sortDirection[column];
     }
@@ -123,15 +120,13 @@ export class ServiceComponent implements OnInit {
       }
       return direction * a.nomService.localeCompare(b.nomService, 'fr', { numeric: true });
     });
-
-    console.log(`Sorted by ${column}, direction: ${this.sortDirection[column] ? 'ascending' : 'descending'}`, this.filteredServices);
     this.updatePaginatedServices();
   }
 
   updatePaginatedServices(): void {
     const start = (this.currentPage - 1) * this.itemsPerPage;
     this.paginatedServices = this.filteredServices.slice(start, start + this.itemsPerPage);
-    console.log('Paginated Services:', this.paginatedServices);
+    this.cdr.detectChanges(); // Ensure UI updates
   }
 
   goToPreviousPage(): void {
@@ -175,7 +170,6 @@ export class ServiceComponent implements OnInit {
     for (let i = startPage; i <= endPage; i++) {
       pages.push(i);
     }
-
     return pages;
   }
 
@@ -198,6 +192,7 @@ export class ServiceComponent implements OnInit {
     this.isEditMode = false;
     this.currentService = this.initService();
     this.isModalOpen = true;
+    this.cdr.detectChanges(); // Ensure modal renders
   }
 
   editService(service: Servicee): void {
@@ -211,30 +206,35 @@ export class ServiceComponent implements OnInit {
         next: (ministeres) => {
           this.ministeres = ministeres;
           this.isModalOpen = true;
+          this.cdr.detectChanges(); // Ensure modal renders
         },
-        error: (err: Error) => {
-          console.error('Erreur lors du chargement des ministères:', err);
-          alert(`Erreur: Impossible de charger les ministères.`);
-        }
+        error: (err: Error) => this.showError(`Erreur lors du chargement des ministères: ${err.message}`)
       });
     } else {
       this.isModalOpen = true;
+      this.cdr.detectChanges(); // Ensure modal renders
     }
   }
 
   closeModal(): void {
     this.isModalOpen = false;
     this.currentService = this.initService();
+    this.serviceForm?.resetForm(); // Reset form if it exists
+    this.cdr.detectChanges(); // Force UI update
   }
 
   saveService(): void {
+    if (this.serviceForm.invalid) {
+      this.showError('Veuillez corriger les erreurs dans le formulaire.');
+      return;
+    }
     const { nomService, ministere } = this.currentService;
     if (!nomService.trim()) {
-      alert('Le nom du service est requis.');
+      this.showError('Le nom du service est requis.');
       return;
     }
     if (!ministere.id || ministere.id <= 0) {
-      alert('Veuillez sélectionner un ministère valide.');
+      this.showError('Veuillez sélectionner un ministère valide.');
       return;
     }
     const serviceData: Omit<Servicee, 'id'> = {
@@ -246,43 +246,49 @@ export class ServiceComponent implements OnInit {
       : this.serviceService.addNewService(serviceData);
 
     operation.subscribe({
-      next: (updatedService: Servicee) => {
-        this.services = this.isEditMode
-          ? this.services.map(s => s.id === updatedService.id ? updatedService : s)
-          : [updatedService, ...this.services];
-        this.filteredServices = this.services.filter(service => {
-          const ministereName = service.ministere ? this.getMinistereName(service.ministere.id) : 'Inconnu';
-          return (
-            service.nomService.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
-            ministereName.toLowerCase().includes(this.searchTerm.toLowerCase())
-          );
-        });
-        this.filteredServices.sort((a, b) => b.id - a.id); // Reapply descending id sort
-        this.updatePaginatedServices();
+      next: () => {
+        this.loadServices(); // Reload data from backend
         this.closeModal();
-        alert(`Service ${this.isEditMode ? 'mis à jour' : 'ajouté'} avec succès.`);
+        this.showSuccess(`Succès: Service ${this.isEditMode ? 'mis à jour' : 'ajouté'} avec succès !`);
       },
-      error: (err: Error) => {
-        console.error('Erreur lors de la sauvegarde du service:', err);
-        alert(`Erreur: ${err.message}`);
-      }
+      error: (err: Error) => this.showError(`Erreur lors de la sauvegarde du service: ${err.message}`)
     });
   }
 
   archiveService(id: number): void {
-    if (confirm('Voulez-vous vraiment archiver ce service ?')) {
+    this.snackBar.open('Voulez-vous vraiment archiver ce service ? Il ne sera plus visible dans la liste active.', 'Confirmer', {
+      duration: 10000,
+      panelClass: ['custom-warning-snackbar'],
+      verticalPosition: 'top',
+      horizontalPosition: 'center'
+    }).onAction().subscribe(() => {
       this.serviceService.archiveService(id).subscribe({
         next: () => {
-          this.services = this.services.filter(s => s.id !== id);
-          this.filteredServices = this.filteredServices.filter(s => s.id !== id);
-          this.updatePaginatedServices();
-          alert('Service archivé avec succès.');
+          this.loadServices(); // Reload data from backend
+          this.showSuccess('Succès: Service archivé avec succès !');
         },
-        error: (err: Error) => {
-          console.error('Erreur lors de l\'archivage du service:', err);
-          alert(`Erreur: ${err.message}`);
-        }
+        error: (err: Error) => this.showError(`Erreur lors de l'archivage du service: ${err.message}`)
       });
-    }
+    });
+  }
+
+  private showSuccess(message: string): void {
+    this.snackBar.open(message, 'Fermer', {
+      duration: 10000,
+      panelClass: ['custom-success-snackbar'],
+      verticalPosition: 'top',
+      horizontalPosition: 'center'
+    });
+    this.cdr.detectChanges();
+  }
+
+  private showError(message: string): void {
+    this.snackBar.open(message, 'Fermer', {
+      duration: 10000,
+      panelClass: ['custom-error-snackbar'],
+      verticalPosition: 'top',
+      horizontalPosition: 'center'
+    });
+    this.cdr.detectChanges();
   }
 }
