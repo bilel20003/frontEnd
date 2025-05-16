@@ -45,14 +45,16 @@ export class RequeteService {
   createRequete(requete: Omit<Requete, 'id'>, files?: File[]): Observable<Requete> {
     const formData = new FormData();
     formData.append('requete', new Blob([JSON.stringify(requete)], { type: 'application/json' }));
+    
     if (files && files.length > 0) {
-      files.forEach((file, index) => {
-        formData.append(`files`, file);
-      });
+        files.forEach(file => {
+            formData.append('files', file, file.name); // Assurez-vous d'inclure le nom du fichier
+        });
     }
+    
     return this.http.post<Requete>(`${this.apiUrl}/addrequete`, formData, this.getHttpOptions())
-      .pipe(catchError(this.handleError));
-  }
+        .pipe(catchError(this.handleError));
+}
 
   updateRequete(id: number, requete: Requete): Observable<Requete> {
     return this.http.put<Requete>(`${this.apiUrl}/updaterequete/${id}`, requete, this.getHttpOptions())

@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { HttpErrorResponse } from '@angular/common/http';
+import { HttpErrorResponse, HttpClient } from '@angular/common/http';
 import { RequeteService } from 'src/app/services/requete.service';
 import { ObjetService } from 'src/app/services/objet.service';
 import { UserInfoService } from 'src/app/services/user-info.service';
@@ -40,7 +40,8 @@ export class GuiHomeComponent implements OnInit {
     private requeteService: RequeteService,
     private objetService: ObjetService,
     private userInfoService: UserInfoService,
-    private snackBar: MatSnackBar
+    private snackBar: MatSnackBar,
+    private http: HttpClient
   ) {}
 
   ngOnInit(): void {
@@ -110,13 +111,17 @@ export class GuiHomeComponent implements OnInit {
     this.requeteService.getRequetesByGuichetierId(guichetierId).subscribe({
       next: (data) => {
         console.log('Reclamations received:', data);
-        this.reclamations = data;
+        this.reclamations = data.map(req => ({
+          ...req,
+          piecesJointes: req.piecesJointes?.map(pj => ({
+            ...pj,
+            url: pj.url || `http://localhost:8082/api/requetes/download/${pj.id}`,
+            name: pj.nom_fichier || this.getFileNameFromUrl(pj.url || `http://localhost:8082/api/requetes/download/${pj.id}`)
+          })) || []
+        }));
         this.filteredReclamations = [...this.reclamations];
-        // Log IDs before sorting
         console.log('IDs before sorting:', this.filteredReclamations.map(r => r.id));
-        // Sort by id in descending order (highest IDs at the top)
         this.filteredReclamations.sort((a, b) => b.id - a.id);
-        // Log IDs after sorting
         console.log('IDs after sorting:', this.filteredReclamations.map(r => r.id));
         this.updatePagination();
       },
@@ -143,11 +148,8 @@ export class GuiHomeComponent implements OnInit {
         (reclamation.objet.produit?.nom?.toLowerCase()?.includes(term) ?? false)
       );
     });
-    // Log IDs before sorting (after filtering)
     console.log('IDs before sorting (after filtering):', this.filteredReclamations.map(r => r.id));
-    // Sort by id in descending order (highest IDs at the top)
     this.filteredReclamations.sort((a, b) => b.id - a.id);
-    // Log IDs after sorting (after filtering)
     console.log('IDs after sorting (after filtering):', this.filteredReclamations.map(r => r.id));
     this.currentPage = 1;
     this.updatePagination();
@@ -155,11 +157,11 @@ export class GuiHomeComponent implements OnInit {
 
   sort(column: string): void {
     if (!this.sortDirection[column]) {
-      this.sortDirection = { [column]: true }; // Reset and set only the clicked column to descending
+      this.sortDirection = { [column]: true };
     } else {
       this.sortDirection[column] = !this.sortDirection[column];
     }
-    const direction = this.sortDirection[column] ? -1 : 1; // Default to descending (-1) for id, toggle for others
+    const direction = this.sortDirection[column] ? -1 : 1;
 
     this.filteredReclamations.sort((a, b) => {
       let valA: any = a[column as keyof Requete];
@@ -303,7 +305,7 @@ export class GuiHomeComponent implements OnInit {
   consulterReclamation(id: number): void {
     const reclamation = this.reclamations.find(r => r.id === id);
     if (reclamation) {
-      this.selectedRequete = reclamation;
+      this.selectedRequete = { ...reclamation };
       this.isPopupOpen = true;
 
       if (reclamation.etat === 'NOUVEAU') {
@@ -433,6 +435,60 @@ export class GuiHomeComponent implements OnInit {
     this.selectedRequete = null;
     this.selectedTechnicienId = null;
     this.noteRetour = '';
+  }
+
+  openInNewTab(url: string): void {
+    if (!url) {
+      this.showError('URL de la pièce jointe non disponible.');
+      return;
+    }
+
+    this.http.get(url, { responseType: 'blob' }).subscribe({
+      next: (blob: Blob) => {
+        const objectUrl = window.URL.createObjectURL(blob);
+        const previewWindow = window.open(objectUrl, '_blank');
+        if (previewWindow) {
+          previewWindow.document.title = this.getFileNameFromUrl(url);
+        } else {
+          this.showError('Impossible d’ouvrir la prévisualisation. Vérifiez les paramètres de votre navigateur.');
+        }
+        setTimeout(() => window.URL.revokeObjectURL(objectUrl), 1000);
+      },
+      error: (err: HttpErrorResponse) => {
+        console.error('Erreur lors de la prévisualisation de la pièce jointe:', err.message);
+        this.showError('Impossible de prévisualiser la pièce jointe.');
+      }
+    });
+  }
+
+  downloadFile(url: string, fileName: string): void {
+    if (!url) {
+      this.showError('URL de la pièce jointe non disponible.');
+      return;
+    }
+
+    this.http.get(url, { responseType: 'blob' }).subscribe({
+      next: (blob: Blob) => {
+        const objectUrl = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = objectUrl;
+        link.download = fileName || this.getFileNameFromUrl(url);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(objectUrl);
+      },
+      error: (err: HttpErrorResponse) => {
+        console.error('Erreur lors du téléchargement de la pièce jointe:', err.message);
+        this.showError('Impossible de télécharger la pièce jointe.');
+      }
+    });
+  }
+
+  private getFileNameFromUrl(url: string): string {
+    const urlParts = url.split('/');
+    const filePart = urlParts[urlParts.length - 1];
+    return filePart.includes('?') ? filePart.split('?')[0] : filePart || 'document';
   }
 
   private showSuccess(message: string): void {

@@ -5,14 +5,15 @@ import { ScheduleService } from '../../../services/schedule.service';
 import { ObjetService } from 'src/app/services/objet.service';
 import { UserInfoService } from 'src/app/services/user-info.service';
 import { Rdv, RdvCreate } from '../../../models/rendez-vous.model';
-import {  ObjetType } from 'src/app/services/objet.service';
+import { ObjetType } from 'src/app/services/objet.service';
 import { Objet } from 'src/app/models/objet.model';
 import { UserInfo } from 'src/app/models/user-info.model';
 import { jwtDecode } from 'jwt-decode';
-import { CalendarOptions, EventInput } from '@fullcalendar/core';
+import { CalendarOptions, EventInput, EventContentArg } from '@fullcalendar/core';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
 import listPlugin from '@fullcalendar/list';
+import interactionPlugin from '@fullcalendar/interaction'; // Added for consistency
 import '@fullcalendar/core';
 import '@fullcalendar/daygrid';
 import '@fullcalendar/timegrid';
@@ -38,8 +39,8 @@ export class RendezVousComponent implements OnInit {
   typesProblemes: Objet[] = [];
 
   calendarOptions: CalendarOptions = {
+    plugins: [dayGridPlugin, timeGridPlugin, listPlugin, interactionPlugin], // Added interactionPlugin
     initialView: 'dayGridMonth',
-    plugins: [dayGridPlugin, timeGridPlugin, listPlugin],
     headerToolbar: {
       left: 'prev,next today',
       center: 'title',
@@ -48,7 +49,18 @@ export class RendezVousComponent implements OnInit {
     events: [],
     eventClick: this.handleEventClick.bind(this),
     height: 'auto',
-    locale: 'fr'
+    locale: 'fr',
+    eventContent: this.renderEventContent.bind(this), // Added for custom rendering
+    dayMaxEvents: true,
+    moreLinkClick: 'popover',
+    eventDisplay: 'block',
+    eventTimeFormat: { hour: '2-digit', minute: '2-digit', meridiem: false },
+    slotDuration: '00:30:00',
+    slotLabelInterval: '01:00',
+    editable: false,
+    selectable: true,
+    dayCellClassNames: 'modern-day-cell',
+    eventClassNames: 'modern-event'
   };
 
   constructor(
@@ -179,7 +191,8 @@ export class RendezVousComponent implements OnInit {
         technicienId: rdv.technicien?.id
       },
       backgroundColor: this.getEventColor(rdv.status),
-      borderColor: this.getEventColor(rdv.status)
+      borderColor: this.getEventColor(rdv.status),
+      textColor: this.getTextColor(rdv.status) // Added for dynamic text color
     }));
     this.calendarOptions = {
       ...this.calendarOptions,
@@ -190,14 +203,22 @@ export class RendezVousComponent implements OnInit {
   getEventColor(status: string): string {
     switch (status) {
       case 'EN_ATTENTE':
-        return '#ffc107';
+        return '#e1c809'; // Soft beige
       case 'TERMINE':
-        return '#28a745';
+        return '#089900'; // Muted taupe
       case 'REFUSE':
-        return '#dc3545';
+        return '#d50606'; // Warm grayish-brown
       default:
         return '#6c757d';
     }
+  }
+
+  getTextColor(status: string): string {
+    return status === 'EN_ATTENTE' ? '#212529' : 'white'; // Dark text for EN_ATTENTE, white for others
+  }
+
+  renderEventContent(eventInfo: EventContentArg): any {
+    return { html: `<div>${eventInfo.event.title}</div>` }; // Simple rendering, matching technician style
   }
 
   handleEventClick(info: any) {

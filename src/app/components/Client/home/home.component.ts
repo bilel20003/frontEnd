@@ -54,8 +54,8 @@ export class HomeComponent implements OnInit {
   isLoadingPopupObjets: boolean = false;
 
   files: File[] = [];
-  filePreviews: { file: File; previewUrl?: string; type: string }[] = [];
-  attachmentPreviews: { name: string; url: string; previewUrl?: string; type: string }[] = [];
+  filePreviews: { file: File; previewUrl?: string; type: string; nom_fichier: string }[] = [];
+  attachmentPreviews: { nom_fichier: string; url: string; previewUrl?: string; type: string }[] = [];
   fileError: string | null = null;
   @ViewChild('fileInput') fileInput!: ElementRef<HTMLInputElement>;
 
@@ -196,7 +196,7 @@ export class HomeComponent implements OnInit {
           piecesJointes: req.piecesJointes?.map(pj => ({
             ...pj,
             url: pj.url || `${this.apiUrl}/download/${pj.id}`,
-            name: pj.name || this.getFileNameFromUrl(pj.url || `${this.apiUrl}/download/${pj.id}`)
+            nom_fichier: pj.nom_fichier || pj.id.toString() // Use id as fallback only if nom_fichier is null
           })) || []
         }));
         if (this.clientProduitId) {
@@ -507,7 +507,7 @@ export class HomeComponent implements OnInit {
     const imageTypes = ['image/jpeg', 'image/png'];
 
     this.files.forEach(file => {
-      const previewObj = { file, previewUrl: '', type: file.type };
+      const previewObj = { file, previewUrl: '', type: file.type, nom_fichier: file.name };
 
       if (imageTypes.includes(file.type)) {
         const reader = new FileReader();
@@ -532,8 +532,8 @@ export class HomeComponent implements OnInit {
     const imageTypes = ['image/jpeg', 'image/png'];
 
     this.selectedRequete.piecesJointes.forEach(attachment => {
-      const type = this.getFileType(attachment.name);
-      const previewObj = { name: attachment.name, url: attachment.url, previewUrl: '', type };
+      const type = this.getFileType(attachment.nom_fichier);
+      const previewObj = { nom_fichier: attachment.nom_fichier, url: attachment.url, previewUrl: '', type };
 
       if (imageTypes.includes(type)) {
         this.http.get(attachment.url, { responseType: 'blob' }).subscribe({
@@ -556,8 +556,8 @@ export class HomeComponent implements OnInit {
     });
   }
 
-  private getFileType(name: string): string {
-    const extension = name.split('.').pop()?.toLowerCase();
+  private getFileType(nom_fichier: string): string {
+    const extension = nom_fichier.split('.').pop()?.toLowerCase();
     switch (extension) {
       case 'jpg':
       case 'jpeg':
@@ -583,14 +583,14 @@ export class HomeComponent implements OnInit {
     }
   }
 
-  isImageFile(name: string): boolean {
+  isImageFile(nom_fichier: string): boolean {
     const imageExtensions = ['jpg', 'jpeg', 'png'];
-    const extension = name.split('.').pop()?.toLowerCase();
+    const extension = nom_fichier.split('.').pop()?.toLowerCase();
     return extension ? imageExtensions.includes(extension) : false;
   }
 
-  getFileIcon(name: string): string {
-    const extension = name.split('.').pop()?.toLowerCase();
+  getFileIcon(nom_fichier: string): string {
+    const extension = nom_fichier.split('.').pop()?.toLowerCase();
     if (extension === 'pdf') return 'fas fa-file-pdf';
     if (extension === 'doc' || extension === 'docx') return 'fas fa-file-word';
     return 'fas fa-file-alt';
@@ -602,7 +602,7 @@ export class HomeComponent implements OnInit {
     return filePart.includes('?') ? filePart.split('?')[0] : filePart || 'document';
   }
 
-  previewAttachment(attachment: { name: string; url: string }): void {
+  previewAttachment(attachment: { url: string; nom_fichier: string }): void {
     if (!attachment.url) {
       this.showError('URL de la pièce jointe non disponible.');
       return;
@@ -610,14 +610,14 @@ export class HomeComponent implements OnInit {
 
     this.http.get(attachment.url, { responseType: 'blob' }).subscribe({
       next: (blob: Blob) => {
-        const url = window.URL.createObjectURL(blob);
-        const previewWindow = window.open(url, '_blank');
+        const objectUrl = window.URL.createObjectURL(blob);
+        const previewWindow = window.open(objectUrl, '_blank');
         if (previewWindow) {
-          previewWindow.document.title = attachment.name || this.getFileNameFromUrl(attachment.url);
+          previewWindow.document.title = attachment.nom_fichier || this.getFileNameFromUrl(attachment.url);
         } else {
           this.showError('Impossible d’ouvrir la prévisualisation. Vérifiez les paramètres de votre navigateur.');
         }
-        setTimeout(() => window.URL.revokeObjectURL(url), 1000);
+        setTimeout(() => window.URL.revokeObjectURL(objectUrl), 1000);
       },
       error: (err: HttpErrorResponse) => {
         console.error('Erreur lors de la prévisualisation de la pièce jointe:', err.message);
@@ -626,7 +626,7 @@ export class HomeComponent implements OnInit {
     });
   }
 
-  downloadAttachment(attachment: { name: string; url: string }): void {
+  downloadAttachment(attachment: { url: string; nom_fichier: string }): void {
     if (!attachment.url) {
       this.showError('URL de la pièce jointe non disponible.');
       return;
@@ -634,14 +634,14 @@ export class HomeComponent implements OnInit {
 
     this.http.get(attachment.url, { responseType: 'blob' }).subscribe({
       next: (blob: Blob) => {
-        const url = window.URL.createObjectURL(blob);
+        const objectUrl = window.URL.createObjectURL(blob);
         const link = document.createElement('a');
-        link.href = url;
-        link.download = attachment.name || this.getFileNameFromUrl(attachment.url);
+        link.href = objectUrl;
+        link.download = attachment.nom_fichier || this.getFileNameFromUrl(attachment.url);
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
-        window.URL.revokeObjectURL(url);
+        window.URL.revokeObjectURL(objectUrl);
       },
       error: (err: HttpErrorResponse) => {
         console.error('Erreur lors du téléchargement de la pièce jointe:', err.message);
@@ -680,16 +680,27 @@ export class HomeComponent implements OnInit {
     this.requeteService.getGuichetierWithLeastRequests().subscribe({
       next: (guichetier) => {
         const completeRequete: Omit<Requete, 'id'> = {
-          type: this.newRequete.type,
-          objet: { id: this.newRequete.objet.id },
-          description: this.newRequete.description,
-          etat: 'NOUVEAU',
-          date: new Date(),
-          dateTraitement: null,
-          client: { id: this.userInfo!.id, name: this.userInfo!.name || 'Client' },
-          guichetier: { id: guichetier.id },
-          technicien: null
-        };
+        type: this.newRequete.type,
+        objet: { id: this.newRequete.objet.id },
+        description: this.newRequete.description,
+        etat: 'NOUVEAU',
+        date: new Date(),
+        dateTraitement: null,
+        client: { id: this.userInfo!.id, name: this.userInfo!.name || 'Client' },
+        guichetier: { id: guichetier.id },
+        technicien: null,
+        piecesJointes: this.files.map((file, index) => ({
+            id: index, // Vous devez générer ou obtenir un ID valide ici
+            url: '', // Vous devez définir l'URL où le fichier sera accessible
+            nom_fichier: file.name
+        }))
+    };
+
+        const formData = new FormData();
+        formData.append('requete', new Blob([JSON.stringify(completeRequete)], { type: 'application/json' }));
+        this.files.forEach(file => {
+          formData.append('files', file, file.name);
+        });
 
         this.requeteService.createRequete(completeRequete, this.files).subscribe({
           next: () => {

@@ -23,5 +23,5 @@ export interface Requete {
   };
   guichetier: { id: number; name?: string };
   technicien: { id: number; name?: string } | null;
-  piecesJointes?: { id: number; name: string; url: string; nom_fichier: string }[]; // Ajout de nom_fichier
+  piecesJointes?: { id: number; url: string; nom_fichier: string }[];
 }

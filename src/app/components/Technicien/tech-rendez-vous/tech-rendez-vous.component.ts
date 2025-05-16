@@ -208,11 +208,11 @@ export class TechRendezVousComponent implements OnInit {
   getEventColor(status: string): string {
     switch (status) {
       case 'EN_ATTENTE':
-        return '#ffca2c';
+        return '#e1c809'; 
       case 'TERMINE':
-        return '#2ecc71';
+        return '#01622a'; 
       case 'REFUSE':
-        return '#ff6b6b';
+        return '#991304'; 
       default:
         return '#6c757d';
     }

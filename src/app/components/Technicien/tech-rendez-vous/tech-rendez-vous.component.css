@@ -454,6 +454,7 @@ header h2 {
   transition: background 0.3s ease;
 }
 
+/* BEGIN: Changing appointment colors to nude/matte tones */
 .modern-event {
   border-radius: 12px;
   padding: 5px 10px;
@@ -461,12 +462,17 @@ header h2 {
   font-weight: 500;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
   transition: transform 0.2s ease, box-shadow 0.2s ease;
+  /* Original colors replaced with nude/matte tones */
+  /* - EN_ATTENTE: #ffca2c (bright yellow) -> #d9b8a0 (soft beige) */
+  /* - TERMINE: #2ecc71 (bright green) -> #c9c0bb (muted taupe) */
+  /* - REFUSE: #ff6b6b (bright red) -> #a68d7a (warm grayish-brown) */
 }
 
 .modern-event:hover {
   transform: scale(1.05);
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
 }
+/* END: Changing appointment colors to nude/matte tones */
 
 .night-mode .calendar-container {
   background: rgba(30, 31, 31, 0.5);

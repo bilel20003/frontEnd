@@ -5,7 +5,7 @@
 <div class="container">
   <!-- Header with Title and Actions -->
   <header class="d-flex justify-content-between align-items-center">
-    <h2>Gestion des Requetes</h2>
+    <h2>Gestion des Requêtes</h2>
     <div class="header-actions">
       <button class="mode-toggle" (click)="toggleMode()">
         <i class="fas" [ngClass]="isNightMode ? 'fa-sun' : 'fa-moon'"></i>
@@ -167,6 +167,23 @@
           <div class="info-item full-width">
             <label for="noteRetour" class="label">📋 Note de Retour:</label>
             <textarea id="noteRetour" [(ngModel)]="noteRetour"></textarea>
+          </div>
+          <!-- Section des pièces jointes -->
+          <div class="info-item full-width">
+            <div class="attachments-container">
+              <h4>📎 Pièces Jointes:</h4>
+              <div *ngIf="selectedRequete.piecesJointes && selectedRequete.piecesJointes.length > 0">
+                <div class="attachment-item" *ngFor="let piece of selectedRequete.piecesJointes">
+                  <i class="fas fa-paperclip"></i>
+                  <a [href]="piece.url" target="_blank">{{ piece.nom_fichier }}</a>
+                  <i class="fas fa-external-link-alt attachment-action" (click)="openInNewTab(piece.url)" title="Ouvrir dans une nouvelle fenêtre"></i>
+                  <i class="fas fa-download attachment-action" (click)="downloadFile(piece.url, piece.nom_fichier)" title="Télécharger"></i>
+                </div>
+              </div>
+              <p *ngIf="!selectedRequete.piecesJointes || selectedRequete.piecesJointes.length === 0">
+                Aucune pièce jointe disponible.
+              </p>
+            </div>
           </div>
         </div>
       </div>

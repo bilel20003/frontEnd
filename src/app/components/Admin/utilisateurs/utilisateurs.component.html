@@ -28,7 +28,7 @@
       <thead class="table-header">
         <tr>
           <th (click)="sort('id')" class="sortable" [ngClass]="{'sorted': sortDirection['id'] !== undefined}">ID</th>
-          <th (click)="sort('nom')" class="sortable" [ngClass]="{'sorted': sortDirection['nom'] !== undefined}">Nom</th>
+          <th (click)="sort('nom')" class="sortable" [ngClass]="{'sorted': sortDirection['nom'] !== undefined}">Nom et prénom</th>
           <th (click)="sort('email')" class="sortable" [ngClass]="{'sorted': sortDirection['email'] !== undefined}">Email</th>
           <th (click)="sort('role')" class="sortable" [ngClass]="{'sorted': sortDirection['role'] !== undefined}">Rôle</th>
           <th (click)="sort('ministere')" class="sortable" [ngClass]="{'sorted': sortDirection['ministere'] !== undefined}">Ministère</th>
@@ -61,15 +61,16 @@
             </label>
           </td>
           <td>
+            <button class="action-icon detail-icon" (click)="openDetailModal(utilisateur)" data-tooltip="Consulter">
+              <i class="fas fa-eye"></i>
+            </button>
             <button class="action-icon edit-icon" (click)="openModal(utilisateur)" data-tooltip="Modifier">
               <i class="fas fa-edit"></i>
             </button>
             <button class="action-icon archive-icon" (click)="archiverUtilisateur(utilisateur)" data-tooltip="Archiver">
               <i class="fas fa-archive"></i>
             </button>
-            <button class="action-icon detail-icon" (click)="openDetailModal(utilisateur)" data-tooltip="Consulter">
-              <i class="fas fa-eye"></i>
-            </button>
+            
           </td>
         </tr>
       </tbody>
@@ -106,7 +107,7 @@
       <div class="modal-body">
         <form (ngSubmit)="editingUtilisateur ? updateUtilisateur() : addUtilisateur()" [formGroup]="utilisateurForm">
           <div class="form-group">
-            <label for="nom" class="label">👤 Nom:</label>
+            <label for="nom" class="label">👤 Nom et prénom:</label>
             <input id="nom" formControlName="nom" class="form-control" placeholder="Entrez le nom" required>
             <div class="error-message" *ngIf="utilisateurForm.get('nom')?.invalid && utilisateurForm.get('nom')?.touched">
               Le nom est requis.
@@ -180,7 +181,7 @@
             <span class="value">{{ selectedUtilisateur.id }}</span>
           </div>
           <div class="info-item">
-            <span class="label">👤 Nom:</span>
+            <span class="label">👤 Nom et prénom:</span>
             <span class="value">{{ selectedUtilisateur.nom }}</span>
           </div>
           <div class="info-item">

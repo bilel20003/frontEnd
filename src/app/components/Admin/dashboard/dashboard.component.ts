@@ -1,8 +1,11 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
-import { ChartConfiguration, ChartData, ChartType } from 'chart.js';
-import { Chart } from 'chart.js/auto';
+import { Chart, ChartConfiguration, ChartData, ChartType, registerables } from 'chart.js';
+import ChartDataLabels from 'chartjs-plugin-datalabels';
 import { DashboardService, DashboardData, DashboardRequete, DashboardRdv, DashboardUserInfo } from '../../../services/dashboard.service';
 import { format, subDays, getDay } from 'date-fns';
+
+// Register Chart.js components and the ChartDataLabels plugin
+Chart.register(...registerables, ChartDataLabels);
 
 @Component({
   selector: 'app-dashboard',
@@ -33,458 +36,6 @@ export class DashboardComponent implements OnInit {
   displayedRequests: DashboardRequete[] = [];
   displayedRdvs: DashboardRdv[] = [];
   displayedProducts: { id: number; nom: string; requestCount: number }[] = [];
-
-  // Chart Configurations
-  public qualityPieChartOptions: ChartConfiguration['options'] = {
-    responsive: true,
-    maintainAspectRatio: false,
-    scales: {
-      x: { 
-        title: { display: true, text: 'Catégories', padding: 10 },
-        ticks: { padding: 10 }
-      },
-      y: { 
-        beginAtZero: true, 
-        title: { display: true, text: 'Nombre de Requêtes', padding: 10 }
-      }
-    },
-    plugins: {
-      legend: { position: 'top' },
-      tooltip: {
-        callbacks: {
-          label: context => {
-            const dataset = context.dataset;
-            const total = (dataset.data as number[]).reduce((sum, val) => sum + val, 0);
-            const value = typeof context.parsed === 'number' ? context.parsed : 0;
-            const percentage = total ? ((value / total) * 100).toFixed(1) : '0.0';
-            return `${context.label}: ${value} (${percentage}%)`;
-          }
-        }
-      }
-    },
-    layout: {
-      padding: {
-        left: 20,
-        right: 20,
-        top: 20,
-        bottom: 40
-      }
-    },
-    animation: { duration: 2000, easing: 'easeOutQuart' }
-  };
-  public qualityPieChartType: ChartType = 'bar';
-  public pieChartData: ChartData<'bar'> = {
-    labels: ['Même Jour', '≤ 2 Jours', '> 2 Jours'],
-    datasets: [{
-      data: [],
-      backgroundColor: ['#22c55e', '#f59e0b', '#ef4444'],
-      hoverBackgroundColor: ['#16a34a', '#d97706', '#dc2626'],
-      barThickness: 50
-    }]
-  };
-
-  public pieChartOptions: ChartConfiguration['options'] = {
-    responsive: true,
-    maintainAspectRatio: false,
-    plugins: {
-      legend: { position: 'right' },
-      tooltip: {
-        callbacks: {
-          label: context => {
-            const dataset = context.dataset;
-            const total = (dataset.data as number[]).reduce((sum, val) => sum + val, 0);
-            const value = typeof context.parsed === 'number' ? context.parsed : 0;
-            const percentage = total ? ((value / total) * 100).toFixed(1) : '0.0';
-            return `${context.label}: ${value} (${percentage}%)`;
-          }
-        }
-      }
-    },
-    elements: {
-      arc: {
-        borderWidth: 2,
-        borderColor: '#fff',
-        hoverOffset: 20
-      }
-    },
-    layout: {
-      padding: {
-        left: 20,
-        right: 20,
-        top: 20,
-        bottom: 40
-      }
-    },
-    animation: { duration: 2000, easing: 'easeOutQuart' }
-  };
-  public pieChartType: ChartType = 'pie';
-
-  public barChartOptions: ChartConfiguration['options'] = {
-    responsive: true,
-    maintainAspectRatio: false,
-    scales: { 
-      x: { ticks: { padding: 10 } },
-      y: { beginAtZero: true }
-    },
-    plugins: { 
-      legend: { display: true },
-      tooltip: { callbacks: { label: context => `${context.dataset.label}: ${context.parsed.y}` } }
-    },
-    layout: {
-      padding: {
-        left: 20,
-        right: 20,
-        top: 20,
-        bottom: 40
-      }
-    },
-    animation: { duration: 2000, easing: 'easeOutQuart' }
-  };
-  public barChartType: ChartType = 'bar';
-
-  public lineChartOptions: ChartConfiguration['options'] = {
-    responsive: true,
-    maintainAspectRatio: false,
-    scales: { 
-      x: { ticks: { padding: 10 } },
-      y: { beginAtZero: true }
-    },
-    plugins: { legend: { display: false } },
-    layout: {
-      padding: {
-        left: 20,
-        right: 20,
-        top: 20,
-        bottom: 40
-      }
-    },
-    animation: { duration: 2000, easing: 'easeOutQuart' }
-  };
-  public lineChartType: ChartType = 'line';
-  public lineChartData: ChartData<'line'> = {
-    labels: [],
-    datasets: [{
-      data: [],
-      label: 'Requêtes',
-      borderColor: '#1e40af',
-      backgroundColor: 'rgba(30, 64, 175, 0.2)',
-      fill: true,
-      tension: 0.4
-    }]
-  };
-
-  public areaChartOptions: ChartConfiguration['options'] = {
-    responsive: true,
-    maintainAspectRatio: false,
-    scales: { 
-      x: { title: { display: true, text: 'Types de Requêtes', padding: 10 }, ticks: { padding: 10 } },
-      y: { beginAtZero: true }
-    },
-    plugins: { legend: { display: true } },
-    layout: {
-      padding: {
-        left: 20,
-        right: 20,
-        top: 20,
-        bottom: 40
-      }
-    },
-    animation: { duration: 2000, easing: 'easeOutQuart' }
-  };
-  public areaChartType: ChartType = 'bar';
-  public areaChartData: ChartData<'bar'> = {
-    labels: ['Nouveau', 'En cours', 'Traitée', 'Refusée'],
-    datasets: [
-      { 
-        data: [0, 0, 0, 0], 
-        label: 'Requêtes', 
-        backgroundColor: ['rgba(0, 123, 255, 0.7)', 'rgba(255, 193, 7, 0.7)', 'rgba(40, 167, 69, 0.7)', 'rgba(220, 53, 69, 0.7)'],
-        borderWidth: 1,
-        borderColor: '#000',
-        borderRadius: 5
-      }
-    ]
-  };
-
-  public pieCssChartOptions: ChartConfiguration['options'] = {
-    responsive: true,
-    maintainAspectRatio: false,
-    plugins: {
-      legend: { position: 'bottom' },
-      tooltip: {
-        callbacks: {
-          label: context => {
-            const dataset = context.dataset;
-            const total = (dataset.data as number[]).reduce((sum, val) => sum + val, 0);
-            const value = typeof context.parsed === 'number' ? context.parsed : 0;
-            const percentage = total ? ((value / total) * 100).toFixed(1) : '0.0';
-            return `${context.label}: ${value} (${percentage}%)`;
-          }
-        }
-      }
-    },
-    elements: {
-      arc: {
-        borderWidth: 2,
-        borderColor: '#fff',
-        hoverOffset: 20
-      }
-    },
-    layout: {
-      padding: {
-        left: 20,
-        right: 20,
-        top: 20,
-        bottom: 40
-      }
-    },
-    animation: { duration: 2000, easing: 'easeOutQuart' }
-  };
-  public pieCssChartType: ChartType = 'pie';
-  public pieCssChartData: ChartData<'pie'> = {
-    labels: ['Nouveau', 'En cours', 'Traitée', 'Refusée'],
-    datasets: [{
-      data: [0, 0, 0, 0],
-      backgroundColor: [
-        'rgba(0, 123, 255, 0.7)',
-        'rgba(255, 193, 7, 0.7)',
-        'rgba(40, 167, 69, 0.7)',
-        'rgba(220, 53, 69, 0.7)'
-      ],
-      hoverBackgroundColor: [
-        'rgba(0, 123, 255, 1)',
-        'rgba(255, 193, 7, 1)',
-        'rgba(40, 167, 69, 1)',
-        'rgba(220, 53, 69, 1)'
-      ]
-    }]
-  };
-
-  public avgProcessingTimeChartOptions: ChartConfiguration['options'] = {
-    responsive: true,
-    maintainAspectRatio: false,
-    indexAxis: 'y',
-    scales: {
-      x: { 
-        max: 1440,
-        beginAtZero: true,
-        title: { display: true, text: 'Temps (minutes)', padding: 10 },
-        ticks: { padding: 10 }
-      },
-      y: { title: { display: true, text: 'Statut', padding: 10 } }
-    },
-    plugins: { 
-      legend: { display: false },
-      tooltip: { callbacks: { label: context => `${context.parsed.x} minutes` } }
-    },
-    layout: {
-      padding: {
-        left: 20,
-        right: 20,
-        top: 20,
-        bottom: 40
-      }
-    },
-    animation: { duration: 2000, easing: 'easeOutQuart' }
-  };
-  public avgProcessingTimeChartType: ChartType = 'bar';
-  public avgProcessingTimeChartData: ChartData<'bar'> = {
-    labels: ['Nouveau', 'En cours', 'Traitée', 'Refusée'],
-    datasets: [{
-      data: [0, 0, 0, 0],
-      backgroundColor: '#3b82f6',
-      borderWidth: 1,
-      borderColor: '#000',
-      borderRadius: 5
-    }]
-  };
-
-  public dayOfWeekChartOptions: ChartConfiguration['options'] = {
-    responsive: true,
-    maintainAspectRatio: false,
-    plugins: {
-      legend: { position: 'right' },
-      tooltip: {
-        callbacks: {
-          label: context => {
-            const dataset = context.dataset;
-            const total = (dataset.data as number[]).reduce((sum, val) => sum + val, 0);
-            const value = typeof context.parsed === 'number' ? context.parsed : 0;
-            const percentage = total ? ((value / total) * 100).toFixed(1) : '0.0';
-            return `${context.label}: ${value} (${percentage}%)`;
-          }
-        }
-      }
-    },
-    elements: {
-      arc: {
-        borderWidth: 2,
-        borderColor: '#fff',
-        hoverOffset: 20
-      }
-    },
-    layout: {
-      padding: {
-        left: 20,
-        right: 20,
-        top: 20,
-        bottom: 40
-      }
-    },
-    animation: { duration: 2000, easing: 'easeOutQuart' }
-  };
-  public dayOfWeekChartType: ChartType = 'pie';
-  public dayOfWeekChartData: ChartData<'pie'> = {
-    labels: ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi', 'Dimanche'],
-    datasets: [{
-      data: [0, 0, 0, 0, 0, 0, 0],
-      backgroundColor: [
-        'rgba(251, 191, 36, 0.7)',
-        'rgba(30, 64, 175, 0.7)',
-        'rgba(30, 58, 138, 0.7)',
-        'rgba(248, 113, 113, 0.7)',
-        'rgba(52, 211, 153, 0.7)',
-        'rgba(251, 146, 60, 0.7)',
-        'rgba(168, 85, 247, 0.7)'
-      ],
-      hoverBackgroundColor: [
-        'rgba(251, 191, 36, 1)',
-        'rgba(30, 64, 175, 1)',
-        'rgba(30, 58, 138, 1)',
-        'rgba(248, 113, 113, 1)',
-        'rgba(52, 211, 153, 1)',
-        'rgba(251, 146, 60, 1)',
-        'rgba(168, 85, 247, 1)'
-      ]
-    }]
-  };
-
-  public userRoleChartData: ChartData<'pie'> = {
-    labels: ['Clients', 'Guichetiers', 'Techniciens', 'Admins'],
-    datasets: [{
-      data: [0, 0, 0, 0],
-      backgroundColor: [
-        'rgba(0, 123, 255, 0.7)',
-        'rgba(255, 193, 7, 0.7)',
-        'rgba(40, 167, 69, 0.7)',
-        'rgba(220, 53, 69, 0.7)'
-      ],
-      hoverBackgroundColor: [
-        'rgba(0, 123, 255, 1)',
-        'rgba(255, 193, 7, 1)',
-        'rgba(40, 167, 69, 1)',
-        'rgba(220, 53, 69, 1)'
-      ]
-    }]
-  };
-
-  public technicianWorkloadChartData: ChartData<'bar'> = {
-    labels: [],
-    datasets: [{ data: [], label: 'RDV', backgroundColor: '#1e40af', borderRadius: 5 }]
-  };
-
-  public productChartData: ChartData<'pie'> = {
-    labels: [],
-    datasets: [{
-      data: [],
-      backgroundColor: [
-        'rgba(251, 191, 36, 0.7)',
-        'rgba(30, 64, 175, 0.7)',
-        'rgba(30, 58, 138, 0.7)',
-        'rgba(248, 113, 113, 0.7)',
-        'rgba(52, 211, 153, 0.7)'
-      ],
-      hoverBackgroundColor: [
-        'rgba(251, 191, 36, 1)',
-        'rgba(30, 64, 175, 1)',
-        'rgba(30, 58, 138, 1)',
-        'rgba(248, 113, 113, 1)',
-        'rgba(52, 211, 153, 1)'
-      ]
-    }]
-  };
-
-  public productTrendChartData: ChartData<'bar'> = {
-    labels: [],
-    datasets: [{ data: [], label: 'Requêtes par Produit', backgroundColor: '#3b82f6', borderRadius: 5 }]
-  };
-
-  public ministereChartData: ChartData<'pie'> = {
-    labels: [],
-    datasets: [{
-      data: [],
-      backgroundColor: [
-        'rgba(251, 191, 36, 0.7)',
-        'rgba(30, 64, 175, 0.7)',
-        'rgba(30, 58, 138, 0.7)',
-        'rgba(248, 113, 113, 0.7)',
-        'rgba(52, 211, 153, 0.7)'
-      ],
-      hoverBackgroundColor: [
-        'rgba(251, 191, 36, 1)',
-        'rgba(30, 64, 175, 1)',
-        'rgba(30, 58, 138, 1)',
-        'rgba(248, 113, 113, 1)',
-        'rgba(52, 211, 153, 1)'
-      ]
-    }]
-  };
-
-  public rdvStatusChartData: ChartData<'bar'> = {
-    labels: ['En attente', 'Terminé', 'Refusé'],
-    datasets: [
-      { 
-        data: [0, 0, 0], 
-        label: 'RDV', 
-        backgroundColor: ['rgba(255, 193, 7, 0.5)', 'rgba(40, 167, 69, 0.5)', 'rgba(220, 53, 69, 0.5)'], 
-        borderColor: ['#ffc107', '#28a745', '#dc3545'], 
-        borderWidth: 1,
-        borderRadius: 5
-      }
-    ]
-  };
-
-  public serviceChartData: ChartData<'pie'> = {
-    labels: [],
-    datasets: [{
-      data: [],
-      backgroundColor: [
-        'rgba(251, 191, 36, 0.7)',
-        'rgba(30, 64, 175, 0.7)',
-        'rgba(30, 58, 138, 0.7)',
-        'rgba(248, 113, 113, 0.7)',
-        'rgba(52, 211, 153, 0.7)'
-      ],
-      hoverBackgroundColor: [
-        'rgba(251, 191, 36, 1)',
-        'rgba(30, 64, 175, 1)',
-        'rgba(30, 58, 138, 1)',
-        'rgba(248, 113, 113, 1)',
-        'rgba(52, 211, 153, 1)'
-      ]
-    }]
-  };
-
-  public clientByMinistereChartData: ChartData<'pie'> = {
-    labels: [],
-    datasets: [{
-      data: [],
-      backgroundColor: [
-        'rgba(251, 191, 36, 0.7)',
-        'rgba(30, 64, 175, 0.7)',
-        'rgba(30, 58, 138, 0.7)',
-        'rgba(248, 113, 113, 0.7)',
-        'rgba(52, 211, 153, 0.7)'
-      ],
-      hoverBackgroundColor: [
-        'rgba(251, 191, 36, 1)',
-        'rgba(30, 64, 175, 1)',
-        'rgba(30, 58, 138, 1)',
-        'rgba(248, 113, 113, 1)',
-        'rgba(52, 211, 153, 1)'
-      ]
-    }]
-  };
 
   // Filters
   requestPeriod: '7days' | '30days' | 'custom' = '7days';
@@ -517,6 +68,478 @@ export class DashboardComponent implements OnInit {
   private allUsers: DashboardUserInfo[] = [];
   private allRdvs: DashboardRdv[] = [];
   private allProducts: { id: number; nom: string; requestCount: number }[] = [];
+
+  // Modern color palette
+  private modernColors = [
+    '#6B7280', // Gray
+    '#3B82F6', // Blue
+    '#10B981', // Green
+    '#F59E0B', // Yellow
+    '#EF4444', // Red
+    '#8B5CF6', // Purple
+    '#EC4899', // Pink
+    '#FBBF24', // Amber
+    '#14B8A6', // Teal
+    '#F87171', // Light Red
+  ];
+
+  private modernHoverColors = [
+    '#4B5563',
+    '#2563EB',
+    '#059669',
+    '#D97706',
+    '#DC2626',
+    '#7C3AED',
+    '#DB2777',
+    '#F59E0B',
+    '#0D9488',
+    '#EF4444',
+  ];
+
+  // Chart Configurations
+  public qualityPieChartOptions: ChartConfiguration['options'] = {
+    responsive: true,
+    maintainAspectRatio: false,
+    scales: {
+      x: { 
+        title: { display: true, text: 'Catégories', color: '#1F2937', padding: 10, font: { size: 14, family: 'Inter', weight: '600' } },
+        ticks: { padding: 10, color: '#6B7280' }
+      },
+      y: { 
+        beginAtZero: true, 
+        title: { display: true, text: 'Nombre de Requêtes', color: '#1F2937', padding: 10, font: { size: 14, family: 'Inter', weight: '600' } },
+        ticks: { color: '#6B7280' }
+      }
+    },
+    plugins: {
+      legend: { position: 'top', labels: { color: '#1F2937', font: { size: 12, family: 'Inter' } } },
+      tooltip: {
+        backgroundColor: '#1F2937',
+        titleColor: '#FFFFFF',
+        bodyColor: '#FFFFFF',
+        callbacks: {
+          label: (context) => {
+            const value = context.parsed as number; // Type assertion for parsed value
+            const dataset = context.dataset;
+            const total = (dataset.data as number[]).reduce((sum: number, val: number) => sum + val, 0); // Explicit typing
+            const percentage = total ? ((value / total) * 100).toFixed(1) : '0.0';
+            return `${context.label}: ${value} (${percentage}%)`;
+          }
+        }
+      }
+    },
+    layout: {
+      padding: {
+        left: 20,
+        right: 20,
+        top: 20,
+        bottom: 40
+      }
+    },
+    animation: { duration: 1500, easing: 'easeInOutQuart' }
+  };
+  public qualityPieChartType: ChartType = 'bar';
+  public pieChartData: ChartData<'bar'> = {
+    labels: ['Même Jour', '≤ 2 Jours', '> 2 Jours'],
+    datasets: [{
+      data: [],
+      backgroundColor: ['#22c55e', '#f59e0b', '#ef4444'],
+      hoverBackgroundColor: ['#16a34a', '#d97706', '#dc2626'],
+      barThickness: 50,
+      borderRadius: 8,
+      borderWidth: 1,
+      borderColor: '#FFFFFF'
+    }]
+  };
+
+  public pieChartOptions: ChartConfiguration['options'] = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: { position: 'right', labels: { color: '#1F2937', font: { size: 14, family: 'Inter' } } },
+      tooltip: {
+        backgroundColor: '#1F2937',
+        titleColor: '#FFFFFF',
+        bodyColor: '#FFFFFF',
+        callbacks: {
+          label: (context) => {
+            const value = context.parsed as number; // Type assertion for parsed value
+            const dataset = context.dataset;
+            const total = (dataset.data as number[]).reduce((sum: number, val: number) => sum + val, 0); // Explicit typing
+            const percentage = total ? ((value / total) * 100).toFixed(1) : '0.0';
+            return `${context.label}: ${value} (${percentage}%)`;
+          }
+        }
+      },
+      datalabels: {
+        color: '#FFFFFF',
+        font: { size: 12, weight: 'bold', family: 'Inter' },
+        formatter: (value: number, context) => {
+          const dataset = context.dataset;
+          const total = (dataset.data as number[]).reduce((sum: number, val: number) => sum + val, 0); // Explicit typing
+          const percentage = total ? ((value / total) * 100).toFixed(1) : '0.0';
+          return percentage !== '0.0' ? `${percentage}%` : '';
+        },
+        anchor: 'end',
+        align: 'end',
+        offset: 20,
+        backgroundColor: (context) => this.modernColors[context.dataIndex % this.modernColors.length],
+        borderRadius: 4,
+        padding: 6,
+        textAlign: 'center',
+        display: (context) => {
+          const dataset = context.dataset;
+          const total = (dataset.data as number[]).reduce((sum: number, val: number) => sum + val, 0); // Explicit typing
+          const value = dataset.data[context.dataIndex] as number;
+          return total ? (value / total) * 100 >= 5 : false;
+        }
+      }
+    },
+    elements: {
+      arc: {
+        borderWidth: 2,
+        borderColor: '#FFFFFF',
+        hoverOffset: 20
+      }
+    },
+    layout: {
+      padding: {
+        left: 30,
+        right: 30,
+        top: 30,
+        bottom: 50
+      }
+    },
+    animation: { duration: 1500, easing: 'easeInOutQuart' }
+  };
+  public pieChartType: ChartType = 'pie';
+
+  public pieCssChartOptions: ChartConfiguration['options'] = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: { position: 'bottom', labels: { color: '#1F2937', font: { size: 14, family: 'Inter' } } },
+      tooltip: {
+        backgroundColor: '#1F2937',
+        titleColor: '#FFFFFF',
+        bodyColor: '#FFFFFF',
+        callbacks: {
+          label: (context) => {
+            const value = context.parsed as number; // Type assertion for parsed value
+            const dataset = context.dataset;
+            const total = (dataset.data as number[]).reduce((sum: number, val: number) => sum + val, 0); // Explicit typing
+            const percentage = total ? ((value / total) * 100).toFixed(1) : '0.0';
+            return `${context.label}: ${value} (${percentage}%)`;
+          }
+        }
+      },
+      datalabels: {
+        color: '#FFFFFF',
+        font: { size: 12, weight: 'bold', family: 'Inter' },
+        formatter: (value: number, context) => {
+          const dataset = context.dataset;
+          const total = (dataset.data as number[]).reduce((sum: number, val: number) => sum + val, 0); // Explicit typing
+          const percentage = total ? ((value / total) * 100).toFixed(1) : '0.0';
+          return percentage !== '0.0' ? `${percentage}%` : '';
+        },
+        anchor: 'end',
+        align: 'end',
+        offset: 20,
+        backgroundColor: (context) => this.modernColors[context.dataIndex % this.modernColors.length],
+        borderRadius: 4,
+        padding: 6,
+        textAlign: 'center',
+        display: (context) => {
+          const dataset = context.dataset;
+          const total = (dataset.data as number[]).reduce((sum: number, val: number) => sum + val, 0); // Explicit typing
+          const value = dataset.data[context.dataIndex] as number;
+          return total ? (value / total) * 100 >= 5 : false;
+        }
+      }
+    },
+    elements: {
+      arc: {
+        borderWidth: 2,
+        borderColor: '#FFFFFF',
+        hoverOffset: 20
+      }
+    },
+    layout: {
+      padding: {
+        left: 30,
+        right: 30,
+        top: 30,
+        bottom: 50
+      }
+    },
+    animation: { duration: 1500, easing: 'easeInOutQuart' }
+  };
+  public pieCssChartType: ChartType = 'pie';
+  public pieCssChartData: ChartData<'pie'> = {
+    labels: ['Nouveau', 'En cours', 'Traitée', 'Refusée'],
+    datasets: [{
+      data: [0, 0, 0, 0],
+      backgroundColor: this.modernColors.slice(0, 4),
+      hoverBackgroundColor: this.modernHoverColors.slice(0, 4)
+    }]
+  };
+
+  public barChartOptions: ChartConfiguration['options'] = {
+    responsive: true,
+    maintainAspectRatio: false,
+    scales: { 
+      x: { ticks: { padding: 10, color: '#6B7280' }, title: { display: true, text: 'Catégories', color: '#1F2937', padding: 10, font: { size: 14, family: 'Inter', weight: '600' } } },
+      y: { beginAtZero: true, ticks: { color: '#6B7280' }, title: { display: true, text: 'Nombre', color: '#1F2937', padding: 10, font: { size: 14, family: 'Inter', weight: '600' } } }
+    },
+    plugins: { 
+      legend: { display: true, labels: { color: '#1F2937', font: { size: 12, family: 'Inter' } } },
+      tooltip: { 
+        backgroundColor: '#1F2937',
+        titleColor: '#FFFFFF',
+        bodyColor: '#FFFFFF',
+        callbacks: { label: context => `${context.dataset.label}: ${context.parsed.y as number}` } 
+      }
+    },
+    layout: {
+      padding: {
+        left: 20,
+        right: 20,
+        top: 20,
+        bottom: 40
+      }
+    },
+    animation: { duration: 1500, easing: 'easeInOutQuart' }
+  };
+  public barChartType: ChartType = 'bar';
+
+  public avgProcessingTimeChartOptions: ChartConfiguration['options'] = {
+    responsive: true,
+    maintainAspectRatio: false,
+    indexAxis: 'y',
+    scales: {
+      x: { 
+        max: 1440,
+        beginAtZero: true,
+        title: { display: true, text: 'Temps (minutes)', color: '#1F2937', padding: 10, font: { size: 14, family: 'Inter', weight: '600' } },
+        ticks: { padding: 10, color: '#6B7280' }
+      },
+      y: { 
+        title: { display: true, text: 'Statut', color: '#1F2937', padding: 10, font: { size: 14, family: 'Inter', weight: '600' } },
+        ticks: { color: '#6B7280' }
+      }
+    },
+    plugins: { 
+      legend: { display: false },
+      tooltip: { 
+        backgroundColor: '#1F2937',
+        titleColor: '#FFFFFF',
+        bodyColor: '#FFFFFF',
+        callbacks: { label: context => `${context.parsed.x as number} minutes` } 
+      }
+    },
+    layout: {
+      padding: {
+        left: 20,
+        right: 20,
+        top: 20,
+        bottom: 40
+      }
+    },
+    animation: { duration: 1500, easing: 'easeInOutQuart' }
+  };
+  public avgProcessingTimeChartType: ChartType = 'bar';
+  public avgProcessingTimeChartData: ChartData<'bar'> = {
+    labels: ['Nouveau', 'En cours', 'Traitée', 'Refusée'],
+    datasets: [{
+      data: [0, 0, 0, 0],
+      backgroundColor: '#3b82f6',
+      hoverBackgroundColor: '#2563EB',
+      borderWidth: 1,
+      borderColor: '#FFFFFF',
+      borderRadius: 8
+    }]
+  };
+
+  public dayOfWeekChartOptions: ChartConfiguration['options'] = this.pieChartOptions; // Reuse pie chart options
+  public dayOfWeekChartType: ChartType = 'pie';
+  public dayOfWeekChartData: ChartData<'pie'> = {
+    labels: ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi', 'Dimanche'],
+    datasets: [{
+      data: [0, 0, 0, 0, 0, 0, 0],
+      backgroundColor: this.modernColors.slice(0, 7),
+      hoverBackgroundColor: this.modernHoverColors.slice(0, 7)
+    }]
+  };
+
+  public lineChartOptions: ChartConfiguration['options'] = {
+    responsive: true,
+    maintainAspectRatio: false,
+    scales: { 
+      x: { ticks: { padding: 10, color: '#6B7280' }, title: { display: true, text: 'Date', color: '#1F2937', padding: 10, font: { size: 14, family: 'Inter', weight: '600' } } },
+      y: { beginAtZero: true, ticks: { color: '#6B7280' }, title: { display: true, text: 'Nombre de Requêtes', color: '#1F2937', padding: 10, font: { size: 14, family: 'Inter', weight: '600' } } }
+    },
+    plugins: { 
+      legend: { display: false },
+      tooltip: { 
+        backgroundColor: '#1F2937',
+        titleColor: '#FFFFFF',
+        bodyColor: '#FFFFFF'
+      }
+    },
+    layout: {
+      padding: {
+        left: 20,
+        right: 20,
+        top: 20,
+        bottom: 40
+      }
+    },
+    animation: { duration: 1500, easing: 'easeInOutQuart' }
+  };
+  public lineChartType: ChartType = 'line';
+  public lineChartData: ChartData<'line'> = {
+    labels: [],
+    datasets: [{
+      data: [],
+      label: 'Requêtes',
+      borderColor: '#3B82F6',
+      backgroundColor: 'rgba(59, 130, 246, 0.2)',
+      fill: true,
+      tension: 0.4,
+      pointRadius: 4,
+      pointHoverRadius: 6
+    }]
+  };
+
+  public areaChartOptions: ChartConfiguration['options'] = {
+    responsive: true,
+    maintainAspectRatio: false,
+    scales: { 
+      x: { 
+        title: { display: true, text: 'Types de Requêtes', color: '#1F2937', padding: 10, font: { size: 14, family: 'Inter', weight: '600' } }, 
+        ticks: { padding: 10, color: '#6B7280' } 
+      },
+      y: { 
+        beginAtZero: true, 
+        ticks: { color: '#6B7280' }, 
+        title: { display: true, text: 'Nombre', color: '#1F2937', padding: 10, font: { size: 14, family: 'Inter', weight: '600' } } 
+      }
+    },
+    plugins: { 
+      legend: { display: true, labels: { color: '#1F2937', font: { size: 12, family: 'Inter' } } },
+      tooltip: { 
+        backgroundColor: '#1F2937',
+        titleColor: '#FFFFFF',
+        bodyColor: '#FFFFFF'
+      }
+    },
+    layout: {
+      padding: {
+        left: 20,
+        right: 20,
+        top: 20,
+        bottom: 40
+      }
+    },
+    animation: { duration: 1500, easing: 'easeInOutQuart' }
+  };
+  public areaChartType: ChartType = 'bar';
+  public areaChartData: ChartData<'bar'> = {
+    labels: ['Nouveau', 'En cours', 'Traitée', 'Refusée'],
+    datasets: [
+      { 
+        data: [0, 0, 0, 0], 
+        label: 'Requêtes', 
+        backgroundColor: this.modernColors.slice(0, 4),
+        hoverBackgroundColor: this.modernHoverColors.slice(0, 4),
+        borderWidth: 1,
+        borderColor: '#FFFFFF',
+        borderRadius: 8
+      }
+    ]
+  };
+
+  public userRoleChartData: ChartData<'pie'> = {
+    labels: ['Clients', 'Guichetiers', 'Techniciens', 'Admins'],
+    datasets: [{
+      data: [0, 0, 0, 0],
+      backgroundColor: this.modernColors.slice(0, 4),
+      hoverBackgroundColor: this.modernHoverColors.slice(0, 4)
+    }]
+  };
+
+  public technicianWorkloadChartData: ChartData<'bar'> = {
+    labels: [],
+    datasets: [{ 
+      data: [], 
+      label: 'RDV', 
+      backgroundColor: '#3B82F6', 
+      hoverBackgroundColor: '#2563EB', 
+      borderRadius: 8 
+    }]
+  };
+
+  public productChartData: ChartData<'pie'> = {
+    labels: [],
+    datasets: [{
+      data: [],
+      backgroundColor: this.modernColors.slice(0, 5),
+      hoverBackgroundColor: this.modernHoverColors.slice(0, 5)
+    }]
+  };
+
+  public productTrendChartData: ChartData<'bar'> = {
+    labels: [],
+    datasets: [{ 
+      data: [], 
+      label: 'Requêtes par Produit', 
+      backgroundColor: '#3B82F6', 
+      hoverBackgroundColor: '#2563EB', 
+      borderRadius: 8 
+    }]
+  };
+
+  public ministereChartData: ChartData<'pie'> = {
+    labels: [],
+    datasets: [{
+      data: [],
+      backgroundColor: this.modernColors.slice(0, 5),
+      hoverBackgroundColor: this.modernHoverColors.slice(0, 5)
+    }]
+  };
+
+  public rdvStatusChartData: ChartData<'bar'> = {
+    labels: ['En attente', 'Terminé', 'Refusé'],
+    datasets: [
+      { 
+        data: [0, 0, 0], 
+        label: 'RDV', 
+        backgroundColor: ['#F59E0B', '#10B981', '#EF4444'], 
+        hoverBackgroundColor: ['#D97706', '#059669', '#DC2626'], 
+        borderWidth: 1,
+        borderColor: '#FFFFFF',
+        borderRadius: 8
+      }
+    ]
+  };
+
+  public serviceChartData: ChartData<'pie'> = {
+    labels: [],
+    datasets: [{
+      data: [],
+      backgroundColor: this.modernColors.slice(0, 5),
+      hoverBackgroundColor: this.modernHoverColors.slice(0, 5)
+    }]
+  };
+
+  public clientByMinistereChartData: ChartData<'pie'> = {
+    labels: [],
+    datasets: [{
+      data: [],
+      backgroundColor: this.modernColors.slice(0, 5),
+      hoverBackgroundColor: this.modernHoverColors.slice(0, 5)
+    }]
+  };
 
   constructor(
     private dashboardService: DashboardService,

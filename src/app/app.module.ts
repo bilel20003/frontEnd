@@ -44,9 +44,10 @@ import { TechRendezVousComponent } from './components/Technicien/tech-rendez-vou
 import { ArchiveComponent } from './components/Admin/archive/archive.component';
 import { ResetPasswordComponent } from './components/reset-password/reset-password.component';
 import { NgChartsModule } from 'ng2-charts';
-import { DashboardComponent } from './components/Admin/dashboard/dashboard.component';
+
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { AuthInterceptor } from 'src/auth.interceptor';  // Import de l'intercepteur
+import { DashboardComponent } from './components/Admin/dashboard/dashboard.component';
 @NgModule({
   declarations: [
     AppComponent,
