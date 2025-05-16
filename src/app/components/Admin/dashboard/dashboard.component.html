@@ -6,102 +6,95 @@
       <!-- Section: Aperçu Général -->
       <div class="section">
         <h2 class="section-title">Aperçu Général</h2>
-        <div class="kpi-grid" *ngIf="!loading; else loadingTemplate">
-          <div class="kpi-card">
-            <i class="fas fa-users kpi-icon"></i>
+        <div class="kpi-grid" *ngIf="!loading && statistics; else loadingTemplate">
+          <div class="kpi-card" style="background: linear-gradient(135deg, #fef3c7, #fffbeb); border-left: 4px solid #f59e0b;">
+            <i class="fas fa-users kpi-icon" style="background: linear-gradient(135deg, #f59e0b, #d97706);"></i>
             <div class="kpi-content">
-              <p class="kpi-value">{{ totalUsers }}</p>
+              <p class="kpi-value" style="color: #d97706;">{{ statistics.kpiMetrics.totalUsers }}</p>
               <p class="kpi-label">Total Utilisateurs</p>
             </div>
           </div>
-          <div class="kpi-card">
-            <i class="fas fa-user kpi-icon"></i>
+          <div class="kpi-card" style="background: linear-gradient(135deg, #e0f2fe, #f0f9ff); border-left: 4px solid #3b82f6;">
+            <i class="fas fa-user kpi-icon" style="background: linear-gradient(135deg, #3b82f6, #2563eb);"></i>
             <div class="kpi-content">
-              <p class="kpi-value">{{ totalClients }}</p>
+              <p class="kpi-value" style="color: #2563eb;">{{ statistics.kpiMetrics.totalClients }}</p>
               <p class="kpi-label">Total Clients</p>
             </div>
           </div>
-          <div class="kpi-card">
-            <i class="fas fa-wrench kpi-icon"></i>
+          <div class="kpi-card" style="background: linear-gradient(135deg, #fce7f3, #fdf2f8); border-left: 4px solid #ec4899;">
+            <i class="fas fa-wrench kpi-icon" style="background: linear-gradient(135deg, #ec4899, #db2777);"></i>
             <div class="kpi-content">
-              <p class="kpi-value">{{ totalTechnicians }}</p>
+              <p class="kpi-value" style="color: #db2777;">{{ statistics.kpiMetrics.totalTechnicians }}</p>
               <p class="kpi-label">Techniciens</p>
             </div>
           </div>
-          <div class="kpi-card">
-            <i class="fas fa-headset kpi-icon"></i>
+          <div class="kpi-card" style="background: linear-gradient(135deg, #e0e7ff, #eef2ff); border-left: 4px solid #8b5cf6;">
+            <i class="fas fa-headset kpi-icon" style="background: linear-gradient(135deg, #8b5cf6, #7c3aed);"></i>
             <div class="kpi-content">
-              <p class="kpi-value">{{ totalGuichetiers }}</p>
+              <p class="kpi-value" style="color: #7c3aed;">{{ statistics.kpiMetrics.totalGuichetiers }}</p>
               <p class="kpi-label">Guichetiers</p>
             </div>
           </div>
-          <div class="kpi-card">
-            <i class="fas fa-file-alt kpi-icon"></i>
+          <div class="kpi-card" style="background: linear-gradient(135deg, #d1fae5, #ecfdf5); border-left: 4px solid #10b981;">
+            <i class="fas fa-file-alt kpi-icon" style="background: linear-gradient(135deg, #10b981, #059669);"></i>
             <div class="kpi-content">
-              <p class="kpi-value">{{ totalRequests }}</p>
+              <p class="kpi-value" style="color: #059669;">{{ statistics.kpiMetrics.totalRequests }}</p>
               <p class="kpi-label">Total Requêtes</p>
             </div>
           </div>
-          <div class="kpi-card">
-            <i class="fas fa-hourglass-half kpi-icon"></i>
+          <div class="kpi-card" style="background: linear-gradient(135deg, #ffedd5, #fff7ed); border-left: 4px solid #f59e0b;">
+            <i class="fas fa-hourglass-half kpi-icon" style="background: linear-gradient(135deg, #f59e0b, #d97706);"></i>
             <div class="kpi-content">
-              <p class="kpi-value">{{ activeRequests }}</p>
+              <p class="kpi-value" style="color: #d97706;">{{ statistics.kpiMetrics.activeRequests }}</p>
               <p class="kpi-label" title="Requêtes en attente de traitement">Requêtes Non Traitées</p>
             </div>
           </div>
-          <div class="kpi-card">
-            <i class="fas fa-check-circle kpi-icon"></i>
+          <div class="kpi-card" style="background: linear-gradient(135deg, #d1fae5, #ecfdf5); border-left: 4px solid #10b981;">
+            <i class="fas fa-check-circle kpi-icon" style="background: linear-gradient(135deg, #10b981, #059669);"></i>
             <div class="kpi-content">
-              <p class="kpi-value">{{ processedRequests }}</p>
+              <p class="kpi-value" style="color: #059669;">{{ statistics.kpiMetrics.processedRequests }}</p>
               <p class="kpi-label">Requêtes Traitées</p>
             </div>
           </div>
-          <div class="kpi-card">
-            <i class="fas fa-times-circle kpi-icon"></i>
+          <div class="kpi-card" style="background: linear-gradient(135deg, #fee2e2, #fef2f2); border-left: 4px solid #ef4444;">
+            <i class="fas fa-times-circle kpi-icon" style="background: linear-gradient(135deg, #ef4444, #dc2626);"></i>
             <div class="kpi-content">
-              <p class="kpi-value">{{ refusedRequests }}</p>
+              <p class="kpi-value" style="color: #dc2626;">{{ statistics.kpiMetrics.refusedRequests }}</p>
               <p class="kpi-label">Requêtes Refusées</p>
             </div>
           </div>
-          <div class="kpi-card">
-            <i class="fas fa-cogs kpi-icon"></i>
+          <div class="kpi-card" style="background: linear-gradient(135deg, #ffedd5, #fff7ed); border-left: 4px solid #f59e0b;">
+            <i class="fas fa-cogs kpi-icon" style="background: linear-gradient(135deg, #f59e0b, #d97706);"></i>
             <div class="kpi-content">
-              <p class="kpi-value">{{ inProgressRequests }}</p>
+              <p class="kpi-value" style="color: #d97706;">{{ statistics.kpiMetrics.inProgressRequests }}</p>
               <p class="kpi-label">Requêtes en Cours</p>
             </div>
           </div>
-          <div class="kpi-card">
-            <i class="fas fa-stopwatch kpi-icon"></i>
+          <div class="kpi-card" style="background: linear-gradient(135deg, #e0f2fe, #f0f9ff); border-left: 4px solid #3b82f6;">
+            <i class="fas fa-building kpi-icon" style="background: linear-gradient(135deg, #3b82f6, #2563eb);"></i>
             <div class="kpi-content">
-              <p class="kpi-value">{{ avgProcessingTime.days > 0 || avgProcessingTime.hours > 0 || avgProcessingTime.minutes > 0 ? (avgProcessingTime.days + 'j ' + avgProcessingTime.hours + 'h ' + avgProcessingTime.minutes + 'm') : 'N/A' }}</p>
-              <p class="kpi-label">Temps Moyen de Traitement</p>
-            </div>
-          </div>
-          <div class="kpi-card">
-            <i class="fas fa-building kpi-icon"></i>
-            <div class="kpi-content">
-              <p class="kpi-value">{{ totalMinisteres }}</p>
+              <p class="kpi-value" style="color: #2563eb;">{{ statistics.kpiMetrics.totalMinisteres }}</p>
               <p class="kpi-label">Ministères</p>
             </div>
           </div>
-          <div class="kpi-card">
-            <i class="fas fa-cog kpi-icon"></i>
+          <div class="kpi-card" style="background: linear-gradient(135deg, #fce7f3, #fdf2f8); border-left: 4px solid #ec4899;">
+            <i class="fas fa-cog kpi-icon" style="background: linear-gradient(135deg, #ec4899, #db2777);"></i>
             <div class="kpi-content">
-              <p class="kpi-value">{{ totalServices }}</p>
+              <p class="kpi-value" style="color: #db2777;">{{ statistics.kpiMetrics.totalServices }}</p>
               <p class="kpi-label">Services</p>
             </div>
           </div>
-          <div class="kpi-card">
-            <i class="fas fa-box kpi-icon"></i>
+          <div class="kpi-card" style="background: linear-gradient(135deg, #ffedd5, #fff7ed); border-left: 4px solid #f59e0b;">
+            <i class="fas fa-box kpi-icon" style="background: linear-gradient(135deg, #f59e0b, #d97706);"></i>
             <div class="kpi-content">
-              <p class="kpi-value">{{ totalProduits }}</p>
+              <p class="kpi-value" style="color: #d97706;">{{ statistics.kpiMetrics.totalProduits }}</p>
               <p class="kpi-label">Produits</p>
             </div>
           </div>
-          <div class="kpi-card">
-            <i class="fas fa-calendar-alt kpi-icon"></i>
+          <div class="kpi-card" style="background: linear-gradient(135deg, #e0e7ff, #eef2ff); border-left: 4px solid #8b5cf6;">
+            <i class="fas fa-calendar-alt kpi-icon" style="background: linear-gradient(135deg, #8b5cf6, #7c3aed);"></i>
             <div class="kpi-content">
-              <p class="kpi-value">{{ totalRdvs }}</p>
+              <p class="kpi-value" style="color: #7c3aed;">{{ statistics.kpiMetrics.totalRdvs }}</p>
               <p class="kpi-label">Total RDVs</p>
             </div>
           </div>
@@ -109,34 +102,46 @@
         <ng-template #loadingTemplate>
           <div class="loading-spinner">Chargement des données...</div>
         </ng-template>
-        <div class="chart-container">
+        <!-- Temps Moyen de Traitement KPI -->
+        <div class="kpi-card temps-moyen" style="background: linear-gradient(135deg, #e0e7ff, #eef2ff); border-left: 4px solid #8b5cf6; margin-top: 1.5rem;" *ngIf="statistics">
+          <i class="fas fa-stopwatch kpi-icon" style="background: linear-gradient(135deg, #8b5cf6, #7c3aed);"></i>
+          <div class="kpi-content">
+            <p class="kpi-value" style="color: #7c3aed;">
+              {{ statistics.kpiMetrics.avgProcessingTime.days > 0 || statistics.kpiMetrics.avgProcessingTime.hours > 0 || statistics.kpiMetrics.avgProcessingTime.minutes > 0 
+                ? (statistics.kpiMetrics.avgProcessingTime.days + 'j ' + statistics.kpiMetrics.avgProcessingTime.hours + 'h ' + statistics.kpiMetrics.avgProcessingTime.minutes + 'm') 
+                : 'N/A' }}
+            </p>
+            <p class="kpi-label">Temps Moyen de Traitement</p>
+          </div>
+        </div>
+        <div class="chart-container" *ngIf="statistics">
           <h3 class="text-lg font-semibold mb-4">Indicateurs de Qualité des Requêtes</h3>
           <canvas baseChart [data]="pieChartData" [options]="qualityPieChartOptions" [type]="qualityPieChartType" *ngIf="hasNonZeroData(pieChartData); else noData"></canvas>
           <ng-template #noData>
             <p class="text-center text-gray-500">Aucune donnée disponible.</p>
           </ng-template>
         </div>
-        <!-- New Quality KPI Boxes -->
-        <div class="kpi-grid" *ngIf="!loading">
-          <div class="kpi-card">
-            <i class="fas fa-check-circle kpi-icon" style="color: #22c55e;"></i>
+        <!-- Quality KPI Boxes -->
+        <div class="kpi-grid" *ngIf="!loading && statistics">
+          <div class="kpi-card" style="background: linear-gradient(135deg, #d1fae5, #ecfdf5); border-left: 4px solid #10b981;">
+            <i class="fas fa-check-circle kpi-icon" style="background: linear-gradient(135deg, #10b981, #059669);"></i>
             <div class="kpi-content">
-              <p class="kpi-value">{{ qualityKpis.sameDay }}</p>
-              <p class="kpi-label">Même Jour</p>
+              <p class="kpi-value" style="color: #059669;">{{ statistics.qualityMetrics.kpis.sameDay }}</p>
+              <p class="kpi-label">Même Jour ({{ statistics.qualityMetrics.percentages.sameDay }}%)</p>
             </div>
           </div>
-          <div class="kpi-card">
-            <i class="fas fa-clock kpi-icon" style="color: #f59e0b;"></i>
+          <div class="kpi-card" style="background: linear-gradient(135deg, #ffedd5, #fff7ed); border-left: 4px solid #f59e0b;">
+            <i class="fas fa-clock kpi-icon" style="background: linear-gradient(135deg, #f59e0b, #d97706);"></i>
             <div class="kpi-content">
-              <p class="kpi-value">{{ qualityKpis.withinTwoDays }}</p>
-              <p class="kpi-label">≤ 2 Jours</p>
+              <p class="kpi-value" style="color: #d97706;">{{ statistics.qualityMetrics.kpis.withinTwoDays }}</p>
+              <p class="kpi-label">≤ 2 Jours ({{ statistics.qualityMetrics.percentages.withinTwoDays }}%)</p>
             </div>
           </div>
-          <div class="kpi-card">
-            <i class="fas fa-exclamation-triangle kpi-icon" style="color: #ef4444;"></i>
+          <div class="kpi-card" style="background: linear-gradient(135deg, #fee2e2, #fef2f2); border-left: 4px solid #ef4444;">
+            <i class="fas fa-exclamation-triangle kpi-icon" style="background: linear-gradient(135deg, #ef4444, #dc2626);"></i>
             <div class="kpi-content">
-              <p class="kpi-value">{{ qualityKpis.moreThanTwoDays }}</p>
-              <p class="kpi-label">> 2 Jours</p>
+              <p class="kpi-value" style="color: #dc2626;">{{ statistics.qualityMetrics.kpis.moreThanTwoDays }}</p>
+              <p class="kpi-label">> 2 Jours ({{ statistics.qualityMetrics.percentages.moreThanTwoDays }}%)</p>
             </div>
           </div>
         </div>
@@ -160,14 +165,14 @@
         <div class="chart-grid requests-charts" *ngIf="!loading; else loadingTemplate">
           <div class="chart-container">
             <h3 class="text-lg font-semibold mb-4">Statut des Requêtes (Barres)</h3>
-            <canvas baseChart [data]="areaChartData" [options]="areaChartOptions" [type]="areaChartType" *ngIf="hasNonZeroData(areaChartData); else noData"></canvas>
+            <canvas baseChart [data]="barChartDataRequestStatus" [options]="barChartOptions" [type]="barChartType" *ngIf="hasNonZeroData(barChartDataRequestStatus); else noData"></canvas>
             <ng-template #noData>
               <p class="text-center text-gray-500">Aucune donnée disponible.</p>
             </ng-template>
           </div>
           <div class="chart-container">
             <h3 class="text-lg font-semibold mb-4">Statut des Requêtes (Pie)</h3>
-            <canvas baseChart [data]="pieCssChartData" [options]="pieCssChartOptions" [type]="pieCssChartType" *ngIf="hasNonZeroData(pieCssChartData); else noData"></canvas>
+            <canvas baseChart [data]="pieChartDataRequestStatus" [options]="pieChartOptions" [type]="pieChartType" *ngIf="hasNonZeroData(pieChartDataRequestStatus); else noData"></canvas>
             <ng-template #noData>
               <p class="text-center text-gray-500">Aucune donnée disponible.</p>
             </ng-template>
@@ -186,71 +191,65 @@
               <p class="text-center text-gray-500">Aucune donnée disponible.</p>
             </ng-template>
           </div>
-          <div class="chart-container">
-            <h3 class="text-lg font-semibold mb-4">Temps Moyen de Traitement par Statut (Bar)</h3>
-            <canvas baseChart [data]="avgProcessingTimeChartData" [options]="avgProcessingTimeChartOptions" [type]="avgProcessingTimeChartType" *ngIf="hasNonZeroData(avgProcessingTimeChartData); else noData"></canvas>
-            <ng-template #noData>
-              <p class="text-center text-gray-500">Aucune donnée disponible.</p>
-            </ng-template>
-          </div>
-          <div class="chart-container">
-            <h3 class="text-lg font-semibold mb-4">Répartition des Requêtes par Jour de la Semaine (Pie)</h3>
-            <canvas baseChart [data]="dayOfWeekChartData" [options]="pieChartOptions" [type]="pieChartType" *ngIf="hasNonZeroData(dayOfWeekChartData); else noData"></canvas>
-            <ng-template #noData>
-              <p class="text-center text-gray-500">Aucune donnée disponible.</p>
-            </ng-template>
-          </div>
-        </div>
-        <!-- Subsection: Tendances des Requêtes -->
-        <div class="section">
-          <h2 class="section-title">Tendances des Requêtes</h2>
-          <div class="chart-container">
-            <h3 class="text-lg font-semibold mb-4">Tendances des Requêtes (Line)</h3>
+          <div class="chart-container" style="grid-column: 1 / -1;">
+            <h3 class="text-lg font-semibold mb-4">Tendances des Requêtes (Ligne)</h3>
             <canvas baseChart [data]="lineChartData" [options]="lineChartOptions" [type]="lineChartType" *ngIf="hasNonZeroData(lineChartData); else noData"></canvas>
             <ng-template #noData>
               <p class="text-center text-gray-500">Aucune donnée disponible.</p>
             </ng-template>
           </div>
+          <div class="chart-container">
+            <h3 class="text-lg font-semibold mb-4">Requêtes par Jour de la Semaine (Pie)</h3>
+            <canvas baseChart [data]="dayOfWeekChartData" [options]="pieChartOptions" [type]="pieChartType" *ngIf="hasNonZeroData(dayOfWeekChartData); else noData"></canvas>
+            <ng-template #noData>
+              <p class="text-center text-gray-500">Aucune donnée disponible.</p>
+            </ng-template>
+          </div>
+          <div class="chart-container">
+            <h3 class="text-lg font-semibold mb-4">Temps Moyen de Traitement par Statut (Ligne)</h3>
+            <canvas baseChart [data]="avgProcessingTimeChartData" [options]="avgProcessingTimeChartOptions" [type]="avgProcessingTimeChartType" *ngIf="hasNonZeroData(avgProcessingTimeChartData); else noData"></canvas>
+            <ng-template #noData>
+              <p class="text-center text-gray-500">Aucune donnée disponible.</p>
+            </ng-template>
+          </div>
         </div>
+        <!-- Table: Liste des Requêtes -->
+        <h3 class="table-subtitle">Liste des Requêtes</h3>
         <div class="search-bar-container">
           <div class="search-bar">
-            <input type="text" [(ngModel)]="requestSearch" (input)="filterRequests()" placeholder="Rechercher une requête...">
+            <input type="text" placeholder="Rechercher une requête..." [(ngModel)]="requestSearch" (input)="filterRequests()">
             <button><i class="fas fa-search"></i></button>
           </div>
         </div>
-        <div class="table-section">
-          <h3 class="table-subtitle">Liste des Requêtes Récentes</h3>
-          <div class="table-responsive">
-            <table class="table table-hover">
-              <thead class="table-header">
-                <tr>
-                  <th>ID</th>
-                  <th>Client</th>
-                  <th>Statut</th>
-                  <th>Date</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr *ngFor="let request of displayedRequests">
-                  <td>{{ request.id }}</td>
-                  <td>{{ request.client?.username || 'N/A' }}</td>
-                  <td>
-                    <span class="badge" [ngClass]="getRequestBadgeClass(request.etat)">{{ request.etat }}</span>
-                  </td>
-                  <td>{{ request.date ? (request.date | date:'short') : 'N/A' }}</td>
-                </tr>
-                <tr *ngIf="!displayedRequests.length">
-                  <td colspan="4" class="text-center">Aucune requête disponible.</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-          <div class="pagination-container">
-            <div class="pagination">
-              <button (click)="changePage(page - 1, 'requests')" [disabled]="page === 1">Précédent</button>
-              <span>Page {{ page }} de {{ totalRequestPages / pageSize | number:'1.0-0' }}</span>
-              <button (click)="changePage(page + 1, 'requests')" [disabled]="page * pageSize >= totalRequestPages">Suivant</button>
-            </div>
+        <div class="table-responsive">
+          <table class="table table-hover">
+            <thead class="table-header">
+              <tr>
+                <th>ID</th>
+                <th>Client</th>
+                <th>État</th>
+                <th>Date</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let request of displayedRequests">
+                <td>{{ request.id }}</td>
+                <td>{{ request.client?.username || 'N/A' }}</td>
+                <td><span class="badge" [ngClass]="getRequestBadgeClass(request.etat)">{{ translateStatus(request.etat) }}</span></td>
+                <td>{{ request.date ? (request.date | date:'dd/MM/yyyy') : 'N/A' }}</td>
+              </tr>
+              <tr *ngIf="displayedRequests.length === 0">
+                <td colspan="4" class="text-center">Aucune requête trouvée.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <!-- Pagination -->
+        <div class="pagination-container">
+          <div class="pagination">
+            <button [disabled]="page === 1" (click)="changePage(page - 1, 'requests')">«</button>
+            <button *ngFor="let p of [1,2,3,4,5]" [class.active]="page === p" (click)="changePage(p, 'requests')">{{ p }}</button>
+            <button [disabled]="page * pageSize >= totalRequestPages" (click)="changePage(page + 1, 'requests')">»</button>
           </div>
         </div>
       </div>
@@ -286,41 +285,46 @@
             </ng-template>
           </div>
         </div>
+        <!-- Table: Liste des Utilisateurs -->
+        <h3 class="table-subtitle">Liste des Utilisateurs</h3>
         <div class="search-bar-container">
           <div class="search-bar">
-            <input type="text" [(ngModel)]="userSearch" (input)="filterUsers()" placeholder="Rechercher un utilisateur...">
+            <input type="text" placeholder="Rechercher un utilisateur..." [(ngModel)]="userSearch" (input)="filterUsers()">
             <button><i class="fas fa-search"></i></button>
           </div>
         </div>
-        <div class="table-section">
-          <h3 class="table-subtitle">Liste des Utilisateurs Actifs</h3>
-          <div class="table-responsive">
-            <table class="table table-hover">
-              <thead class="table-header">
-                <tr>
-                  <th>ID</th>
-                  <th>Nom</th>
-                  <th>Rôle</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr *ngFor="let user of displayedUsers">
-                  <td>{{ user.id }}</td>
-                  <td>{{ user.username }}</td>
-                  <td>
-                    <span class="badge" [ngClass]="getRoleBadgeClass(user.role)">{{ user.role }}</span>
-                  </td>
-                </tr>
-                <tr *ngIf="!displayedUsers.length">
-                  <td colspan="3" class="text-center">Aucun utilisateur disponible.</td>
-                </tr>
-              </tbody>
-            </table>
+        <div class="table-responsive">
+          <table class="table table-hover">
+            <thead class="table-header">
+              <tr>
+                <th>ID</th>
+                <th>Nom d'utilisateur</th>
+                <th>Rôle</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let user of displayedUsers">
+                <td>{{ user.id }}</td>
+                <td>{{ user.username }}</td>
+                <td><span class="badge" [ngClass]="getRoleBadgeClass(user.role)">{{ translateRole(user.role) }}</span></td>
+              </tr>
+              <tr *ngIf="displayedUsers.length === 0">
+                <td colspan="3" class="text-center">Aucun utilisateur trouvé.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <!-- Pagination -->
+        <div class="pagination-container">
+          <div class="pagination">
+            <button [disabled]="page === 1" (click)="changePage(page - 1, 'users')">«</button>
+            <button *ngFor="let p of [1,2,3,4,5]" [class.active]="page === p" (click)="changePage(p, 'users')">{{ p }}</button>
+            <button [disabled]="page * pageSize >= totalRequestPages" (click)="changePage(page + 1, 'users')">»</button>
           </div>
         </div>
       </div>
 
-      <!-- Section: RDV -->
+      <!-- Section: Rendez-vous -->
       <div class="section">
         <h2 class="section-title">Rendez-vous</h2>
         <div class="chart-filter">
@@ -337,59 +341,57 @@
         </div>
         <div class="chart-grid" *ngIf="!loading; else loadingTemplate">
           <div class="chart-container">
-            <h3 class="text-lg font-semibold mb-4">Statut des RDV (Bar)</h3>
+            <h3 class="text-lg font-semibold mb-4">Statut des RDVs (Barres)</h3>
             <canvas baseChart [data]="rdvStatusChartData" [options]="barChartOptions" [type]="barChartType" *ngIf="hasNonZeroData(rdvStatusChartData); else noData"></canvas>
             <ng-template #noData>
               <p class="text-center text-gray-500">Aucune donnée disponible.</p>
             </ng-template>
           </div>
           <div class="chart-container">
-            <h3 class="text-lg font-semibold mb-4">Charge des Techniciens (Bar)</h3>
+            <h3 class="text-lg font-semibold mb-4">Charge de Travail des Techniciens (Barres)</h3>
             <canvas baseChart [data]="technicianWorkloadChartData" [options]="barChartOptions" [type]="barChartType" *ngIf="hasNonZeroData(technicianWorkloadChartData); else noData"></canvas>
             <ng-template #noData>
-              <p class="text-center text-gray-500">Aucune données disponible.</p>
+              <p class="text-center text-gray-500">Aucune donnée disponible.</p>
             </ng-template>
           </div>
         </div>
+        <!-- Table: Liste des RDVs -->
+        <h3 class="table-subtitle">Liste des RDVs</h3>
         <div class="search-bar-container">
           <div class="search-bar">
-            <input type="text" [(ngModel)]="rdvSearch" (input)="filterRdvs()" placeholder="Rechercher un RDV...">
+            <input type="text" placeholder="Rechercher un RDV..." [(ngModel)]="rdvSearch" (input)="filterRdvs()">
             <button><i class="fas fa-search"></i></button>
           </div>
         </div>
-        <div class="table-section">
-          <h3 class="table-subtitle">Liste des Rendez-vous Planifiés</h3>
-          <div class="table-responsive">
-            <table class="table table-hover">
-              <thead class="table-header">
-                <tr>
-                  <th>ID</th>
-                  <th>Technicien</th>
-                  <th>Date</th>
-                  <th>Statut</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr *ngFor="let rdv of displayedRdvs">
-                  <td>{{ rdv.id || 'N/A' }}</td>
-                  <td>{{ rdv.technicien?.username || 'N/A' }}</td>
-                  <td>{{ rdv.dateSouhaitee ? (rdv.dateSouhaitee | date:'short') : 'N/A' }}</td>
-                  <td>
-                    <span class="badge" [ngClass]="getRdvBadgeClass(rdv.status)">{{ rdv.status || 'N/A' }}</span>
-                  </td>
-                </tr>
-                <tr *ngIf="!displayedRdvs.length">
-                  <td colspan="4" class="text-center">Aucun RDV disponible.</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-          <div class="pagination-container">
-            <div class="pagination">
-              <button (click)="changePage(page - 1, 'rdvs')" [disabled]="page === 1">Précédent</button>
-              <span>Page {{ page }} de {{ totalRdvs / pageSize | number:'1.0-0' }}</span>
-              <button (click)="changePage(page + 1, 'rdvs')" [disabled]="page * pageSize >= totalRdvs">Suivant</button>
-            </div>
+        <div class="table-responsive">
+          <table class="table table-hover">
+            <thead class="table-header">
+              <tr>
+                <th>ID</th>
+                <th>Technicien</th>
+                <th>Date</th>
+                <th>Statut</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let rdv of displayedRdvs">
+                <td>{{ rdv.id || 'N/A' }}</td>
+                <td>{{ rdv.technicien?.username || 'N/A' }}</td>
+                <td>{{ rdv.dateSouhaitee ? (rdv.dateSouhaitee | date:'dd/MM/yyyy') : 'N/A' }}</td>
+                <td><span class="badge" [ngClass]="getRdvBadgeClass(rdv.status)">{{ translateStatus(rdv.status) }}</span></td>
+              </tr>
+              <tr *ngIf="displayedRdvs.length === 0">
+                <td colspan="4" class="text-center">Aucun RDV trouvé.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <!-- Pagination -->
+        <div class="pagination-container">
+          <div class="pagination">
+            <button [disabled]="page === 1" (click)="changePage(page - 1, 'rdvs')">«</button>
+            <button *ngFor="let p of [1,2,3,4,5]" [class.active]="page === p" (click)="changePage(p, 'rdvs')">{{ p }}</button>
+            <button [disabled]="page * pageSize >= totalRdvPages" (click)="changePage(page + 1, 'rdvs')">»</button>
           </div>
         </div>
       </div>
@@ -411,47 +413,46 @@
         </div>
         <div class="chart-grid" *ngIf="!loading; else loadingTemplate">
           <div class="chart-container">
-            <h3 class="text-lg font-semibold mb-4">Requêtes par Produit (Pie)</h3>
+            <h3 class="text-lg font-semibold mb-4">Top Produits (Pie)</h3>
             <canvas baseChart [data]="productChartData" [options]="pieChartOptions" [type]="pieChartType" *ngIf="hasNonZeroData(productChartData); else noData"></canvas>
             <ng-template #noData>
               <p class="text-center text-gray-500">Aucune donnée disponible.</p>
             </ng-template>
           </div>
           <div class="chart-container">
-            <h3 class="text-lg font-semibold mb-4">Tendances des Requêtes par Produit (Bar)</h3>
+            <h3 class="text-lg font-semibold mb-4">Tendances des Produits (Barres)</h3>
             <canvas baseChart [data]="productTrendChartData" [options]="barChartOptions" [type]="barChartType" *ngIf="hasNonZeroData(productTrendChartData); else noData"></canvas>
             <ng-template #noData>
               <p class="text-center text-gray-500">Aucune donnée disponible.</p>
             </ng-template>
           </div>
         </div>
+        <!-- Table: Liste des Produits -->
+        <h3 class="table-subtitle">Liste des Produits</h3>
         <div class="search-bar-container">
           <div class="search-bar">
-            <input type="text" [(ngModel)]="productSearch" (input)="filterProducts()" placeholder="Rechercher un produit...">
+            <input type="text" placeholder="Rechercher un produit..." [(ngModel)]="productSearch" (input)="filterProducts()">
             <button><i class="fas fa-search"></i></button>
           </div>
         </div>
-        <div class="table-section">
-          <h3 class="table-subtitle">Liste des Produits Populaires</h3>
-          <div class="table-responsive">
-            <table class="table table-hover">
-              <thead class="table-header">
-                <tr>
-                  <th>Produit</th>
-                  <th>Nombre de Requêtes</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr *ngFor="let product of displayedProducts">
-                  <td>{{ product.nom }}</td>
-                  <td>{{ product.requestCount }}</td>
-                </tr>
-                <tr *ngIf="!displayedProducts.length">
-                  <td colspan="2" class="text-center">Aucun produit disponible.</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
+        <div class="table-responsive">
+          <table class="table table-hover">
+            <thead class="table-header">
+              <tr>
+                <th>Nom</th>
+                <th>Nombre de Requêtes</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let product of displayedProducts">
+                <td>{{ product.nom }}</td>
+                <td>{{ product.requestCount }}</td>
+              </tr>
+              <tr *ngIf="displayedProducts.length === 0">
+                <td colspan="2" class="text-center">Aucun produit trouvé.</td>
+              </tr>
+            </tbody>
+          </table>
         </div>
       </div>
     </div>

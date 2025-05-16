@@ -288,4 +288,19 @@ export class UserInfoService {
       catchError(this.handleError)
     );
   }
+
+  // New function to get users by role
+  getUsersByRole(roleName: string): Observable<UserDisplay[]> {
+    console.log(`getUsersByRole called with role: ${roleName}`);
+    return this.getAllUsers().pipe(
+      map(users => {
+        const filteredUsers = users.filter(user => 
+          user.role.toUpperCase() === roleName.toUpperCase()
+        );
+        console.log(`Found ${filteredUsers.length} users with role ${roleName}`);
+        return filteredUsers;
+      }),
+      catchError(this.handleError)
+    );
+  }
 }
