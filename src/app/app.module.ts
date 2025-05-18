@@ -1,4 +1,4 @@
-import { NgModule } from '@angular/core';
+import { LOCALE_ID, NgModule } from '@angular/core';
 import { HTTP_INTERCEPTORS, HttpClientModule } from '@angular/common/http';
 import { ReactiveFormsModule } from '@angular/forms';
 import { BrowserModule } from '@angular/platform-browser';
@@ -44,10 +44,14 @@ import { TechRendezVousComponent } from './components/Technicien/tech-rendez-vou
 import { ArchiveComponent } from './components/Admin/archive/archive.component';
 import { ResetPasswordComponent } from './components/reset-password/reset-password.component';
 import { NgChartsModule } from 'ng2-charts';
-
 import { MatSnackBarModule } from '@angular/material/snack-bar';
-import { AuthInterceptor } from 'src/auth.interceptor';  // Import de l'intercepteur
+import { AuthInterceptor } from 'src/auth.interceptor';
 import { DashboardComponent } from './components/Admin/dashboard/dashboard.component';
+import { registerLocaleData } from '@angular/common';
+import localeFr from '@angular/common/locales/fr';
+
+registerLocaleData(localeFr);
+
 @NgModule({
   declarations: [
     AppComponent,
@@ -101,7 +105,8 @@ import { DashboardComponent } from './components/Admin/dashboard/dashboard.compo
     RendezvousService,
     UserInfoService,
     DashboardService,
-    { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true } // Enregistrement de l'intercepteur
+    { provide: LOCALE_ID, useValue: 'fr' },
+    { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true }
   ],
   bootstrap: [AppComponent]
 })

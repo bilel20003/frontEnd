@@ -200,18 +200,56 @@ header h2 {
   border: 1px solid #ddd;
 }
 
-.form-group input,
-.form-group select,
-.form-group textarea {
+/* Enhanced Select and Textarea */
+.custom-select {
   width: 100%;
-  padding: 10px;
-  border: 1px solid #ccc;
-  border-radius: 6px;
+  padding: 12px 40px 12px 12px; /* Add padding-right to avoid overlap with arrow */
+  border: 2px solid #ddd;
+  border-radius: 10px;
   font-size: 14px;
-  resize: vertical;
-  min-height: 100px;
+  background-color: #fff;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%231e3c72' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  cursor: pointer;
 }
 
+.custom-select:focus {
+  border-color: #1e3c72;
+  outline: none;
+  box-shadow: 0 4px 8px rgba(30, 60, 114, 0.2);
+}
+
+.custom-select option {
+  padding: 10px;
+  background-color: #fff;
+  color: #333;
+}
+
+.custom-textarea {
+  width: 100%;
+  padding: 12px;
+  border: 2px solid #ddd;
+  border-radius: 10px;
+  font-size: 14px;
+  background-color: #f9f9f9;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+  min-height: 150px;
+  resize: vertical;
+  line-height: 1.6;
+}
+
+.custom-textarea:focus {
+  border-color: #1e3c72;
+  outline: none;
+  box-shadow: 0 4px 8px rgba(30, 60, 114, 0.2);
+}
+
+/* Form Group Focus */
 .form-group input:focus,
 .form-group select:focus,
 .form-group textarea:focus {
@@ -219,9 +257,144 @@ header h2 {
   outline: none;
 }
 
-.modal-calendar {
-  height: 300px;
-  margin-bottom: 15px;
+/* Week Navigation and Days */
+.week-nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.nav-btn {
+  background: #1e3c72;
+  color: white;
+  border: none;
+  padding: 5px 10px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.week-days {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 10px;
+}
+
+.day-slot {
+  padding: 10px;
+  border: 1px solid #ccc;
+  text-align: center;
+  min-width: 80px;
+  border-radius: 8px;
+  transition: background-color 0.3s ease;
+}
+
+.day-info {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.day-name {
+  font-size: 14px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.day-number {
+  font-size: 18px;
+  font-weight: 700;
+  margin: 2px 0;
+}
+
+.month-name {
+  font-size: 12px;
+  text-transform: capitalize;
+}
+
+.available-day {
+  background-color: #28a745;
+  color: #ffffff;
+  cursor: pointer;
+}
+
+.available-day:hover {
+  background-color: #218838;
+}
+
+.available-day .day-name,
+.available-day .day-number,
+.available-day .month-name {
+  color: #ffffff;
+}
+
+.unavailable-day {
+  background-color: #e9ecef;
+  color: #6c757d;
+  cursor: not-allowed;
+}
+
+.unavailable-day .day-name,
+.unavailable-day .day-number,
+.unavailable-day .month-name {
+  color: #6c757d;
+}
+
+.selected-day {
+  background-color: #17a2b8;
+  border-color: #138496;
+  color: #ffffff;
+}
+
+.selected-day .day-name,
+.selected-day .day-number,
+.selected-day .month-name {
+  color: #ffffff;
+}
+
+/* Time Slots */
+.time-slots {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.time-slot {
+  background-color: #28a745;
+  color: #ffffff;
+  padding: 10px;
+  border: 1px solid #218838;
+  cursor: pointer;
+  font-size: 14px;
+  text-align: center;
+  min-width: 80px;
+  border-radius: 8px;
+  transition: background-color 0.3s ease;
+}
+
+.time-slot:hover {
+  background-color: #218838;
+}
+
+.selected-slot {
+  background-color: #17a2b8;
+  border-color: #138496;
+}
+
+.night-mode .time-slot {
+  background-color: #28a745;
+  color: #ffffff;
+}
+
+.night-mode .time-slot:hover {
+  background-color: #218838;
+}
+
+.night-mode .selected-slot {
+  background-color: #17a2b8;
+  border-color: #138496;
 }
 
 .form-actions {
@@ -288,46 +461,93 @@ header h2 {
 /* Calendar Styling */
 .calendar-container {
   margin-top: 30px;
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 10px;
   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
-  padding: 20px;
+  padding: 15px;
   padding-left: 250px;
   width: 100%;
   box-sizing: border-box;
-  backdrop-filter: blur(10px);
   transition: background 0.3s ease;
 }
 
-.available-day {
-  background-color: #1e3c72;
-  color: white !important;
-  border-radius: 50%;
-  padding: 5px;
+/* Ensure the day grid cells are square and styled as boxes */
+.fc-daygrid-day {
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  height: 80px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
   transition: background-color 0.3s ease;
 }
 
-.available-day:hover {
-  background-color: #2a5298;
+.fc-daygrid-day-frame {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
+/* Style for available days */
+.available-day {
+  background-color: #000000;
+  color: #ffffff !important;
+  cursor: pointer;
+}
+
+.available-day .fc-daygrid-day-number {
+  color: #ffffff !important;
+  font-size: 16px;
+  font-weight: 500;
+  text-decoration: none;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.available-day:hover {
+  background-color: #333333;
+}
+
+/* Style for unavailable days */
 .unavailable-day {
-  background-color: #ccc;
-  color: #666 !important;
-  border-radius: 50%;
-  padding: 5px;
+  background-color: #d3d3d3;
+  color: #666666 !important;
   opacity: 0.6;
   cursor: not-allowed;
 }
 
+.unavailable-day .fc-daygrid-day-number {
+  color: #666666 !important;
+  font-size: 16px;
+  font-weight: 500;
+  text-decoration: none;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* General styles for day numbers and header cells */
 .fc .fc-daygrid-day-number,
 .fc .fc-col-header-cell-cushion {
   color: #333;
   font-weight: 500;
+  text-decoration: none;
+  padding: 5px;
 }
 
-.fc .fc-daygrid-day {
-  transition: background-color 0.3s ease;
+/* Ensure the day grid container doesn't override our styles */
+.fc-daygrid-day-top {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
 }
 
 /* Night Mode */
@@ -416,26 +636,114 @@ header h2 {
 }
 
 .night-mode .calendar-container {
-  background: rgba(30, 31, 31, 0.5);
+  background: rgba(30, 31, 31, 0.9);
 }
 
 .night-mode .available-day {
-  background-color: #2ecc71;
-  color: #121212 !important;
+  background-color: #000000;
+  color: #ffffff !important;
+}
+
+.night-mode .available-day .fc-daygrid-day-number {
+  color: #ffffff !important;
 }
 
 .night-mode .available-day:hover {
-  background-color: #27ae60;
+  background-color: #333333;
 }
 
 .night-mode .unavailable-day {
-  background-color: #444;
-  color: #999 !important;
+  background-color: #666666;
+  color: #999999 !important;
+}
+
+.night-mode .unavailable-day .fc-daygrid-day-number {
+  color: #999999 !important;
 }
 
 .night-mode .fc .fc-daygrid-day-number,
 .night-mode .fc .fc-col-header-cell-cushion {
   color: #ddd;
+}
+
+.night-mode .available-day {
+  background-color: #28a745;
+  color: #ffffff;
+}
+
+.night-mode .available-day:hover {
+  background-color: #218838;
+}
+
+.night-mode .available-day .day-name,
+.night-mode .available-day .day-number,
+.night-mode .available-day .month-name {
+  color: #ffffff;
+}
+
+.night-mode .unavailable-day {
+  background-color: #4a4a4a;
+  color: #b0b0b0;
+}
+
+.night-mode .unavailable-day .day-name,
+.night-mode .unavailable-day .day-number,
+.night-mode .unavailable-day .month-name {
+  color: #b0b0b0;
+}
+
+.night-mode .selected-day {
+  background-color: #17a2b8;
+  border-color: #138496;
+  color: #ffffff;
+}
+
+.night-mode .selected-day .day-name,
+.night-mode .selected-day .day-number,
+.night-mode .selected-day .month-name {
+  color: #ffffff;
+}
+
+.night-mode .time-slot {
+  background-color: #28a745;
+  color: #ffffff;
+}
+
+.night-mode .time-slot:hover {
+  background-color: #218838;
+}
+
+.night-mode .selected-slot {
+  background-color: #17a2b8;
+  border-color: #138496;
+}
+
+.night-mode .custom-select {
+  background: #333;
+  color: #ddd;
+  border-color: #555;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%232ecc71' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
+}
+
+.night-mode .custom-select:focus {
+  border-color: #2ecc71;
+  box-shadow: 0 4px 8px rgba(46, 204, 113, 0.2);
+}
+
+.night-mode .custom-select option {
+  background-color: #333;
+  color: #ddd;
+}
+
+.night-mode .custom-textarea {
+  background: #2a2a2a;
+  color: #ddd;
+  border-color: #444;
+}
+
+.night-mode .custom-textarea:focus {
+  border-color: #2ecc71;
+  box-shadow: 0 4px 8px rgba(46, 204, 113, 0.2);
 }
 
 /* Style pour les messages de succès (vert) */
@@ -531,6 +839,10 @@ header h2 {
     padding: 6px 12px;
   }
 
+  .fc-daygrid-day {
+    height: 60px;
+  }
+
   .modal-content {
     max-width: 90%;
     margin: 10px;
@@ -560,8 +872,15 @@ header h2 {
     font-size: 14px;
   }
 
-  .modal-calendar {
-    height: 200px;
+  .week-days {
+    grid-template-columns: repeat(7, 1fr);
+  }
+
+  .day-slot,
+  .time-slot {
+    min-width: 60px;
+    padding: 8px;
+    font-size: 12px;
   }
 
   .form-actions {
@@ -598,6 +917,10 @@ header h2 {
     font-size: 13px;
   }
 
+  .fc-daygrid-day {
+    height: 70px;
+  }
+
   .modal-content {
     max-width: 80%;
   }
@@ -608,5 +931,11 @@ header h2 {
 
   .modal-body {
     padding: 18px;
+  }
+
+  .day-slot,
+  .time-slot {
+    min-width: 70px;
+    padding: 9px;
   }
 }

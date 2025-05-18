@@ -10,7 +10,7 @@ import { Objet } from 'src/app/models/objet.model';
 import { UserInfo } from 'src/app/models/user-info.model';
 import { jwtDecode } from 'jwt-decode';
 import { CalendarOptions, EventInput, EventContentArg, DayCellContentArg } from '@fullcalendar/core';
-import { DateClickArg } from '@fullcalendar/interaction'; // Import DateClickArg from @fullcalendar/interaction
+import { DateClickArg } from '@fullcalendar/interaction';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
 import listPlugin from '@fullcalendar/list';
@@ -21,7 +21,7 @@ import '@fullcalendar/timegrid';
 import '@fullcalendar/list';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Schedule } from 'src/app/models/schedule.model';
-import { FullCalendarComponent } from '@fullcalendar/angular'; // Import FullCalendarComponent from @fullcalendar/angular
+import { FullCalendarComponent } from '@fullcalendar/angular';
 
 @Component({
   selector: 'app-rendez-vous',
@@ -36,14 +36,17 @@ export class RendezVousComponent implements OnInit {
   isDetailsModalOpen: boolean = false;
   selectedRdv: Rdv | null = null;
   availableSlots: string[] = [];
+  selectedSlot: string | null = null;
   clientId: number | null = null;
   clientProduitId: number | null = null;
   minDate: string;
   typesProblemes: Objet[] = [];
   schedules: { [key: string]: Schedule[] } = {};
+  currentWeekStart: Date = new Date();
+  daysInWeek: { date: Date; isAvailable: boolean }[] = [];
 
   @ViewChild('calendar') calendarComponent!: FullCalendarComponent;
-  @ViewChild('modalCalendar') modalCalendarComponent!: FullCalendarComponent;
+  // Remove modalCalendarComponent since we're replacing it with custom week view
 
   calendarOptions: CalendarOptions = {
     plugins: [dayGridPlugin, timeGridPlugin, listPlugin, interactionPlugin],
@@ -73,18 +76,6 @@ export class RendezVousComponent implements OnInit {
     dateClick: this.handleDateClick.bind(this)
   };
 
-  modalCalendarOptions: CalendarOptions = {
-    plugins: [dayGridPlugin, interactionPlugin],
-    initialView: 'dayGridWeek',
-    height: '300px',
-    contentHeight: 'auto',
-    locale: 'fr',
-    dayCellClassNames: this.getDayCellClassNames.bind(this),
-    dateClick: this.handleDateClick.bind(this),
-    events: [],
-    selectable: true
-  };
-
   constructor(
     private fb: FormBuilder,
     private rendezvousService: RendezvousService,
@@ -96,10 +87,10 @@ export class RendezVousComponent implements OnInit {
     const tomorrow = new Date();
     tomorrow.setDate(tomorrow.getDate() + 1);
     this.minDate = tomorrow.toISOString().split('T')[0];
+    this.currentWeekStart.setDate(tomorrow.getDate() - tomorrow.getDay());
 
     this.rendezvousForm = this.fb.group({
       dateSouhaitee: ['', Validators.required],
-      timeSlot: ['', Validators.required],
       typeProbleme: ['', Validators.required],
       description: ['', [Validators.required, Validators.minLength(10)]]
     });
@@ -111,6 +102,7 @@ export class RendezVousComponent implements OnInit {
         this.getRendezvous();
         this.loadTypesProblemes();
         this.updateAvailableDays();
+        this.loadDaysInWeek();
       } else {
         this.showError('Veuillez vous connecter pour accéder à vos rendez-vous.');
       }
@@ -217,10 +209,6 @@ export class RendezVousComponent implements OnInit {
       ...this.calendarOptions,
       events
     };
-    this.modalCalendarOptions = {
-      ...this.modalCalendarOptions,
-      events
-    };
   }
 
   getEventColor(status: string): string {
@@ -274,24 +262,26 @@ export class RendezVousComponent implements OnInit {
     this.isModalOpen = true;
     this.rendezvousForm.reset({
       dateSouhaitee: '',
-      timeSlot: '',
       typeProbleme: '',
       description: ''
     });
     this.availableSlots = [];
+    this.selectedSlot = null;
+    this.loadDaysInWeek();
   }
 
   closeModal(): void {
     this.isModalOpen = false;
     this.rendezvousForm.reset();
     this.availableSlots = [];
+    this.selectedSlot = null;
   }
 
   addRendezvous() {
-    if (this.rendezvousForm.valid && this.clientId) {
+    if (this.rendezvousForm.valid && this.clientId && this.selectedSlot) {
       const formValue = this.rendezvousForm.value;
       const date = new Date(formValue.dateSouhaitee);
-      const [hours, minutes] = formValue.timeSlot.split(':').map(Number);
+      const [hours, minutes] = this.selectedSlot.split(':').map(Number);
       date.setHours(hours, minutes, 0, 0);
       const formattedDate = date.toISOString().slice(0, 19);
       const rdv: RdvCreate = {
@@ -321,7 +311,7 @@ export class RendezVousComponent implements OnInit {
         }
       });
     } else {
-      this.showError('Veuillez remplir tous les champs requis correctement ou vérifier votre connexion.');
+      this.showError('Veuillez sélectionner un créneau horaire et remplir tous les champs requis.');
     }
   }
 
@@ -331,16 +321,23 @@ export class RendezVousComponent implements OnInit {
       this.scheduleService.getAvailableSlots(date).subscribe({
         next: (slots) => {
           this.availableSlots = slots;
-          this.rendezvousForm.get('timeSlot')?.setValue('');
+          this.selectedSlot = null;
         },
         error: (err) => {
           console.error('Erreur lors du chargement des créneaux:', err);
           this.showError(err.message);
+          this.availableSlots = [];
+          this.selectedSlot = null;
         }
       });
     } else {
       this.availableSlots = [];
+      this.selectedSlot = null;
     }
+  }
+
+  selectSlot(slot: string) {
+    this.selectedSlot = slot;
   }
 
   toggleMode() {
@@ -442,6 +439,43 @@ export class RendezVousComponent implements OnInit {
   handleDateClick(info: DateClickArg): void {
     const selectedDate = info.dateStr;
     this.rendezvousForm.patchValue({ dateSouhaitee: selectedDate });
+    this.loadAvailableSlots();
+  }
+
+  loadDaysInWeek() {
+    this.daysInWeek = [];
+    const dayMap = {
+      SUNDAY: 0,
+      MONDAY: 1,
+      TUESDAY: 2,
+      WEDNESDAY: 3,
+      THURSDAY: 4,
+      FRIDAY: 5,
+      SATURDAY: 6
+    } as const;
+    const dayMapKeys = Object.keys(dayMap) as Array<keyof typeof dayMap>;
+
+    for (let i = 0; i < 7; i++) {
+      const date = new Date(this.currentWeekStart);
+      date.setDate(this.currentWeekStart.getDate() + i);
+      const dayOfWeek = dayMapKeys[date.getDay()];
+      const isAvailable = dayOfWeek && this.schedules[dayOfWeek]?.length > 0 && date >= new Date();
+      this.daysInWeek.push({ date, isAvailable: !!isAvailable });
+    }
+  }
+
+  prevWeek() {
+    this.currentWeekStart.setDate(this.currentWeekStart.getDate() - 7);
+    this.loadDaysInWeek();
+  }
+
+  nextWeek() {
+    this.currentWeekStart.setDate(this.currentWeekStart.getDate() + 7);
+    this.loadDaysInWeek();
+  }
+
+  selectDay(date: Date) {
+    this.rendezvousForm.patchValue({ dateSouhaitee: date.toISOString().split('T')[0] });
     this.loadAvailableSlots();
   }
 }

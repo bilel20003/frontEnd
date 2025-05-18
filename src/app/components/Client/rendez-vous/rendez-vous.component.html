@@ -13,7 +13,7 @@
 
   <!-- Calendrier -->
   <div class="calendar-container">
-    <full-calendar [options]="calendarOptions"></full-calendar>
+    <full-calendar #calendar [options]="calendarOptions"></full-calendar>
   </div>
 
   <!-- Modale pour formulaire Créer Rendez-vous -->
@@ -30,23 +30,45 @@
           <div class="info-grid">
             <div class="info-item full-width">
               <span class="label">📅 Sélectionner une date</span>
-              <div class="modal-calendar">
-                <full-calendar [options]="modalCalendarOptions"></full-calendar>
+              <div class="week-nav">
+                <button class="nav-btn" (click)="prevWeek()">←</button>
+                <span>Semaine du {{ daysInWeek[0].date | date:'d MMMM yyyy' }} au {{ daysInWeek[6].date | date:'d MMMM yyyy' }}</span>
+                <button class="nav-btn" (click)="nextWeek()">→</button>
+              </div>
+              <div class="week-days">
+                <div
+                  *ngFor="let day of daysInWeek"
+                  class="day-slot"
+                  [ngClass]="{'available-day': day.isAvailable, 'unavailable-day': !day.isAvailable, 'selected-day': rendezvousForm.get('dateSouhaitee')?.value === day.date.toISOString().split('T')[0]}"
+                  (click)="day.isAvailable ? selectDay(day.date) : null"
+                >
+                  <div class="day-info">
+                    <div class="day-name">{{ day.date | date:'EEE': 'fr' }}</div>
+                    <div class="day-number">{{ day.date | date:'d' }}</div>
+                    <div class="month-name">{{ day.date | date:'MMMM': 'fr' }}</div>
+                  </div>
+                </div>
               </div>
             </div>
             <div class="info-item" *ngIf="availableSlots.length > 0">
-              <span class="label">🕒 Créneau horaire</span>
-              <select formControlName="timeSlot" id="timeSlot" required>
-                <option value="" disabled>Sélectionner un créneau</option>
-                <option *ngFor="let slot of availableSlots" [value]="slot">{{ slot }}</option>
-              </select>
-              <div *ngIf="rendezvousForm.get('timeSlot')?.touched && rendezvousForm.get('timeSlot')?.invalid" class="error-message">
-                Le créneau horaire est requis
+              <span class="label">🕒 Créneaux horaires disponibles</span>
+              <div class="time-slots">
+                <div
+                  *ngFor="let slot of availableSlots"
+                  class="time-slot"
+                  [ngClass]="{'selected-slot': selectedSlot === slot}"
+                  (click)="selectSlot(slot)"
+                >
+                  {{ slot }}
+                </div>
+              </div>
+              <div *ngIf="!selectedSlot && availableSlots.length > 0" class="error-message">
+                Veuillez sélectionner un créneau horaire
               </div>
             </div>
             <div class="info-item">
               <span class="label">⚠️ Type de problème</span>
-              <select formControlName="typeProbleme" id="typeProbleme" required>
+              <select formControlName="typeProbleme" id="typeProbleme" class="custom-select" required>
                 <option value="" disabled>Sélectionner un type de problème</option>
                 <option *ngFor="let type of typesProblemes" [value]="type.id">
                   {{ type.name }}
@@ -58,7 +80,7 @@
             </div>
             <div class="info-item full-width">
               <span class="label">📝 Description</span>
-              <textarea formControlName="description" id="description" required></textarea>
+              <textarea formControlName="description" id="description" class="custom-textarea" required></textarea>
               <div *ngIf="rendezvousForm.get('description')?.touched && rendezvousForm.get('description')?.invalid" class="error-message">
                 La description est requise (minimum 10 caractères)
               </div>
@@ -66,7 +88,7 @@
           </div>
         </div>
         <div class="form-actions">
-          <button type="submit" [disabled]="rendezvousForm.invalid" class="btn btn-primary">Créer</button>
+          <button type="submit" [disabled]="rendezvousForm.invalid || !selectedSlot" class="btn btn-primary">Créer</button>
           <button type="button" class="btn btn-secondary" (click)="closeModal()">Annuler</button>
         </div>
       </form>
