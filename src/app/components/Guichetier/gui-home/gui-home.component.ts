@@ -9,6 +9,15 @@ import { Requete } from 'src/app/models/requete.model';
 import { Objet } from 'src/app/models/objet.model';
 import { jwtDecode } from 'jwt-decode';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { Observable, forkJoin, of } from 'rxjs';
+import { map, catchError } from 'rxjs/operators';
+
+interface AttachmentPreview {
+  nom_fichier: string;
+  url: string;
+  previewUrl?: string;
+  type: string;
+}
 
 @Component({
   selector: 'app-gui-home',
@@ -23,7 +32,7 @@ export class GuiHomeComponent implements OnInit {
   objetMap: { [key: number]: Objet } = {};
   techniciens: UserInfo[] = [];
   searchTerm: string = '';
-  sortDirection: { [key: string]: boolean } = { id: true }; // Default to descending order by id (highest first)
+  sortDirection: { [key: string]: boolean } = { id: true };
   currentPage: number = 1;
   itemsPerPage: number = 5;
   totalPages: number = 1;
@@ -34,6 +43,7 @@ export class GuiHomeComponent implements OnInit {
   noteRetour: string = '';
   isObjetsLoaded: boolean = false;
   isNightMode: boolean = false;
+  attachmentPreviews: AttachmentPreview[] = [];
 
   constructor(
     private router: Router,
@@ -116,7 +126,7 @@ export class GuiHomeComponent implements OnInit {
           piecesJointes: req.piecesJointes?.map(pj => ({
             ...pj,
             url: pj.url || `http://localhost:8082/api/requetes/download/${pj.id}`,
-            name: pj.nom_fichier || this.getFileNameFromUrl(pj.url || `http://localhost:8082/api/requetes/download/${pj.id}`)
+            nom_fichier: pj.nom_fichier || this.getFileNameFromUrl(pj.url || `http://localhost:8082/api/requetes/download/${pj.id}`)
           })) || []
         }));
         this.filteredReclamations = [...this.reclamations];
@@ -282,7 +292,7 @@ export class GuiHomeComponent implements OnInit {
     if (!text) return '';
 
     const displayMap: { [key: string]: string } = {
-      'DEMANDE_TRAVAUX': 'Demande de travaux',
+      'DEMANDE_DE_TRAVAUX': 'Demande de travaux',
       'RECLAMATION': 'Réclamation',
       'NOUVEAU': 'Nouveau',
       'EN_COURS_DE_TRAITEMENT': 'En cours de traitement',
@@ -309,23 +319,187 @@ export class GuiHomeComponent implements OnInit {
       this.isPopupOpen = true;
 
       if (reclamation.etat === 'NOUVEAU') {
-        reclamation.etat = 'EN_COURS_DE_TRAITEMENT';
-        this.requeteService.updateRequete(id, reclamation).subscribe({
+        const updatedRequete = { ...reclamation, etat: 'EN_COURS_DE_TRAITEMENT', dateTraitement: new Date() };
+        this.requeteService.updateRequete(id, updatedRequete).subscribe({
           next: () => {
-            console.log('Requête mise à jour');
+            console.log('Requête mise à jour avec succès');
             this.loadReclamations(this.getGuichetierIdFromToken()!);
             this.showSuccess('Requête mise à jour avec succès !');
+            this.loadPieceJointesForRequete();
+            this.generateAttachmentPreviews();
           },
           error: (error: HttpErrorResponse) => {
             console.error('Erreur lors de la mise à jour de la requête', error);
             this.showError('Erreur lors de la mise à jour de la requête.');
           }
         });
+      } else {
+        this.loadPieceJointesForRequete();
+        this.generateAttachmentPreviews();
       }
 
       this.noteRetour = reclamation.noteRetour || '';
       this.selectedTechnicienId = reclamation.technicien?.id || null;
     }
+  }
+
+  private loadPieceJointesForRequete(): void {
+    if (!this.selectedRequete || !this.selectedRequete.piecesJointes || this.selectedRequete.piecesJointes.length === 0) {
+      if (this.selectedRequete) {
+        this.selectedRequete = { ...this.selectedRequete, piecesJointes: [] };
+      }
+      return;
+    }
+
+    const pieceJointeCalls = this.selectedRequete.piecesJointes.map(pj =>
+      this.requeteService.getPieceJointeParId(pj.id!).pipe(
+        catchError(err => {
+          console.error(`Erreur lors du chargement de la pièce jointe ${pj.id}:`, err.message);
+          return of({ id: pj.id, nomFichier: `fichier_${pj.id}`, url: `http://localhost:8082/api/requetes/download/${pj.id}`, typeFichier: 'application/octet-stream' });
+        })
+      )
+    );
+
+    forkJoin(pieceJointeCalls).subscribe({
+      next: (results) => {
+        if (this.selectedRequete) {
+          this.selectedRequete = {
+            ...this.selectedRequete,
+            piecesJointes: results.map((pj: any) => ({
+              id: pj.id,
+              nom_fichier: pj.nomFichier,
+              url: pj.url || `http://localhost:8082/api/requetes/download/${pj.id}`,
+              typeFichier: pj.typeFichier
+            }))
+          };
+          this.generateAttachmentPreviews();
+        }
+      },
+      error: (err) => {
+        console.error('Erreur globale lors du chargement des pièces jointes:', err.message);
+        if (this.selectedRequete) {
+          this.selectedRequete = { ...this.selectedRequete, piecesJointes: [] };
+        }
+      }
+    });
+  }
+
+  private generateAttachmentPreviews(): void {
+    this.attachmentPreviews = [];
+    if (!this.selectedRequete?.piecesJointes || this.selectedRequete.piecesJointes.length === 0) {
+      console.warn('No pieces jointes found for requete ID:', this.selectedRequete?.id);
+      return;
+    }
+
+    const imageTypes = ['image/jpeg', 'image/png'];
+    this.selectedRequete.piecesJointes.forEach(attachment => {
+      const type = this.getFileType(attachment.nom_fichier || '');
+      const previewObj = {
+        nom_fichier: attachment.nom_fichier || `fichier_${attachment.id}`,
+        url: attachment.url || `http://localhost:8082/api/requetes/download/${attachment.id}`,
+        previewUrl: '',
+        type
+      };
+
+      if (imageTypes.includes(type)) {
+        this.http.get(attachment.url || `http://localhost:8082/api/requetes/download/${attachment.id}`, { responseType: 'blob' }).subscribe({
+          next: (blob: Blob) => {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+              previewObj.previewUrl = e.target?.result as string;
+              this.attachmentPreviews = [...this.attachmentPreviews, previewObj];
+            };
+            reader.readAsDataURL(blob);
+          },
+          error: (err: HttpErrorResponse) => {
+            console.error('Erreur lors de la récupération de la pièce jointe pour prévisualisation:', err.message);
+            this.attachmentPreviews = [...this.attachmentPreviews, previewObj];
+          }
+        });
+      } else {
+        this.attachmentPreviews = [...this.attachmentPreviews, previewObj];
+      }
+    });
+  }
+
+  previewAttachment(attachment: { url: string; nom_fichier: string }): void {
+    if (!attachment.url) {
+      this.showError('URL de la pièce jointe non disponible.');
+      return;
+    }
+
+    this.http.get(attachment.url, { responseType: 'blob' }).subscribe({
+      next: (blob: Blob) => {
+        const objectUrl = window.URL.createObjectURL(blob);
+        const previewWindow = window.open(objectUrl, '_blank');
+        if (previewWindow) {
+          previewWindow.document.title = attachment.nom_fichier || this.getFileNameFromUrl(attachment.url);
+        } else {
+          this.showError('Impossible d’ouvrir la prévisualisation. Vérifiez les paramètres de votre navigateur.');
+        }
+        setTimeout(() => window.URL.revokeObjectURL(objectUrl), 1000);
+      },
+      error: (err: HttpErrorResponse) => {
+        console.error('Erreur lors de la prévisualisation de la pièce jointe:', err.message);
+        this.showError('Impossible de prévisualiser la pièce jointe.');
+      }
+    });
+  }
+
+  downloadAttachment(attachment: { url: string; nom_fichier: string }): void {
+    if (!attachment.url) {
+      this.showError('URL de la pièce jointe non disponible.');
+      return;
+    }
+
+    this.http.get(attachment.url, { responseType: 'blob' }).subscribe({
+      next: (blob: Blob) => {
+        const objectUrl = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = objectUrl;
+        link.download = attachment.nom_fichier || this.getFileNameFromUrl(attachment.url);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(objectUrl);
+      },
+      error: (err: HttpErrorResponse) => {
+        console.error('Erreur lors du téléchargement de la pièce jointe:', err.message);
+        this.showError('Impossible de télécharger la pièce jointe.');
+      }
+    });
+  }
+
+  private getFileType(nom_fichier: string): string {
+    const extension = nom_fichier.split('.').pop()?.toLowerCase() || '';
+    const typeMap: { [key: string]: string } = {
+      'jpg': 'image/jpeg',
+      'jpeg': 'image/jpeg',
+      'png': 'image/png',
+      'pdf': 'application/pdf',
+      'doc': 'application/msword',
+      'docx': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+    };
+    return typeMap[extension] || 'application/octet-stream';
+  }
+
+  private getFileNameFromUrl(url: string): string {
+    const urlParts = url.split('/');
+    const filePart = urlParts[urlParts.length - 1];
+    return filePart.includes('?') ? filePart.split('?')[0] : filePart || 'document';
+  }
+
+   getFileIcon(nom_fichier: string): string {
+    const extension = nom_fichier.split('.').pop()?.toLowerCase() || '';
+    const iconMap: { [key: string]: string } = {
+      'jpg': 'far fa-image',
+      'jpeg': 'far fa-image',
+      'png': 'far fa-image',
+      'pdf': 'far fa-file-pdf',
+      'doc': 'far fa-file-word',
+      'docx': 'far fa-file-word'
+    };
+    return iconMap[extension] || 'far fa-file';
   }
 
   openTechnicienPopup(): void {
@@ -435,60 +609,7 @@ export class GuiHomeComponent implements OnInit {
     this.selectedRequete = null;
     this.selectedTechnicienId = null;
     this.noteRetour = '';
-  }
-
-  openInNewTab(url: string): void {
-    if (!url) {
-      this.showError('URL de la pièce jointe non disponible.');
-      return;
-    }
-
-    this.http.get(url, { responseType: 'blob' }).subscribe({
-      next: (blob: Blob) => {
-        const objectUrl = window.URL.createObjectURL(blob);
-        const previewWindow = window.open(objectUrl, '_blank');
-        if (previewWindow) {
-          previewWindow.document.title = this.getFileNameFromUrl(url);
-        } else {
-          this.showError('Impossible d’ouvrir la prévisualisation. Vérifiez les paramètres de votre navigateur.');
-        }
-        setTimeout(() => window.URL.revokeObjectURL(objectUrl), 1000);
-      },
-      error: (err: HttpErrorResponse) => {
-        console.error('Erreur lors de la prévisualisation de la pièce jointe:', err.message);
-        this.showError('Impossible de prévisualiser la pièce jointe.');
-      }
-    });
-  }
-
-  downloadFile(url: string, fileName: string): void {
-    if (!url) {
-      this.showError('URL de la pièce jointe non disponible.');
-      return;
-    }
-
-    this.http.get(url, { responseType: 'blob' }).subscribe({
-      next: (blob: Blob) => {
-        const objectUrl = window.URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.href = objectUrl;
-        link.download = fileName || this.getFileNameFromUrl(url);
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        window.URL.revokeObjectURL(objectUrl);
-      },
-      error: (err: HttpErrorResponse) => {
-        console.error('Erreur lors du téléchargement de la pièce jointe:', err.message);
-        this.showError('Impossible de télécharger la pièce jointe.');
-      }
-    });
-  }
-
-  private getFileNameFromUrl(url: string): string {
-    const urlParts = url.split('/');
-    const filePart = urlParts[urlParts.length - 1];
-    return filePart.includes('?') ? filePart.split('?')[0] : filePart || 'document';
+    this.attachmentPreviews = [];
   }
 
   private showSuccess(message: string): void {

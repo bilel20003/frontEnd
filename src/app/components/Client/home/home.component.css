@@ -466,91 +466,83 @@ body.night-mode {
   overflow-y: auto;
 }
 
-.attachment-item {
+.attachment-preview-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.attachment-preview-item {
   display: flex;
   align-items: center;
-  margin: 10px 0;
-  padding: 8px;
-  background: #f8f9fa;
-  border-radius: 5px;
-  transition: background 0.3s ease;
+  gap: 8px;
 }
 
-.attachment-item:hover {
-  background: #e9ecef;
+.attachment-preview-bubble {
+  display: flex;
+  align-items: center;
+  background: #f1f1f1;
+  padding: 8px 12px;
+  border-radius: 15px;
+  border: 1px solid #ddd;
+  transition: background 0.3s ease, transform 0.2s ease;
 }
 
-.attachment-item a {
+.attachment-preview-bubble:hover {
+  background: #e0e0e0;
+  transform: scale(1.05);
+}
+
+.attachment-preview-bubble i {
+  margin-right: 8px;
   color: #1e3c72;
-  text-decoration: none;
+}
+
+.attachment-preview-bubble span {
   font-size: 14px;
-  margin-left: 10px;
-  flex-grow: 1;
+  color: #333;
+  max-width: 150px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-.attachment-item a:hover {
-  color: #2a5298;
-  text-decoration: underline;
+.attachment-preview-image {
+  width: 30px;
+  height: 30px;
+  object-fit: cover;
+  border-radius: 50%;
+  margin-left: 8px;
 }
 
-.attachment-item i {
-  color: #2a5298;
-  font-size: 16px;
-  margin-right: 10px;
-}
-
-/* Icônes d'action pour les pièces jointes */
-.attachment-action {
-  margin-left: 10px;
+.remove-attachment-btn {
+  background-color: #dc3545;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.remove-attachment-btn:hover {
+  background-color: #c82333;
+}
+
+.remove-attachment-btn i {
+  font-size: 12px;
+}
+
+.no-attachments {
   font-size: 14px;
-  color: #1e3c72;
-  transition: color 0.3s;
+  color: #666;
 }
 
-.attachment-action:hover {
-  color: #2a5298;
-}
-
-/* Night mode pour les pièces jointes */
-.night-mode .attachments-container {
-  background: rgba(40, 40, 40, 0.9);
-  border-color: #555;
-}
-
-.night-mode .attachment-item {
-  background: #2d2d2d;
-}
-
-.night-mode .attachment-item:hover {
-  background: #3a3a3a;
-}
-
-.night-mode .attachment-item a {
-  color: #2ecc71;
-}
-
-.night-mode .attachment-item a:hover {
-  color: #27ae60;
-}
-
-.night-mode .attachment-item i {
-  color: #2ecc71;
-}
-
-.night-mode .attachment-action {
-  color: #2ecc71;
-}
-
-.night-mode .attachment-action:hover {
-  color: #27ae60;
-}
-
-.night-mode .no-attachments {
-  color: #aaa;
-}
-
-/* Styles de la popup */
 .modal-overlay {
   position: fixed;
   top: 0;
@@ -642,72 +634,6 @@ body.night-mode {
 .value.description {
   margin: 0;
   line-height: 1.6;
-}
-
-/* Styles pour la liste des pièces jointes (dans la popup de création) */
-.attachment-preview-list {
-  display: block; /* Liste verticale */
-  gap: 10px;
-  margin-top: 10px;
-}
-
-.attachment-preview-item {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-bottom: 10px; /* Espacement entre les éléments */
-}
-
-.attachment-preview {
-  display: none; /* Désactiver l'ancien style de prévisualisation */
-}
-
-.attachment-preview-icon {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.attachment-preview-icon i {
-  font-size: 1.1rem; /* Taille cohérente avec les icônes d'action */
-  color: #1e3c72;
-}
-
-.attachment-preview-icon span {
-  font-size: 14px;
-  color: #333;
-  max-width: 200px; /* Ajuster pour mieux afficher les noms */
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.remove-attachment-btn {
-  margin-left: 10px; /* Alignement avec les icônes */
-  background-color: #dc3545;
-  color: white;
-  border: none;
-  border-radius: 50%;
-  width: 20px;
-  height: 20px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: background-color 0.3s;
-}
-
-.remove-attachment-btn:hover {
-  background-color: #c82333;
-}
-
-.remove-attachment-btn i {
-  font-size: 12px;
-}
-
-.no-attachments {
-  font-size: 14px;
-  color: #666;
 }
 
 .modal-content textarea {
@@ -846,12 +772,37 @@ body.night-mode {
 }
 
 /* Night mode pour les pièces jointes dans la popup de création */
-.night-mode .attachment-preview-icon i {
+.night-mode .attachment-preview-bubble {
+  background: #2d2d2d;
+  border-color: #444;
+}
+
+.night-mode .attachment-preview-bubble:hover {
+  background: #3a3a3a;
+}
+
+.night-mode .attachment-preview-bubble i {
   color: #2ecc71;
 }
 
-.night-mode .attachment-preview-icon span {
+.night-mode .attachment-preview-bubble span {
   color: #ddd;
+}
+
+.night-mode .attachment-preview-image {
+  border: 1px solid #444;
+}
+
+.night-mode .remove-attachment-btn {
+  background-color: #ff6b6b;
+}
+
+.night-mode .remove-attachment-btn:hover {
+  background-color: #ff4040;
+}
+
+.night-mode .no-attachments {
+  color: #aaa;
 }
 
 /* Animations */

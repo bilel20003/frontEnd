@@ -20,46 +20,49 @@
   <div *ngIf="isModalOpen" class="modal-overlay" (click)="closeModal()">
     <div class="modal-content" (click)="$event.stopPropagation()">
       <div class="modal-header">
-        <h3>Prendre un Rendez-vous</h3>
+        <h3>📅 Prendre un Rendez-vous</h3>
         <button class="close-btn" (click)="closeModal()">
           <i class="fas fa-times"></i>
         </button>
       </div>
       <form [formGroup]="rendezvousForm" (ngSubmit)="addRendezvous()">
-        <div class="form-group">
-          <label for="dateSouhaitee"><i class="fas fa-calendar-alt"></i> Date souhaitée</label>
-          <input type="date" formControlName="dateSouhaitee" id="dateSouhaitee" (change)="loadAvailableSlots()" [min]="minDate" required>
-          <div *ngIf="rendezvousForm.get('dateSouhaitee')?.touched && rendezvousForm.get('dateSouhaitee')?.invalid" class="error-message">
-            La date souhaitée est requise
-          </div>
-        </div>
-        <div class="form-group" *ngIf="availableSlots.length > 0">
-          <label for="timeSlot"><i class="fas fa-clock"></i> Créneau horaire</label>
-          <select formControlName="timeSlot" id="timeSlot" required>
-            <option value="" disabled>Sélectionner un créneau</option>
-            <option *ngFor="let slot of availableSlots" [value]="slot">{{ slot }}</option>
-          </select>
-          <div *ngIf="rendezvousForm.get('timeSlot')?.touched && rendezvousForm.get('timeSlot')?.invalid" class="error-message">
-            Le créneau horaire est requis
-          </div>
-        </div>
-        <div class="form-group">
-          <label for="typeProbleme"><i class="fas fa-exclamation-circle"></i> Type de problème</label>
-          <select formControlName="typeProbleme" id="typeProbleme" required>
-            <option value="" disabled>Sélectionner un type de problème</option>
-            <option *ngFor="let type of typesProblemes" [value]="type.id">
-              {{ type.name }}
-            </option>
-          </select>
-          <div *ngIf="rendezvousForm.get('typeProbleme')?.touched && rendezvousForm.get('typeProbleme')?.invalid" class="error-message">
-            Le type de problème est requis
-          </div>
-        </div>
-        <div class="form-group">
-          <label for="description"><i class="fas fa-comment"></i> Description</label>
-          <textarea formControlName="description" id="description" required></textarea>
-          <div *ngIf="rendezvousForm.get('description')?.touched && rendezvousForm.get('description')?.invalid" class="error-message">
-            La description est requise (minimum 10 caractères)
+        <div class="modal-body">
+          <div class="info-grid">
+            <div class="info-item full-width">
+              <span class="label">📅 Sélectionner une date</span>
+              <div class="modal-calendar">
+                <full-calendar [options]="modalCalendarOptions"></full-calendar>
+              </div>
+            </div>
+            <div class="info-item" *ngIf="availableSlots.length > 0">
+              <span class="label">🕒 Créneau horaire</span>
+              <select formControlName="timeSlot" id="timeSlot" required>
+                <option value="" disabled>Sélectionner un créneau</option>
+                <option *ngFor="let slot of availableSlots" [value]="slot">{{ slot }}</option>
+              </select>
+              <div *ngIf="rendezvousForm.get('timeSlot')?.touched && rendezvousForm.get('timeSlot')?.invalid" class="error-message">
+                Le créneau horaire est requis
+              </div>
+            </div>
+            <div class="info-item">
+              <span class="label">⚠️ Type de problème</span>
+              <select formControlName="typeProbleme" id="typeProbleme" required>
+                <option value="" disabled>Sélectionner un type de problème</option>
+                <option *ngFor="let type of typesProblemes" [value]="type.id">
+                  {{ type.name }}
+                </option>
+              </select>
+              <div *ngIf="rendezvousForm.get('typeProbleme')?.touched && rendezvousForm.get('typeProbleme')?.invalid" class="error-message">
+                Le type de problème est requis
+              </div>
+            </div>
+            <div class="info-item full-width">
+              <span class="label">📝 Description</span>
+              <textarea formControlName="description" id="description" required></textarea>
+              <div *ngIf="rendezvousForm.get('description')?.touched && rendezvousForm.get('description')?.invalid" class="error-message">
+                La description est requise (minimum 10 caractères)
+              </div>
+            </div>
           </div>
         </div>
         <div class="form-actions">
@@ -74,31 +77,51 @@
   <div *ngIf="isDetailsModalOpen" class="modal-overlay" (click)="closeDetailsModal()">
     <div class="modal-content" (click)="$event.stopPropagation()">
       <div class="modal-header">
-        <h3>Détails du Rendez-vous</h3>
+        <h3>📌 Détails du Rendez-vous</h3>
         <button class="close-btn" (click)="closeDetailsModal()">
           <i class="fas fa-times"></i>
         </button>
       </div>
       <div class="modal-body" *ngIf="selectedRdv">
-        
-        <p><strong>Technicien:</strong> {{ selectedRdv.technicien?.name || 'Non assigné' }}</p>
-        <p><strong>Type de problème:</strong> {{ selectedRdv.typeProbleme }}</p>
-        <p><strong>Date du Rendez-vous:</strong> {{ selectedRdv.dateSouhaitee | date:'medium':'fr-FR' }}</p>
-        <p><strong>Description:</strong> {{ selectedRdv.description }}</p>
-        <p><strong>Statut:</strong> 
-          <span class="badge" [ngClass]="{
-            'badge-warning': selectedRdv.status === 'EN_ATTENTE',
-            'badge-success': selectedRdv.status === 'TERMINE',
-            'badge-danger': selectedRdv.status === 'REFUSE'
-          }">{{ selectedRdv.status }}</span>
-        </p>
-        <p><strong>Lien Google Meet:</strong> 
-          <ng-container *ngIf="selectedRdv.meetLink; else noMeetLink">
-            <a [href]="selectedRdv.meetLink" target="_blank" class="meet-link">{{ selectedRdv.meetLink }}</a>
-          </ng-container>
-          <ng-template #noMeetLink>Aucun lien généré</ng-template>
-        </p>
-        <p><strong>Note de retour:</strong> {{ selectedRdv.noteRetour || 'Aucune' }}</p>
+        <div class="info-grid">
+          <div class="info-item">
+            <span class="label">👤 Technicien</span>
+            <span class="value">{{ selectedRdv.technicien?.name || 'Non assigné' }}</span>
+          </div>
+          <div class="info-item">
+            <span class="label">⚠️ Type de problème</span>
+            <span class="value">{{ selectedRdv.typeProbleme }}</span>
+          </div>
+          <div class="info-item">
+            <span class="label">📅 Date du Rendez-vous</span>
+            <span class="value">{{ selectedRdv.dateSouhaitee | date:'medium':'fr-FR' }}</span>
+          </div>
+          <div class="info-item full-width">
+            <span class="label">📝 Description</span>
+            <p class="value description">{{ selectedRdv.description }}</p>
+          </div>
+          <div class="info-item">
+            <span class="label">⚡ Statut</span>
+            <span class="badge" [ngClass]="{
+              'badge-warning': selectedRdv.status === 'EN_ATTENTE',
+              'badge-success': selectedRdv.status === 'TERMINE',
+              'badge-danger': selectedRdv.status === 'REFUSE'
+            }">{{ selectedRdv.status }}</span>
+          </div>
+          <div class="info-item full-width">
+            <span class="label">🔗 Lien Google Meet</span>
+            <ng-container *ngIf="selectedRdv.meetLink; else noMeetLink">
+              <a [href]="selectedRdv.meetLink" target="_blank" class="meet-link value">{{ selectedRdv.meetLink }}</a>
+            </ng-container>
+            <ng-template #noMeetLink>
+              <span class="value">Aucun lien généré</span>
+            </ng-template>
+          </div>
+          <div class="info-item full-width">
+            <span class="label">📋 Note de retour</span>
+            <p class="value description">{{ selectedRdv.noteRetour || 'Aucune' }}</p>
+          </div>
+        </div>
       </div>
       <div class="form-actions">
         <button class="btn btn-secondary" (click)="closeDetailsModal()">Fermer</button>

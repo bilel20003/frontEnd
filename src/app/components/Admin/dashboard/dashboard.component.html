@@ -116,7 +116,7 @@
         </div>
         <div class="chart-container" *ngIf="statistics">
           <h3 class="text-lg font-semibold mb-4">Indicateurs de Qualité des Requêtes</h3>
-          <canvas baseChart [data]="pieChartData" [options]="qualityPieChartOptions" [type]="qualityPieChartType" *ngIf="hasNonZeroData(pieChartData); else noData"></canvas>
+          <canvas #qualityChart baseChart [data]="pieChartData" [options]="qualityPieChartOptions" [type]="qualityPieChartType" *ngIf="hasNonZeroData(pieChartData); else noData"></canvas>
           <ng-template #noData>
             <p class="text-center text-gray-500">Aucune donnée disponible.</p>
           </ng-template>
@@ -165,52 +165,73 @@
         <div class="chart-grid requests-charts" *ngIf="!loading; else loadingTemplate">
           <div class="chart-container">
             <h3 class="text-lg font-semibold mb-4">Statut des Requêtes (Barres)</h3>
-            <canvas baseChart [data]="barChartDataRequestStatus" [options]="barChartOptions" [type]="barChartType" *ngIf="hasNonZeroData(barChartDataRequestStatus); else noData"></canvas>
+            <canvas #requestStatusBarChart baseChart [data]="barChartDataRequestStatus" [options]="barChartOptions" [type]="barChartType" *ngIf="hasNonZeroData(barChartDataRequestStatus); else noData"></canvas>
             <ng-template #noData>
               <p class="text-center text-gray-500">Aucune donnée disponible.</p>
             </ng-template>
           </div>
           <div class="chart-container">
             <h3 class="text-lg font-semibold mb-4">Statut des Requêtes (Pie)</h3>
-            <canvas baseChart [data]="pieChartDataRequestStatus" [options]="pieChartOptions" [type]="pieChartType" *ngIf="hasNonZeroData(pieChartDataRequestStatus); else noData"></canvas>
+            <canvas #requestStatusPieChart baseChart [data]="pieChartDataRequestStatus" [options]="pieChartOptions" [type]="pieChartType" *ngIf="hasNonZeroData(pieChartDataRequestStatus); else noData"></canvas>
             <ng-template #noData>
               <p class="text-center text-gray-500">Aucune donnée disponible.</p>
             </ng-template>
           </div>
           <div class="chart-container">
             <h3 class="text-lg font-semibold mb-4">Requêtes par Ministère (Pie)</h3>
-            <canvas baseChart [data]="ministereChartData" [options]="pieChartOptions" [type]="pieChartType" *ngIf="hasNonZeroData(ministereChartData); else noData"></canvas>
+            <canvas #ministereChart baseChart [data]="ministereChartData" [options]="pieChartOptions" [type]="pieChartType" *ngIf="hasNonZeroData(ministereChartData); else noData"></canvas>
             <ng-template #noData>
               <p class="text-center text-gray-500">Aucune donnée disponible.</p>
             </ng-template>
           </div>
           <div class="chart-container">
             <h3 class="text-lg font-semibold mb-4">Requêtes par Services (Pie)</h3>
-            <canvas baseChart [data]="serviceChartData" [options]="pieChartOptions" [type]="pieChartType" *ngIf="hasNonZeroData(serviceChartData); else noData"></canvas>
+            <canvas #serviceChart baseChart [data]="serviceChartData" [options]="pieChartOptions" [type]="pieChartType" *ngIf="hasNonZeroData(serviceChartData); else noData"></canvas>
             <ng-template #noData>
               <p class="text-center text-gray-500">Aucune donnée disponible.</p>
             </ng-template>
           </div>
           <div class="chart-container" style="grid-column: 1 / -1;">
             <h3 class="text-lg font-semibold mb-4">Tendances des Requêtes (Ligne)</h3>
-            <canvas baseChart [data]="lineChartData" [options]="lineChartOptions" [type]="lineChartType" *ngIf="hasNonZeroData(lineChartData); else noData"></canvas>
+            <canvas #lineChart baseChart [data]="lineChartData" [options]="lineChartOptions" [type]="lineChartType" *ngIf="hasNonZeroData(lineChartData); else noData"></canvas>
             <ng-template #noData>
               <p class="text-center text-gray-500">Aucune donnée disponible.</p>
             </ng-template>
           </div>
           <div class="chart-container">
             <h3 class="text-lg font-semibold mb-4">Requêtes par Jour de la Semaine (Pie)</h3>
-            <canvas baseChart [data]="dayOfWeekChartData" [options]="pieChartOptions" [type]="pieChartType" *ngIf="hasNonZeroData(dayOfWeekChartData); else noData"></canvas>
+            <canvas #dayOfWeekChart baseChart [data]="dayOfWeekChartData" [options]="pieChartOptions" [type]="pieChartType" *ngIf="hasNonZeroData(dayOfWeekChartData); else noData"></canvas>
             <ng-template #noData>
               <p class="text-center text-gray-500">Aucune donnée disponible.</p>
             </ng-template>
           </div>
           <div class="chart-container">
             <h3 class="text-lg font-semibold mb-4">Temps Moyen de Traitement par Statut (Ligne)</h3>
-            <canvas baseChart [data]="avgProcessingTimeChartData" [options]="avgProcessingTimeChartOptions" [type]="avgProcessingTimeChartType" *ngIf="hasNonZeroData(avgProcessingTimeChartData); else noData"></canvas>
+            <canvas #avgProcessingTimeChart baseChart [data]="avgProcessingTimeChartData" [options]="avgProcessingTimeChartOptions" [type]="avgProcessingTimeChartType" *ngIf="hasNonZeroData(avgProcessingTimeChartData); else noData"></canvas>
             <ng-template #noData>
               <p class="text-center text-gray-500">Aucune donnée disponible.</p>
             </ng-template>
+          </div>
+        </div>
+        <!-- Historical Comparison -->
+        <div class="historical-comparison">
+          <h3 class="table-subtitle">Comparaison Historique (par Mois)</h3>
+          <div class="chart-filter">
+            <label>Plage de Mois :</label>
+            <select [(ngModel)]="compareMonthRange" (change)="loadCompareData()">
+              <option value="3">Derniers 3 mois</option>
+              <option value="6">Derniers 6 mois</option>
+              <option value="12">Derniers 12 mois</option>
+            </select>
+          </div>
+          <div class="chart-grid">
+            <div class="chart-container" style="grid-column: 1 / -1;">
+              <h3 class="text-lg font-semibold mb-4">Tendances Mensuelles des Métriques (Ligne)</h3>
+              <canvas #monthlyTrendChart baseChart [data]="monthlyTrendChartData" [options]="monthlyTrendChartOptions" [type]="monthlyTrendChartType" *ngIf="hasNonZeroData(monthlyTrendChartData); else noData"></canvas>
+              <ng-template #noData>
+                <p class="text-center text-gray-500">Aucune donnée disponible.</p>
+              </ng-template>
+            </div>
           </div>
         </div>
         <!-- Table: Liste des Requêtes -->
@@ -272,14 +293,14 @@
         <div class="chart-grid" *ngIf="!loading; else loadingTemplate">
           <div class="chart-container">
             <h3 class="text-lg font-semibold mb-4">Répartition des Rôles (Pie)</h3>
-            <canvas baseChart [data]="userRoleChartData" [options]="pieChartOptions" [type]="pieChartType" *ngIf="hasNonZeroData(userRoleChartData); else noData"></canvas>
+            <canvas #userRoleChart baseChart [data]="userRoleChartData" [options]="pieChartOptions" [type]="pieChartType" *ngIf="hasNonZeroData(userRoleChartData); else noData"></canvas>
             <ng-template #noData>
               <p class="text-center text-gray-500">Aucune donnée disponible.</p>
             </ng-template>
           </div>
           <div class="chart-container">
             <h3 class="text-lg font-semibold mb-4">Clients par Ministère (Pie)</h3>
-            <canvas baseChart [data]="clientByMinistereChartData" [options]="pieChartOptions" [type]="pieChartType" *ngIf="hasNonZeroData(clientByMinistereChartData); else noData"></canvas>
+            <canvas #clientByMinistereChart baseChart [data]="clientByMinistereChartData" [options]="pieChartOptions" [type]="pieChartType" *ngIf="hasNonZeroData(clientByMinistereChartData); else noData"></canvas>
             <ng-template #noData>
               <p class="text-center text-gray-500">Aucune donnée disponible.</p>
             </ng-template>
@@ -319,7 +340,7 @@
           <div class="pagination">
             <button [disabled]="page === 1" (click)="changePage(page - 1, 'users')">«</button>
             <button *ngFor="let p of [1,2,3,4,5]" [class.active]="page === p" (click)="changePage(p, 'users')">{{ p }}</button>
-            <button [disabled]="page * pageSize >= totalRequestPages" (click)="changePage(page + 1, 'users')">»</button>
+            <button [disabled]="page * pageSize >= totalUserPages" (click)="changePage(page + 1, 'users')">»</button>
           </div>
         </div>
       </div>
@@ -342,14 +363,14 @@
         <div class="chart-grid" *ngIf="!loading; else loadingTemplate">
           <div class="chart-container">
             <h3 class="text-lg font-semibold mb-4">Statut des RDVs (Barres)</h3>
-            <canvas baseChart [data]="rdvStatusChartData" [options]="barChartOptions" [type]="barChartType" *ngIf="hasNonZeroData(rdvStatusChartData); else noData"></canvas>
+            <canvas #rdvStatusChart baseChart [data]="rdvStatusChartData" [options]="barChartOptions" [type]="barChartType" *ngIf="hasNonZeroData(rdvStatusChartData); else noData"></canvas>
             <ng-template #noData>
               <p class="text-center text-gray-500">Aucune donnée disponible.</p>
             </ng-template>
           </div>
           <div class="chart-container">
             <h3 class="text-lg font-semibold mb-4">Charge de Travail des Techniciens (Barres)</h3>
-            <canvas baseChart [data]="technicianWorkloadChartData" [options]="barChartOptions" [type]="barChartType" *ngIf="hasNonZeroData(technicianWorkloadChartData); else noData"></canvas>
+            <canvas #technicianWorkloadChart baseChart [data]="technicianWorkloadChartData" [options]="barChartOptions" [type]="barChartType" *ngIf="hasNonZeroData(technicianWorkloadChartData); else noData"></canvas>
             <ng-template #noData>
               <p class="text-center text-gray-500">Aucune donnée disponible.</p>
             </ng-template>
@@ -414,14 +435,14 @@
         <div class="chart-grid" *ngIf="!loading; else loadingTemplate">
           <div class="chart-container">
             <h3 class="text-lg font-semibold mb-4">Top Produits (Pie)</h3>
-            <canvas baseChart [data]="productChartData" [options]="pieChartOptions" [type]="pieChartType" *ngIf="hasNonZeroData(productChartData); else noData"></canvas>
+            <canvas #productChart baseChart [data]="productChartData" [options]="pieChartOptions" [type]="pieChartType" *ngIf="hasNonZeroData(productChartData); else noData"></canvas>
             <ng-template #noData>
               <p class="text-center text-gray-500">Aucune donnée disponible.</p>
             </ng-template>
           </div>
           <div class="chart-container">
             <h3 class="text-lg font-semibold mb-4">Tendances des Produits (Barres)</h3>
-            <canvas baseChart [data]="productTrendChartData" [options]="barChartOptions" [type]="barChartType" *ngIf="hasNonZeroData(productTrendChartData); else noData"></canvas>
+            <canvas #productTrendChart baseChart [data]="productTrendChartData" [options]="barChartOptions" [type]="barChartType" *ngIf="hasNonZeroData(productTrendChartData); else noData"></canvas>
             <ng-template #noData>
               <p class="text-center text-gray-500">Aucune donnée disponible.</p>
             </ng-template>
@@ -439,20 +460,30 @@
           <table class="table table-hover">
             <thead class="table-header">
               <tr>
+                <th>ID</th>
                 <th>Nom</th>
                 <th>Nombre de Requêtes</th>
               </tr>
             </thead>
             <tbody>
               <tr *ngFor="let product of displayedProducts">
+                <td>{{ product.id }}</td>
                 <td>{{ product.nom }}</td>
                 <td>{{ product.requestCount }}</td>
               </tr>
               <tr *ngIf="displayedProducts.length === 0">
-                <td colspan="2" class="text-center">Aucun produit trouvé.</td>
+                <td colspan="3" class="text-center">Aucun produit trouvé.</td>
               </tr>
             </tbody>
           </table>
+        </div>
+        <!-- Pagination -->
+        <div class="pagination-container">
+          <div class="pagination">
+            <button [disabled]="page === 1" (click)="changePage(page - 1, 'products')">«</button>
+            <button *ngFor="let p of [1,2,3,4,5]" [class.active]="page === p" (click)="changePage(p, 'products')">{{ p }}</button>
+            <button [disabled]="page * pageSize >= totalProductPages" (click)="changePage(page + 1, 'products')">»</button>
+          </div>
         </div>
       </div>
     </div>

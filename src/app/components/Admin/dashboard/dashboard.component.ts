@@ -1,11 +1,10 @@
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, AfterViewInit, ChangeDetectorRef, ViewChild, ElementRef } from '@angular/core';
 import { Chart, ChartConfiguration, ChartData, ChartType, registerables } from 'chart.js';
 import ChartDataLabels from 'chartjs-plugin-datalabels';
 import { DashboardService, DashboardData, DashboardRequete, DashboardRdv, DashboardUserInfo } from '../../../services/dashboard.service';
 import { Statistics } from '../../../models/statistics.model';
-import { format, subDays } from 'date-fns';
+import { format, subDays, subMonths, startOfMonth, endOfMonth, eachMonthOfInterval } from 'date-fns';
 
-// Register Chart.js components and the ChartDataLabels plugin
 Chart.register(...registerables, ChartDataLabels);
 
 @Component({
@@ -13,11 +12,8 @@ Chart.register(...registerables, ChartDataLabels);
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.css']
 })
-export class DashboardComponent implements OnInit {
-  // Main statistics object
+export class DashboardComponent implements OnInit, AfterViewInit {
   statistics: Statistics | null = null;
-
-  // Table Data
   displayedUsers: DashboardUserInfo[] = [];
   displayedRequests: DashboardRequete[] = [];
   displayedRdvs: DashboardRdv[] = [];
@@ -27,7 +23,6 @@ export class DashboardComponent implements OnInit {
   private allRdvs: DashboardRdv[] = [];
   private allProducts: { id: number; nom: string; requestCount: number }[] = [];
 
-  // Filters
   requestPeriod: '7days' | '30days' | 'custom' = '7days';
   requestStartDate: string = '';
   requestEndDate: string = '';
@@ -40,21 +35,21 @@ export class DashboardComponent implements OnInit {
   productPeriod: '7days' | '30days' | 'custom' = '7days';
   productStartDate: string = '';
   productEndDate: string = '';
+  compareMonthRange: number = 6; // Default to last 6 months
 
-  // Search
   requestSearch: string = '';
   userSearch: string = '';
   rdvSearch: string = '';
   productSearch: string = '';
 
-  // Pagination
   page: number = 1;
   pageSize: number = 5;
   totalRequestPages: number = 0;
+  totalUserPages: number = 0;
   totalRdvPages: number = 0;
+  totalProductPages: number = 0;
   loading: boolean = true;
 
-  // Modern color palette
   private modernColors = [
     '#6B7280', '#3B82F6', '#10B981', '#F59E0B', '#EF4444',
     '#8B5CF6', '#EC4899', '#FBBF24', '#14B8A6', '#F87171'
@@ -65,18 +60,35 @@ export class DashboardComponent implements OnInit {
     '#7C3AED', '#DB2777', '#F59E0B', '#0D9488', '#EF4444'
   ];
 
-  // Chart Configurations
+  @ViewChild('qualityChart') qualityChart!: ElementRef;
+  @ViewChild('requestStatusBarChart') requestStatusBarChart!: ElementRef;
+  @ViewChild('requestStatusPieChart') requestStatusPieChart!: ElementRef;
+  @ViewChild('ministereChart') ministereChart!: ElementRef;
+  @ViewChild('serviceChart') serviceChart!: ElementRef;
+  @ViewChild('lineChart') lineChart!: ElementRef;
+  @ViewChild('dayOfWeekChart') dayOfWeekChart!: ElementRef;
+  @ViewChild('avgProcessingTimeChart') avgProcessingTimeChart!: ElementRef;
+  @ViewChild('userRoleChart') userRoleChart!: ElementRef;
+  @ViewChild('clientByMinistereChart') clientByMinistereChart!: ElementRef;
+  @ViewChild('rdvStatusChart') rdvStatusChart!: ElementRef;
+  @ViewChild('technicianWorkloadChart') technicianWorkloadChart!: ElementRef;
+  @ViewChild('productChart') productChart!: ElementRef;
+  @ViewChild('productTrendChart') productTrendChart!: ElementRef;
+  @ViewChild('monthlyTrendChart') monthlyTrendChart!: ElementRef;
+
+  private charts: { [key: string]: Chart | null } = {};
+
   public qualityPieChartOptions: ChartConfiguration['options'] = {
     responsive: true,
     maintainAspectRatio: false,
     scales: {
       x: { 
-        title: { display: true, text: 'Catégories', color: '#1F2937', font: { size: 14, family: 'Inter', weight: 600 as any } },
+        title: { display: true, text: 'Catégories', color: '#1F2937', font: { size: 14, family: 'Inter', weight: 600 } },
         ticks: { color: '#6B7280' }
       },
       y: { 
         beginAtZero: true, 
-        title: { display: true, text: 'Nombre de Requêtes', color: '#1F2937', font: { size: 14, family: 'Inter', weight: 600 as any } },
+        title: { display: true, text: 'Nombre de Requêtes', color: '#1F2937', font: { size: 14, family: 'Inter', weight: 600 } },
         ticks: { color: '#6B7280' }
       }
     },
@@ -88,15 +100,24 @@ export class DashboardComponent implements OnInit {
         bodyColor: '#FFFFFF',
         callbacks: {
           label: (context) => {
-            const value = context.parsed as number;
+            const value = context.parsed.y as number;
             const dataset = context.dataset;
             const total = (dataset.data as number[]).reduce((sum: number, val: number) => sum + val, 0);
             const percentage = total ? ((value / total) * 100).toFixed(1) : '0.0';
             return `${context.label}: ${value} (${percentage}%)`;
           }
         }
+      },
+      datalabels: {
+        color: '#FFFFFF',
+        font: { size: 12, weight: 'bold', family: 'Inter' },
+        formatter: (value: number) => value > 0 ? value.toString() : '',
+        anchor: 'end',
+        align: 'end',
+        offset: 10
       }
-    }
+    },
+    onClick: (event, elements) => this.onChartClick(event, elements, 'quality')
   };
   public qualityPieChartType: ChartType = 'bar';
   public pieChartData: ChartData<'bar'> = {
@@ -154,7 +175,8 @@ export class DashboardComponent implements OnInit {
           return total ? (value / total) * 100 >= 5 : false;
         }
       }
-    }
+    },
+    onClick: (event, elements) => this.onChartClick(event, elements, 'pie')
   };
   public pieChartType: ChartType = 'pie';
 
@@ -171,8 +193,8 @@ export class DashboardComponent implements OnInit {
     responsive: true,
     maintainAspectRatio: false,
     scales: { 
-      x: { ticks: { color: '#6B7280' }, title: { display: true, text: 'Catégories', color: '#1F2937', font: { size: 14, family: 'Inter', weight: 600 as any } } },
-      y: { beginAtZero: true, ticks: { color: '#6B7280' }, title: { display: true, text: 'Nombre', color: '#1F2937', font: { size: 14, family: 'Inter', weight: 600 as any } } }
+      x: { ticks: { color: '#6B7280' }, title: { display: true, text: 'Catégories', color: '#1F2937', font: { size: 14, family: 'Inter', weight: 600 } } },
+      y: { beginAtZero: true, ticks: { color: '#6B7280' }, title: { display: true, text: 'Nombre', color: '#1F2937', font: { size: 14, family: 'Inter', weight: 600 } } }
     },
     plugins: { 
       legend: { display: true, labels: { color: '#1F2937', font: { size: 12, family: 'Inter' } } },
@@ -181,8 +203,17 @@ export class DashboardComponent implements OnInit {
         titleColor: '#FFFFFF',
         bodyColor: '#FFFFFF',
         callbacks: { label: context => `${context.dataset.label}: ${context.parsed.y as number}` } 
+      },
+      datalabels: {
+        color: '#FFFFFF',
+        font: { size: 12, weight: 'bold', family: 'Inter' },
+        formatter: (value: number) => value > 0 ? value.toString() : '',
+        anchor: 'end',
+        align: 'end',
+        offset: 10
       }
-    }
+    },
+    onClick: (event, elements) => this.onChartClick(event, elements, 'bar')
   };
   public barChartType: ChartType = 'bar';
 
@@ -191,12 +222,12 @@ export class DashboardComponent implements OnInit {
     maintainAspectRatio: false,
     scales: {
       x: { 
-        title: { display: true, text: 'Statut', color: '#1F2937', font: { size: 14, family: 'Inter', weight: 600 as any } },
+        title: { display: true, text: 'Statut', color: '#1F2937', font: { size: 14, family: 'Inter', weight: 600 } },
         ticks: { color: '#6B7280' }
       },
       y: { 
         beginAtZero: true,
-        title: { display: true, text: 'Temps (minutes)', color: '#1F2937', font: { size: 14, family: 'Inter', weight: 600 as any } },
+        title: { display: true, text: 'Temps (minutes)', color: '#1F2937', font: { size: 14, family: 'Inter', weight: 600 } },
         ticks: { color: '#6B7280' }
       }
     },
@@ -208,7 +239,8 @@ export class DashboardComponent implements OnInit {
         bodyColor: '#FFFFFF',
         callbacks: { label: context => `${context.parsed.y as number} minutes` } 
       }
-    }
+    },
+    onClick: (event, elements) => this.onChartClick(event, elements, 'avgProcessingTime')
   };
   public avgProcessingTimeChartType: ChartType = 'line';
   public avgProcessingTimeChartData: ChartData<'line'> = {
@@ -238,8 +270,8 @@ export class DashboardComponent implements OnInit {
     responsive: true,
     maintainAspectRatio: false,
     scales: { 
-      x: { ticks: { color: '#6B7280' }, title: { display: true, text: 'Date', color: '#1F2937', font: { size: 14, family: 'Inter', weight: 600 as any } } },
-      y: { beginAtZero: true, ticks: { color: '#6B7280' }, title: { display: true, text: 'Nombre de Requêtes', color: '#1F2937', font: { size: 14, family: 'Inter', weight: 600 as any } } }
+      x: { ticks: { color: '#6B7280' }, title: { display: true, text: 'Date', color: '#1F2937', font: { size: 14, family: 'Inter', weight: 600 } } },
+      y: { beginAtZero: true, ticks: { color: '#6B7280' }, title: { display: true, text: 'Nombre de Requêtes', color: '#1F2937', font: { size: 14, family: 'Inter', weight: 600 } } }
     },
     plugins: { 
       legend: { display: false },
@@ -247,8 +279,17 @@ export class DashboardComponent implements OnInit {
         backgroundColor: '#1F2937',
         titleColor: '#FFFFFF',
         bodyColor: '#FFFFFF'
+      },
+      datalabels: {
+        color: '#FFFFFF',
+        font: { size: 12, weight: 'bold', family: 'Inter' },
+        formatter: (value: number) => value > 0 ? value.toString() : '',
+        anchor: 'end',
+        align: 'end',
+        offset: 10
       }
-    }
+    },
+    onClick: (event, elements) => this.onChartClick(event, elements, 'line')
   };
   public lineChartType: ChartType = 'line';
   public lineChartData: ChartData<'line'> = {
@@ -362,6 +403,44 @@ export class DashboardComponent implements OnInit {
     }]
   };
 
+  public monthlyTrendChartData: ChartData<'line'> = {
+    labels: [],
+    datasets: [
+      { label: 'Requêtes', data: [], borderColor: '#3B82F6', backgroundColor: 'rgba(59, 130, 246, 0.2)', fill: true, tension: 0.4, pointRadius: 4, pointHoverRadius: 6 },
+      { label: 'Clients', data: [], borderColor: '#10B981', backgroundColor: 'rgba(16, 185, 129, 0.2)', fill: true, tension: 0.4, pointRadius: 4, pointHoverRadius: 6 },
+      { label: 'RDVs', data: [], borderColor: '#F59E0B', backgroundColor: 'rgba(245, 158, 11, 0.2)', fill: true, tension: 0.4, pointRadius: 4, pointHoverRadius: 6 },
+      { label: 'Produits', data: [], borderColor: '#EF4444', backgroundColor: 'rgba(239, 68, 68, 0.2)', fill: true, tension: 0.4, pointRadius: 4, pointHoverRadius: 6 }
+    ]
+  };
+
+  public monthlyTrendChartOptions: ChartConfiguration['options'] = {
+    responsive: true,
+    maintainAspectRatio: false,
+    scales: { 
+      x: { ticks: { color: '#6B7280' }, title: { display: true, text: 'Mois', color: '#1F2937', font: { size: 14, family: 'Inter', weight: 600 } } },
+      y: { beginAtZero: true, ticks: { color: '#6B7280' }, title: { display: true, text: 'Nombre', color: '#1F2937', font: { size: 14, family: 'Inter', weight: 600 } } }
+    },
+    plugins: { 
+      legend: { display: true, labels: { color: '#1F2937', font: { size: 12, family: 'Inter' } } },
+      tooltip: { 
+        backgroundColor: '#1F2937',
+        titleColor: '#FFFFFF',
+        bodyColor: '#FFFFFF',
+        callbacks: { label: context => `${context.dataset.label}: ${context.parsed.y as number}` } 
+      },
+      datalabels: {
+        color: '#FFFFFF',
+        font: { size: 12, weight: 'bold', family: 'Inter' },
+        formatter: (value: number) => value > 0 ? value.toString() : '',
+        anchor: 'end',
+        align: 'end',
+        offset: 10
+      }
+    },
+    onClick: (event, elements) => this.onChartClick(event, elements, 'monthlyTrend')
+  };
+  public monthlyTrendChartType: ChartType = 'line';
+
   constructor(
     private dashboardService: DashboardService,
     private cdr: ChangeDetectorRef
@@ -369,7 +448,91 @@ export class DashboardComponent implements OnInit {
 
   ngOnInit(): void {
     this.loading = true;
+    this.initializeCharts();
     this.loadAllData();
+  }
+
+  ngAfterViewInit(): void {
+    this.createCharts();
+  }
+
+  initializeCharts(): void {
+    this.charts = {
+      quality: null,
+      pie: null,
+      bar: null,
+      avgProcessingTime: null,
+      line: null,
+      userRole: null,
+      clientByMinistere: null,
+      rdvStatus: null,
+      technicianWorkload: null,
+      product: null,
+      productTrend: null,
+      ministere: null,
+      service: null,
+      monthlyTrend: null
+    };
+  }
+
+  createCharts(): void {
+    if (this.qualityChart) {
+      this.charts['quality'] = new Chart(this.qualityChart.nativeElement, { type: this.qualityPieChartType, data: this.pieChartData, options: this.qualityPieChartOptions });
+    }
+    if (this.requestStatusBarChart) {
+      this.charts['bar'] = new Chart(this.requestStatusBarChart.nativeElement, { type: this.barChartType, data: this.barChartDataRequestStatus, options: this.barChartOptions });
+    }
+    if (this.requestStatusPieChart) {
+      this.charts['pie'] = new Chart(this.requestStatusPieChart.nativeElement, { type: this.pieChartType, data: this.pieChartDataRequestStatus, options: this.pieChartOptions });
+    }
+    if (this.avgProcessingTimeChart) {
+      this.charts['avgProcessingTime'] = new Chart(this.avgProcessingTimeChart.nativeElement, { type: this.avgProcessingTimeChartType, data: this.avgProcessingTimeChartData, options: this.avgProcessingTimeChartOptions });
+    }
+    if (this.lineChart) {
+      this.charts['line'] = new Chart(this.lineChart.nativeElement, { type: this.lineChartType, data: this.lineChartData, options: this.lineChartOptions });
+    }
+    if (this.dayOfWeekChart) {
+      this.charts['dayOfWeek'] = new Chart(this.dayOfWeekChart.nativeElement, { type: this.pieChartType, data: this.dayOfWeekChartData, options: this.pieChartOptions });
+    }
+    if (this.userRoleChart) {
+      this.charts['userRole'] = new Chart(this.userRoleChart.nativeElement, { type: this.pieChartType, data: this.userRoleChartData, options: this.pieChartOptions });
+    }
+    if (this.clientByMinistereChart) {
+      this.charts['clientByMinistere'] = new Chart(this.clientByMinistereChart.nativeElement, { type: this.pieChartType, data: this.clientByMinistereChartData, options: this.pieChartOptions });
+    }
+    if (this.rdvStatusChart) {
+      this.charts['rdvStatus'] = new Chart(this.rdvStatusChart.nativeElement, { type: this.barChartType, data: this.rdvStatusChartData, options: this.barChartOptions });
+    }
+    if (this.technicianWorkloadChart) {
+      this.charts['technicianWorkload'] = new Chart(this.technicianWorkloadChart.nativeElement, { type: this.barChartType, data: this.technicianWorkloadChartData, options: this.barChartOptions });
+    }
+    if (this.productChart) {
+      this.charts['product'] = new Chart(this.productChart.nativeElement, { type: this.pieChartType, data: this.productChartData, options: this.pieChartOptions });
+    }
+    if (this.productTrendChart) {
+      this.charts['productTrend'] = new Chart(this.productTrendChart.nativeElement, { type: this.barChartType, data: this.productTrendChartData, options: this.barChartOptions });
+    }
+    if (this.ministereChart) {
+      this.charts['ministere'] = new Chart(this.ministereChart.nativeElement, { type: this.pieChartType, data: this.ministereChartData, options: this.pieChartOptions });
+    }
+    if (this.serviceChart) {
+      this.charts['service'] = new Chart(this.serviceChart.nativeElement, { type: this.pieChartType, data: this.serviceChartData, options: this.pieChartOptions });
+    }
+    if (this.monthlyTrendChart) {
+      this.charts['monthlyTrend'] = new Chart(this.monthlyTrendChart.nativeElement, { type: this.monthlyTrendChartType, data: this.monthlyTrendChartData, options: this.monthlyTrendChartOptions });
+    }
+  }
+
+  onChartClick(event: any, elements: any[], chartType: string): void {
+    if (elements.length > 0) {
+      const chart = this.charts[chartType];
+      if (chart) {
+        const index = elements[0].index;
+        const label = chart.data.labels ? chart.data.labels[index] : 'Unknown';
+        const value = chart.data.datasets[0].data[index];
+        alert(`Clicked on ${label} with value ${value}`);
+      }
+    }
   }
 
   hasNonZeroData(chartData: ChartData<any>): boolean {
@@ -438,6 +601,7 @@ export class DashboardComponent implements OnInit {
     this.loadUserData();
     this.loadRdvData();
     this.loadProductData();
+    this.loadCompareData();
   }
 
   getPeriodDates(period: string, startDate: string, endDate: string): { start: Date; end: Date } {
@@ -497,6 +661,7 @@ export class DashboardComponent implements OnInit {
         ];
 
         this.filterRequests();
+        this.updateCharts();
         this.loading = false;
         this.cdr.detectChanges();
       },
@@ -526,13 +691,16 @@ export class DashboardComponent implements OnInit {
         this.clientByMinistereChartData.datasets[0].data = this.statistics.clientsByMinistere.map(m => m.clientCount);
 
         this.allUsers = data.users || [];
+        this.totalUserPages = this.allUsers.length;
         this.filterUsers();
+        this.updateCharts();
         this.loading = false;
         this.cdr.detectChanges();
       },
       error: (err) => {
         console.error('Error loading user data:', err);
         this.loading = false;
+        this.cdr.detectChanges();
       }
     });
   }
@@ -557,6 +725,7 @@ export class DashboardComponent implements OnInit {
         this.allRdvs = data.rdvs;
         this.totalRdvPages = data.rdvs.length;
         this.filterRdvs();
+        this.updateCharts();
         this.loading = false;
         this.cdr.detectChanges();
       },
@@ -577,12 +746,14 @@ export class DashboardComponent implements OnInit {
       next: (data: DashboardData) => {
         this.statistics = data.statistics;
         this.allProducts = this.statistics.topProducts;
+        this.totalProductPages = this.allProducts.length;
         this.productChartData.labels = this.statistics.topProducts.map(p => p.nom);
         this.productChartData.datasets[0].data = this.statistics.topProducts.map(p => p.requestCount);
         this.productTrendChartData.labels = this.statistics.topProducts.filter(p => p.nom !== 'Any').map(p => p.nom);
         this.productTrendChartData.datasets[0].data = this.statistics.topProducts.filter(p => p.nom !== 'Any').map(p => p.requestCount);
 
         this.filterProducts();
+        this.updateCharts();
         this.loading = false;
         this.cdr.detectChanges();
       },
@@ -592,6 +763,58 @@ export class DashboardComponent implements OnInit {
         this.cdr.detectChanges();
       }
     });
+  }
+
+  loadCompareData(): void {
+    const endDate = new Date(); // Current date
+    const startDate = subMonths(endDate, this.compareMonthRange); // Go back by the selected number of months
+
+    // Get all months in the range
+    const months = eachMonthOfInterval({ start: startDate, end: endDate });
+
+    // Initialize arrays to store data for each metric per month
+    const requestsData: number[] = new Array(months.length).fill(0);
+    const clientsData: number[] = new Array(months.length).fill(0);
+    const rdvsData: number[] = new Array(months.length).fill(0);
+    const productsData: number[] = new Array(months.length).fill(0);
+
+    // Fetch data for each month
+    const fetchPromises = months.map((month, index) => {
+      const monthStart = startOfMonth(month);
+      const monthEnd = endOfMonth(month);
+
+      return this.dashboardService.getDashboardData(monthStart, monthEnd).toPromise().then((data: DashboardData | undefined) => {
+        if (data && data.statistics) {
+          requestsData[index] = data.statistics.kpiMetrics.totalRequests;
+          clientsData[index] = data.statistics.kpiMetrics.totalClients;
+          rdvsData[index] = data.statistics.kpiMetrics.totalRdvs;
+          productsData[index] = data.statistics.kpiMetrics.totalProduits;
+        }
+      }).catch(err => {
+        console.error(`Error loading data for ${format(month, 'MMMM yyyy')}:`, err);
+      });
+    });
+
+    Promise.all(fetchPromises).then(() => {
+      // Update chart labels (month names)
+      this.monthlyTrendChartData.labels = months.map(month => format(month, 'MMM yyyy'));
+
+      // Update datasets
+      this.monthlyTrendChartData.datasets[0].data = requestsData; // Requêtes
+      this.monthlyTrendChartData.datasets[1].data = clientsData;  // Clients
+      this.monthlyTrendChartData.datasets[2].data = rdvsData;     // RDVs
+      this.monthlyTrendChartData.datasets[3].data = productsData; // Produits
+
+      this.updateCharts();
+      this.cdr.detectChanges();
+    }).catch(err => {
+      console.error('Error loading monthly comparison data:', err);
+      this.cdr.detectChanges();
+    });
+  }
+
+  updateCharts(): void {
+    Object.values(this.charts).forEach(chart => chart?.update());
   }
 
   filterRequests(): void {
@@ -639,7 +862,7 @@ export class DashboardComponent implements OnInit {
       .slice((this.page - 1) * this.pageSize, this.page * this.pageSize);
   }
 
-  changePage(newPage: number, type: 'requests' | 'rdvs' | 'users'): void {
+  changePage(newPage: number, type: 'requests' | 'rdvs' | 'users' | 'products'): void {
     if (newPage < 1) return;
     let totalItems: number;
     if (type === 'requests') {
@@ -647,7 +870,9 @@ export class DashboardComponent implements OnInit {
     } else if (type === 'rdvs') {
       totalItems = this.totalRdvPages;
     } else if (type === 'users') {
-      totalItems = this.allUsers.length; // Assuming total users length as a placeholder; adjust based on your data structure
+      totalItems = this.totalUserPages;
+    } else if (type === 'products') {
+      totalItems = this.totalProductPages;
     } else {
       return;
     }
@@ -660,6 +885,8 @@ export class DashboardComponent implements OnInit {
       this.filterRdvs();
     } else if (type === 'users') {
       this.filterUsers();
+    } else if (type === 'products') {
+      this.filterProducts();
     }
   }
 }

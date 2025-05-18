@@ -560,48 +560,57 @@ body.night-mode {
   overflow-y: auto;
 }
 
-.attachments-container h4 {
-  margin: 0 0 10px 0;
-  font-size: 16px;
-  color: #1e3c72;
+.attachment-preview-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 10px;
 }
 
-.attachment-item {
+.attachment-preview-item {
   display: flex;
   align-items: center;
-  margin: 10px 0;
-  padding: 8px;
-  background: #f8f9fa;
-  border-radius: 5px;
-  transition: background 0.3s ease;
+  gap: 8px;
 }
 
-.attachment-item:hover {
-  background: #e9ecef;
+.attachment-preview-bubble {
+  display: flex;
+  align-items: center;
+  background: #f1f1f1;
+  padding: 8px 12px;
+  border-radius: 15px;
+  border: 1px solid #ddd;
+  transition: background 0.3s ease, transform 0.2s ease;
 }
 
-.attachment-item a {
+.attachment-preview-bubble:hover {
+  background: #e0e0e0;
+  transform: scale(1.05);
+}
+
+.attachment-preview-bubble i {
+  margin-right: 8px;
   color: #1e3c72;
-  text-decoration: none;
+}
+
+.attachment-preview-bubble span {
   font-size: 14px;
-  margin-left: 10px;
-  flex-grow: 1;
+  color: #333;
+  max-width: 150px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-.attachment-item a:hover {
-  color: #2a5298;
-  text-decoration: underline;
+.attachment-preview-image {
+  width: 30px;
+  height: 30px;
+  object-fit: cover;
+  border-radius: 50%;
+  margin-left: 8px;
 }
 
-.attachment-item i {
-  color: #2a5298;
-  font-size: 16px;
-  margin-right: 10px;
-}
-
-/* Icônes d'action pour les pièces jointes */
 .attachment-action {
-  margin-left: 10px;
   cursor: pointer;
   font-size: 14px;
   color: #1e3c72;
@@ -610,6 +619,11 @@ body.night-mode {
 
 .attachment-action:hover {
   color: #2a5298;
+}
+
+.no-attachments {
+  font-size: 14px;
+  color: #666;
 }
 
 /* Styles pour la popup de sélection de technicien */
@@ -685,28 +699,25 @@ body.night-mode {
   border-color: #555;
 }
 
-.night-mode .attachments-container h4 {
-  color: #2ecc71;
-}
-
-.night-mode .attachment-item {
+.night-mode .attachment-preview-bubble {
   background: #2d2d2d;
+  border-color: #444;
 }
 
-.night-mode .attachment-item:hover {
+.night-mode .attachment-preview-bubble:hover {
   background: #3a3a3a;
 }
 
-.night-mode .attachment-item a {
+.night-mode .attachment-preview-bubble i {
   color: #2ecc71;
 }
 
-.night-mode .attachment-item a:hover {
-  color: #27ae60;
+.night-mode .attachment-preview-bubble span {
+  color: #ddd;
 }
 
-.night-mode .attachment-item i {
-  color: #2ecc71;
+.night-mode .attachment-preview-image {
+  border: 1px solid #444;
 }
 
 .night-mode .attachment-action {
@@ -715,6 +726,10 @@ body.night-mode {
 
 .night-mode .attachment-action:hover {
   color: #27ae60;
+}
+
+.night-mode .no-attachments {
+  color: #aaa;
 }
 
 /* Animations */
@@ -785,4 +800,3 @@ body.night-mode {
   background-color: #ffca2c;
   color: #121212;
 }
-@import "~@fortawesome/fontawesome-free/css/all.min.css";

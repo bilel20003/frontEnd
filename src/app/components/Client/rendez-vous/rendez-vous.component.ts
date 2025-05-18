@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { RendezvousService } from 'src/app/services/rendez-vous.service';
 import { ScheduleService } from '../../../services/schedule.service';
@@ -9,16 +9,19 @@ import { ObjetType } from 'src/app/services/objet.service';
 import { Objet } from 'src/app/models/objet.model';
 import { UserInfo } from 'src/app/models/user-info.model';
 import { jwtDecode } from 'jwt-decode';
-import { CalendarOptions, EventInput, EventContentArg } from '@fullcalendar/core';
+import { CalendarOptions, EventInput, EventContentArg, DayCellContentArg } from '@fullcalendar/core';
+import { DateClickArg } from '@fullcalendar/interaction'; // Import DateClickArg from @fullcalendar/interaction
 import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
 import listPlugin from '@fullcalendar/list';
-import interactionPlugin from '@fullcalendar/interaction'; // Added for consistency
+import interactionPlugin from '@fullcalendar/interaction';
 import '@fullcalendar/core';
 import '@fullcalendar/daygrid';
 import '@fullcalendar/timegrid';
 import '@fullcalendar/list';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { Schedule } from 'src/app/models/schedule.model';
+import { FullCalendarComponent } from '@fullcalendar/angular'; // Import FullCalendarComponent from @fullcalendar/angular
 
 @Component({
   selector: 'app-rendez-vous',
@@ -37,9 +40,13 @@ export class RendezVousComponent implements OnInit {
   clientProduitId: number | null = null;
   minDate: string;
   typesProblemes: Objet[] = [];
+  schedules: { [key: string]: Schedule[] } = {};
+
+  @ViewChild('calendar') calendarComponent!: FullCalendarComponent;
+  @ViewChild('modalCalendar') modalCalendarComponent!: FullCalendarComponent;
 
   calendarOptions: CalendarOptions = {
-    plugins: [dayGridPlugin, timeGridPlugin, listPlugin, interactionPlugin], // Added interactionPlugin
+    plugins: [dayGridPlugin, timeGridPlugin, listPlugin, interactionPlugin],
     initialView: 'dayGridMonth',
     headerToolbar: {
       left: 'prev,next today',
@@ -48,9 +55,11 @@ export class RendezVousComponent implements OnInit {
     },
     events: [],
     eventClick: this.handleEventClick.bind(this),
-    height: 'auto',
+    height: '600px',
+    contentHeight: 'auto',
+    aspectRatio: 1.5,
     locale: 'fr',
-    eventContent: this.renderEventContent.bind(this), // Added for custom rendering
+    eventContent: this.renderEventContent.bind(this),
     dayMaxEvents: true,
     moreLinkClick: 'popover',
     eventDisplay: 'block',
@@ -59,8 +68,21 @@ export class RendezVousComponent implements OnInit {
     slotLabelInterval: '01:00',
     editable: false,
     selectable: true,
-    dayCellClassNames: 'modern-day-cell',
-    eventClassNames: 'modern-event'
+    dayCellClassNames: this.getDayCellClassNames.bind(this),
+    datesSet: this.updateAvailableDays.bind(this),
+    dateClick: this.handleDateClick.bind(this)
+  };
+
+  modalCalendarOptions: CalendarOptions = {
+    plugins: [dayGridPlugin, interactionPlugin],
+    initialView: 'dayGridWeek',
+    height: '300px',
+    contentHeight: 'auto',
+    locale: 'fr',
+    dayCellClassNames: this.getDayCellClassNames.bind(this),
+    dateClick: this.handleDateClick.bind(this),
+    events: [],
+    selectable: true
   };
 
   constructor(
@@ -88,6 +110,7 @@ export class RendezVousComponent implements OnInit {
       if (this.clientId) {
         this.getRendezvous();
         this.loadTypesProblemes();
+        this.updateAvailableDays();
       } else {
         this.showError('Veuillez vous connecter pour accéder à vos rendez-vous.');
       }
@@ -105,18 +128,15 @@ export class RendezVousComponent implements OnInit {
         resolve();
         return;
       }
-
       try {
         const decoded: any = jwtDecode(token);
         console.log('Decoded JWT:', decoded);
         this.clientId = Number(decoded.id) || null;
-
         if (!this.clientId) {
           this.showError('Erreur: ID client invalide. Veuillez vous reconnecter.');
           resolve();
           return;
         }
-
         this.userInfoService.getUserById(this.clientId).subscribe({
           next: (user: UserInfo) => {
             this.clientProduitId = user.produit?.id || null;
@@ -144,7 +164,6 @@ export class RendezVousComponent implements OnInit {
       this.showError('Produit du client non trouvé. Veuillez vérifier votre configuration.');
       return;
     }
-
     this.objetService.getObjetsByProduitIdAndType(this.clientProduitId, ObjetType.RENDEZVOUS).subscribe({
       next: (objets) => {
         this.typesProblemes = objets;
@@ -192,10 +211,14 @@ export class RendezVousComponent implements OnInit {
       },
       backgroundColor: this.getEventColor(rdv.status),
       borderColor: this.getEventColor(rdv.status),
-      textColor: this.getTextColor(rdv.status) // Added for dynamic text color
+      textColor: this.getTextColor(rdv.status)
     }));
     this.calendarOptions = {
       ...this.calendarOptions,
+      events
+    };
+    this.modalCalendarOptions = {
+      ...this.modalCalendarOptions,
       events
     };
   }
@@ -203,22 +226,22 @@ export class RendezVousComponent implements OnInit {
   getEventColor(status: string): string {
     switch (status) {
       case 'EN_ATTENTE':
-        return '#e1c809'; // Soft beige
+        return '#e1c809';
       case 'TERMINE':
-        return '#089900'; // Muted taupe
+        return '#089900';
       case 'REFUSE':
-        return '#d50606'; // Warm grayish-brown
+        return '#d50606';
       default:
         return '#6c757d';
     }
   }
 
   getTextColor(status: string): string {
-    return status === 'EN_ATTENTE' ? '#212529' : 'white'; // Dark text for EN_ATTENTE, white for others
+    return status === 'EN_ATTENTE' ? '#212529' : 'white';
   }
 
   renderEventContent(eventInfo: EventContentArg): any {
-    return { html: `<div>${eventInfo.event.title}</div>` }; // Simple rendering, matching technician style
+    return { html: `<div>${eventInfo.event.title}</div>` };
   }
 
   handleEventClick(info: any) {
@@ -270,9 +293,7 @@ export class RendezVousComponent implements OnInit {
       const date = new Date(formValue.dateSouhaitee);
       const [hours, minutes] = formValue.timeSlot.split(':').map(Number);
       date.setHours(hours, minutes, 0, 0);
-
       const formattedDate = date.toISOString().slice(0, 19);
-
       const rdv: RdvCreate = {
         dateSouhaitee: formattedDate,
         dateEnvoi: new Date().toISOString(),
@@ -281,10 +302,8 @@ export class RendezVousComponent implements OnInit {
         status: 'EN_ATTENTE',
         client: { id: this.clientId }
       };
-
       console.log('POST payload:', JSON.stringify(rdv, null, 2));
       console.log('Client ID:', this.clientId);
-
       this.rendezvousService.addRendezvous(rdv).subscribe({
         next: () => {
           this.getRendezvous();
@@ -330,7 +349,6 @@ export class RendezVousComponent implements OnInit {
     localStorage.setItem('mode', this.isNightMode ? 'night' : 'day');
   }
 
-  // Méthodes pour afficher les notifications
   private showSuccess(message: string): void {
     this.snackBar.open(message, '', {
       duration: 6000,
@@ -356,5 +374,74 @@ export class RendezVousComponent implements OnInit {
       verticalPosition: 'top',
       horizontalPosition: 'center'
     });
+  }
+
+  updateAvailableDays(): void {
+    const calendarApi = this.calendarComponent?.getApi();
+    if (!calendarApi) return;
+
+    const currentDate = calendarApi.getDate();
+    const start = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
+    const end = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0);
+    const dayMap = {
+      SUNDAY: 0,
+      MONDAY: 1,
+      TUESDAY: 2,
+      WEDNESDAY: 3,
+      THURSDAY: 4,
+      FRIDAY: 5,
+      SATURDAY: 6
+    } as const;
+
+    const dayMapKeys = Object.keys(dayMap) as Array<keyof typeof dayMap>;
+
+    for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+      const dayOfWeek = dayMapKeys.find(key => dayMap[key] === d.getDay());
+      if (dayMap && dayOfWeek) {
+        this.scheduleService.getSchedulesByDay(dayOfWeek).subscribe({
+          next: (schedules) => {
+            this.schedules[dayOfWeek] = schedules;
+            const isAvailable = schedules.length > 0 && d >= new Date();
+            const dayElement = document.querySelector(`[data-date="${d.toISOString().split('T')[0]}"]`);
+            if (dayElement) {
+              dayElement.classList.toggle('available-day', isAvailable);
+              dayElement.classList.toggle('unavailable-day', !isAvailable);
+            }
+          },
+          error: (err) => {
+            console.error(`Erreur lors du chargement des horaires pour ${dayOfWeek}:`, err);
+            this.showError('Erreur lors du chargement des horaires.');
+          }
+        });
+      }
+    }
+  }
+
+  getDayCellClassNames(info: DayCellContentArg): string[] {
+    const dayMap = {
+      SUNDAY: 0,
+      MONDAY: 1,
+      TUESDAY: 2,
+      WEDNESDAY: 3,
+      THURSDAY: 4,
+      FRIDAY: 5,
+      SATURDAY: 6
+    } as const;
+
+    const dayMapKeys = Object.keys(dayMap) as Array<keyof typeof dayMap>;
+    const date = info.date;
+    const dayOfWeek = dayMapKeys.find(key => dayMap[key] === date.getDay());
+    if (dayOfWeek) {
+      const schedules = this.schedules[dayOfWeek] || [];
+      const isAvailable = schedules.length > 0 && date >= new Date();
+      return isAvailable ? ['available-day'] : ['unavailable-day'];
+    }
+    return ['unavailable-day'];
+  }
+
+  handleDateClick(info: DateClickArg): void {
+    const selectedDate = info.dateStr;
+    this.rendezvousForm.patchValue({ dateSouhaitee: selectedDate });
+    this.loadAvailableSlots();
   }
 }

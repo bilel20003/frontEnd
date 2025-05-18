@@ -5,7 +5,7 @@ export interface Rdv {
   typeProbleme: string;
   description: string;
   status: string;
-  client: { id: number };
+  client: { id: number; name?: string };
   technicien?: { id: number; name: string };
   meetLink?: string;
   noteRetour?: string | null;

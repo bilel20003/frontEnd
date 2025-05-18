@@ -137,14 +137,19 @@
             <div class="info-item full-width">
               <span class="label">📎 Pièces jointes:</span>
               <div class="attachments-container">
-                <div *ngIf="!selectedRequete.piecesJointes || selectedRequete.piecesJointes.length === 0" class="no-attachments">
+                <div *ngIf="attachmentPreviews.length === 0" class="no-attachments">
                   Aucune pièce jointe.
                 </div>
-                <div class="attachment-item" *ngFor="let piece of selectedRequete.piecesJointes">
-                  <i class="fas fa-paperclip"></i>
-                  <a [href]="piece.url" target="_blank">{{ piece.nom_fichier }}</a>
-                  <i class="fas fa-external-link-alt attachment-action" (click)="previewAttachment(piece)" title="Ouvrir dans une nouvelle fenêtre"></i>
-                  <i class="fas fa-download attachment-action" (click)="downloadAttachment(piece)" title="Télécharger"></i>
+                <div class="attachment-preview-list" *ngIf="attachmentPreviews.length > 0">
+                  <div *ngFor="let attachment of attachmentPreviews" class="attachment-preview-item">
+                    <div class="attachment-preview-bubble">
+                      <i [class]="getFileIcon(attachment.nom_fichier)"></i>
+                      <span>{{ attachment.nom_fichier }}</span>
+                      <img *ngIf="attachment.previewUrl" [src]="attachment.previewUrl" alt="{{ attachment.nom_fichier }}" class="attachment-preview-image">
+                    </div>
+                    <i class="fas fa-external-link-alt attachment-action" (click)="previewAttachment(attachment)" title="Ouvrir dans une nouvelle fenêtre"></i>
+                    <i class="fas fa-download attachment-action" (click)="downloadAttachment(attachment)" title="Télécharger"></i>
+                  </div>
                 </div>
               </div>
             </div>
@@ -210,17 +215,18 @@
               <div *ngIf="fileError" class="error-message">{{ fileError }}</div>
               <div class="attachment-preview-list" *ngIf="filePreviews.length > 0">
                 <div *ngFor="let preview of filePreviews; let i = index" class="attachment-preview-item">
-                  <div class="attachment-preview">
+                  <div class="attachment-preview-bubble">
+                    <i [class]="getFileIcon(preview.nom_fichier)"></i>
+                    <span>{{ preview.nom_fichier }}</span>
                     <img *ngIf="preview.previewUrl" [src]="preview.previewUrl" alt="{{ preview.nom_fichier }}" class="attachment-preview-image">
-                    <div *ngIf="!preview.previewUrl" class="attachment-preview-icon">
-                      <i [class]="getFileIcon(preview.nom_fichier)"></i>
-                      <span>{{ preview.nom_fichier }}</span>
-                    </div>
-                    <button type="button" class="remove-attachment-btn" (click)="removeFile(i)">
-                      <i class="fas fa-times"></i>
-                    </button>
                   </div>
+                  <button type="button" class="remove-attachment-btn" (click)="removeFile(i)">
+                    <i class="fas fa-times"></i>
+                  </button>
                 </div>
+              </div>
+              <div *ngIf="filePreviews.length === 0" class="no-attachments">
+                Aucune pièce jointe sélectionnée.
               </div>
             </div>
             <div class="form-group">

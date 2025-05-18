@@ -1,4 +1,3 @@
-// src/app/models/requete.model.ts
 export interface Requete {
   id: number;
   type: string;
@@ -23,5 +22,5 @@ export interface Requete {
   };
   guichetier: { id: number; name?: string };
   technicien: { id: number; name?: string } | null;
-  piecesJointes?: { id: number; url: string; nom_fichier: string }[];
+  piecesJointes?: { id?: number; url: string; nom_fichier: string; typeFichier?: string }[];
 }

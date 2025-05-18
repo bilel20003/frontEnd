@@ -11,9 +11,10 @@ import { ProduitService } from 'src/app/services/produit.service';
 import { AiService } from 'src/app/services/ai.service';
 import { UserInfoService } from 'src/app/services/user-info.service';
 import { jwtDecode } from 'jwt-decode';
-import { Observable, forkJoin } from 'rxjs';
+import { Observable, forkJoin, of } from 'rxjs'; // Ajout de "of"
 import { HttpErrorResponse, HttpClient } from '@angular/common/http';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { map, catchError } from 'rxjs/operators';
 
 @Component({
   selector: 'app-home',
@@ -40,6 +41,7 @@ export class HomeComponent implements OnInit {
   isPopupOpen: boolean = false;
   isCreatePopupOpen: boolean = false;
   selectedRequete: Requete | null = null;
+  attachmentPreviews: { nom_fichier: string; url: string; previewUrl?: string; type: string }[] = [];
 
   newRequete: Omit<Requete, 'id'> = this.getEmptyRequete();
   userInfo: { id: number; role: string; produit?: { id: number }; name?: string } | null = null;
@@ -55,7 +57,6 @@ export class HomeComponent implements OnInit {
 
   files: File[] = [];
   filePreviews: { file: File; previewUrl?: string; type: string; nom_fichier: string }[] = [];
-  attachmentPreviews: { nom_fichier: string; url: string; previewUrl?: string; type: string }[] = [];
   fileError: string | null = null;
   @ViewChild('fileInput') fileInput!: ElementRef<HTMLInputElement>;
 
@@ -165,6 +166,9 @@ export class HomeComponent implements OnInit {
     if (!this.userInfo) {
       console.warn('User info not available, skipping requetes loading.');
       this.requetes = [];
+      this.filteredRequetes = [];
+      this.paginatedRequetes = [];
+      this.updatePagination();
       return;
     }
 
@@ -189,33 +193,38 @@ export class HomeComponent implements OnInit {
 
     observable.subscribe({
       next: (data) => {
-        console.log('All requetes from API:', data);
+        console.log('All requetes from API with pieces jointes:', data);
         this.requetes = data.map(req => ({
           ...req,
           client: { id: req.client.id, name: req.client.name || 'Inconnu' },
           piecesJointes: req.piecesJointes?.map(pj => ({
             ...pj,
             url: pj.url || `${this.apiUrl}/download/${pj.id}`,
-            nom_fichier: pj.nom_fichier || pj.id.toString() // Use id as fallback only if nom_fichier is null
+            nom_fichier: pj.nom_fichier || (pj.url ? this.getFileNameFromUrl(pj.url) : `fichier_${pj.id}`)
           })) || []
         }));
         if (this.clientProduitId) {
           this.requetes = this.requetes.filter(req => req.objet.produit?.id === this.clientProduitId);
         }
         console.log('Loaded requetes for client ID:', this.userInfo?.id, this.requetes);
-        const guichetierRequests = data.map(req =>
-          this.userInfoService.getUserById(req.guichetier.id).subscribe({
-            next: (user) => {
-              req.guichetier.name = user.name || 'Inconnu';
-            },
-            error: (err) => {
-              console.error(`Error fetching guichetier ${req.guichetier.id}:`, err.message);
-              req.guichetier.name = 'Inconnu';
-            }
+
+        const guichetierPromises = data.map(req =>
+          new Promise<void>((resolve) => {
+            this.userInfoService.getUserById(req.guichetier.id).subscribe({
+              next: (user) => {
+                req.guichetier.name = user.name || 'Inconnu';
+                resolve();
+              },
+              error: (err) => {
+                console.error(`Error fetching guichetier ${req.guichetier.id}:`, err.message);
+                req.guichetier.name = 'Inconnu';
+                resolve();
+              }
+            });
           })
         );
 
-        Promise.all(guichetierRequests).then(() => {
+        Promise.all(guichetierPromises).then(() => {
           this.filteredRequetes = [...this.requetes];
           this.filteredRequetes.sort((a, b) => b.id - a.id);
           this.updatePagination();
@@ -224,6 +233,10 @@ export class HomeComponent implements OnInit {
       error: (err: HttpErrorResponse) => {
         console.error('Error loading requetes:', err.message);
         this.showError('Impossible de charger les requêtes.');
+        this.requetes = [];
+        this.filteredRequetes = [];
+        this.paginatedRequetes = [];
+        this.updatePagination();
       }
     });
   }
@@ -358,9 +371,53 @@ export class HomeComponent implements OnInit {
   }
 
   openPopup(requete: Requete): void {
-    this.selectedRequete = requete;
-    this.generateAttachmentPreviews();
-    this.isPopupOpen = true;
+    this.selectedRequete = { ...requete }; // Crée une copie pour éviter les modifications directes
+    this.loadPieceJointesForRequete().subscribe(() => {
+      this.generateAttachmentPreviews();
+      this.isPopupOpen = true;
+    });
+  }
+
+  private loadPieceJointesForRequete(): Observable<void> {
+    if (!this.selectedRequete || !this.selectedRequete.piecesJointes || this.selectedRequete.piecesJointes.length === 0) {
+      // Vérification que selectedRequete n'est pas null avant de l'assigner
+      if (this.selectedRequete) {
+        this.selectedRequete = { ...this.selectedRequete, piecesJointes: [] };
+      }
+      return new Observable(observer => observer.next());
+    }
+
+    const pieceJointeCalls = this.selectedRequete.piecesJointes.map(pj =>
+      this.requeteService.getPieceJointeParId(pj.id!).pipe( // Utilisation de la nouvelle méthode du service
+        catchError(err => {
+          console.error(`Erreur lors du chargement de la pièce jointe ${pj.id}:`, err.message);
+          return of({ id: pj.id, nomFichier: `fichier_${pj.id}`, url: `${this.apiUrl}/download/${pj.id}`, typeFichier: 'application/octet-stream' });
+        })
+      )
+    );
+
+    return forkJoin(pieceJointeCalls).pipe(
+      map(results => {
+        if (this.selectedRequete) { // Vérification que selectedRequete n'est pas null
+          this.selectedRequete = {
+            ...this.selectedRequete,
+            piecesJointes: results.map((pj: any) => ({
+              id: pj.id,
+              nom_fichier: pj.nomFichier,
+              url: pj.url || `${this.apiUrl}/download/${pj.id}`,
+              typeFichier: pj.typeFichier
+            }))
+          };
+        }
+      }),
+      catchError(err => {
+        console.error('Erreur globale lors du chargement des pièces jointes:', err.message);
+        if (this.selectedRequete) { // Vérification que selectedRequete n'est pas null
+          this.selectedRequete = { ...this.selectedRequete, piecesJointes: [] };
+        }
+        return of(null as any);
+      })
+    );
   }
 
   closePopup(): void {
@@ -513,65 +570,13 @@ export class HomeComponent implements OnInit {
         const reader = new FileReader();
         reader.onload = (e) => {
           previewObj.previewUrl = e.target?.result as string;
-          this.filePreviews = [...this.filePreviews, previewObj];
+          this.filePreviews = [...this.filePreviews.filter(p => p.file !== file), previewObj];
         };
         reader.readAsDataURL(file);
       } else {
-        this.filePreviews = [...this.filePreviews, previewObj];
+        this.filePreviews = [...this.filePreviews.filter(p => p.file !== file), previewObj];
       }
     });
-  }
-
-  private generateAttachmentPreviews(): void {
-    if (!this.selectedRequete?.piecesJointes) {
-      this.attachmentPreviews = [];
-      return;
-    }
-
-    this.attachmentPreviews = [];
-    const imageTypes = ['image/jpeg', 'image/png'];
-
-    this.selectedRequete.piecesJointes.forEach(attachment => {
-      const type = this.getFileType(attachment.nom_fichier);
-      const previewObj = { nom_fichier: attachment.nom_fichier, url: attachment.url, previewUrl: '', type };
-
-      if (imageTypes.includes(type)) {
-        this.http.get(attachment.url, { responseType: 'blob' }).subscribe({
-          next: (blob: Blob) => {
-            const reader = new FileReader();
-            reader.onload = (e) => {
-              previewObj.previewUrl = e.target?.result as string;
-              this.attachmentPreviews = [...this.attachmentPreviews, previewObj];
-            };
-            reader.readAsDataURL(blob);
-          },
-          error: (err: HttpErrorResponse) => {
-            console.error('Erreur lors de la récupération de la pièce jointe pour prévisualisation:', err.message);
-            this.attachmentPreviews = [...this.attachmentPreviews, previewObj];
-          }
-        });
-      } else {
-        this.attachmentPreviews = [...this.attachmentPreviews, previewObj];
-      }
-    });
-  }
-
-  private getFileType(nom_fichier: string): string {
-    const extension = nom_fichier.split('.').pop()?.toLowerCase();
-    switch (extension) {
-      case 'jpg':
-      case 'jpeg':
-        return 'image/jpeg';
-      case 'png':
-        return 'image/png';
-      case 'pdf':
-        return 'application/pdf';
-      case 'doc':
-      case 'docx':
-        return 'application/msword';
-      default:
-        return 'application/octet-stream';
-    }
   }
 
   removeFile(index: number): void {
@@ -597,9 +602,65 @@ export class HomeComponent implements OnInit {
   }
 
   private getFileNameFromUrl(url: string): string {
+    if (!url || typeof url !== 'string') {
+      return 'document';
+    }
     const urlParts = url.split('/');
     const filePart = urlParts[urlParts.length - 1];
     return filePart.includes('?') ? filePart.split('?')[0] : filePart || 'document';
+  }
+
+  private generateAttachmentPreviews(): void {
+    this.attachmentPreviews = [];
+    if (!this.selectedRequete?.piecesJointes || this.selectedRequete.piecesJointes.length === 0) {
+      console.warn('No pieces jointes found for requete ID:', this.selectedRequete?.id);
+      return;
+    }
+
+    const imageTypes = ['image/jpeg', 'image/png'];
+    this.selectedRequete.piecesJointes.forEach(attachment => {
+      console.log('Processing attachment:', attachment); // Débogage
+      const type = this.getFileType(attachment.nom_fichier || '');
+      const previewObj = {
+        nom_fichier: attachment.nom_fichier || `fichier_${attachment.id}`,
+        url: attachment.url || `${this.apiUrl}/download/${attachment.id}`,
+        previewUrl: '',
+        type
+      };
+
+      if (imageTypes.includes(type)) {
+        this.http.get(attachment.url || `${this.apiUrl}/download/${attachment.id}`, { responseType: 'blob' }).subscribe({
+          next: (blob: Blob) => {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+              previewObj.previewUrl = e.target?.result as string;
+              this.attachmentPreviews = [...this.attachmentPreviews, previewObj];
+              console.log('Attachment preview generated:', previewObj); // Débogage
+            };
+            reader.readAsDataURL(blob);
+          },
+          error: (err: HttpErrorResponse) => {
+            console.error('Erreur lors de la récupération de la pièce jointe pour prévisualisation:', err.message);
+            this.attachmentPreviews = [...this.attachmentPreviews, previewObj];
+          }
+        });
+      } else {
+        this.attachmentPreviews = [...this.attachmentPreviews, previewObj];
+      }
+    });
+  }
+
+  private getFileType(nom_fichier: string): string {
+    const extension = nom_fichier.split('.').pop()?.toLowerCase() || '';
+    const typeMap: { [key: string]: string } = {
+      'jpg': 'image/jpeg',
+      'jpeg': 'image/jpeg',
+      'png': 'image/png',
+      'pdf': 'application/pdf',
+      'doc': 'application/msword',
+      'docx': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+    };
+    return typeMap[extension] || 'application/octet-stream';
   }
 
   previewAttachment(attachment: { url: string; nom_fichier: string }): void {
@@ -677,24 +738,31 @@ export class HomeComponent implements OnInit {
       return;
     }
 
+    const token = localStorage.getItem('token');
+    if (!token) {
+      this.showError('Token manquant. Veuillez vous reconnecter.');
+      this.redirectToLogin();
+      return;
+    }
+
     this.requeteService.getGuichetierWithLeastRequests().subscribe({
       next: (guichetier) => {
         const completeRequete: Omit<Requete, 'id'> = {
-        type: this.newRequete.type,
-        objet: { id: this.newRequete.objet.id },
-        description: this.newRequete.description,
-        etat: 'NOUVEAU',
-        date: new Date(),
-        dateTraitement: null,
-        client: { id: this.userInfo!.id, name: this.userInfo!.name || 'Client' },
-        guichetier: { id: guichetier.id },
-        technicien: null,
-        piecesJointes: this.files.map((file, index) => ({
-            id: index, // Vous devez générer ou obtenir un ID valide ici
-            url: '', // Vous devez définir l'URL où le fichier sera accessible
-            nom_fichier: file.name
-        }))
-    };
+          type: this.newRequete.type,
+          objet: { id: this.newRequete.objet.id },
+          description: this.newRequete.description,
+          etat: 'NOUVEAU',
+          date: new Date(),
+          dateTraitement: null,
+          client: { id: this.userInfo!.id, name: this.userInfo!.name || 'Client' },
+          guichetier: { id: guichetier.id },
+          technicien: null,
+          piecesJointes: this.files.length > 0 ? this.files.map(file => ({
+            url: '',
+            nom_fichier: file.name,
+            typeFichier: file.type
+          })) : undefined
+        };
 
         const formData = new FormData();
         formData.append('requete', new Blob([JSON.stringify(completeRequete)], { type: 'application/json' }));
@@ -702,16 +770,29 @@ export class HomeComponent implements OnInit {
           formData.append('files', file, file.name);
         });
 
+        console.log('Submitting request with token:', token.substring(0, 10) + '...');
         this.requeteService.createRequete(completeRequete, this.files).subscribe({
-          next: () => {
+          next: (response) => {
             this.refreshData();
             this.loadRequetes();
             this.closeCreatePopup();
             this.showSuccess('Requête créée avec succès !');
+            console.log('Response from backend:', response); // Log the response to verify pieces jointes
           },
           error: (error: HttpErrorResponse) => {
-            console.error('Error creating requete:', error.message);
-            this.showError(`Erreur lors de la création de la requête: ${error.message}`);
+            console.error('Error creating requete:', {
+              status: error.status,
+              statusText: error.statusText,
+              error: error.error,
+              message: error.message
+            });
+            let errorMessage = 'Une erreur est survenue, veuillez réessayer.';
+            if (error.status === 403) {
+              errorMessage = 'Accès refusé : vérifiez vos permissions ou reconnectez-vous.';
+            } else if (error.error && typeof error.error === 'string') {
+              errorMessage = error.error;
+            }
+            this.showError(`Erreur lors de la création de la requête: ${errorMessage}`);
           }
         });
       },

@@ -566,6 +566,76 @@ body.night-mode {
 .value.description {
   margin: 0;
   line-height: 1.6;
+  background-color: #f9f9f9;
+  padding: 10px;
+  border-radius: 6px;
+  border: 1px solid #ddd;
+}
+
+/* Attachment Preview Styles */
+.attachments-container {
+  margin-top: 10px;
+}
+
+.no-attachments {
+  color: #666;
+  font-style: italic;
+}
+
+.attachment-preview-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.attachment-preview-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  background-color: #f9f9f9;
+  transition: background-color 0.3s;
+}
+
+.attachment-preview-item:hover {
+  background-color: #f1f1f1;
+}
+
+.attachment-preview-bubble {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.attachment-preview-bubble i {
+  font-size: 16px;
+  color: #1e3c72;
+}
+
+.attachment-preview-bubble span {
+  font-size: 14px;
+  color: #333;
+}
+
+.attachment-preview-image {
+  width: 40px;
+  height: 40px;
+  object-fit: cover;
+  border-radius: 5px;
+  margin-left: 5px;
+}
+
+.attachment-action {
+  cursor: pointer;
+  font-size: 14px;
+  color: #1e3c72;
+  transition: color 0.3s;
+}
+
+.attachment-action:hover {
+  color: #2a5298;
 }
 
 .modal-content textarea {
@@ -608,6 +678,40 @@ body.night-mode {
 
 .night-mode .modal-body .value {
   color: #ddd;
+}
+
+.night-mode .value.description {
+  background-color: #2a2a2a;
+  border-color: #444;
+}
+
+.night-mode .attachment-preview-item {
+  background-color: #2a2a2a;
+  border-color: #444;
+}
+
+.night-mode .attachment-preview-item:hover {
+  background-color: #333;
+}
+
+.night-mode .attachment-preview-bubble i {
+  color: #2ecc71;
+}
+
+.night-mode .attachment-preview-bubble span {
+  color: #ddd;
+}
+
+.night-mode .attachment-action {
+  color: #2ecc71;
+}
+
+.night-mode .attachment-action:hover {
+  color: #27ae60;
+}
+
+.night-mode .no-attachments {
+  color: #999;
 }
 
 .night-mode .form-actions {

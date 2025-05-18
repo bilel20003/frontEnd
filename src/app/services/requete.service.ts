@@ -13,13 +13,22 @@ export class RequeteService {
 
   constructor(private http: HttpClient) {}
 
-  private getHttpOptions(): { headers: HttpHeaders } {
+  // Rendre la méthode publique
+  public getHttpOptions(): { headers: HttpHeaders } {
     const token = localStorage.getItem('token');
     return {
       headers: new HttpHeaders({
         'Authorization': token ? `Bearer ${token}` : ''
       })
     };
+  }
+
+  // Nouvelle méthode pour récupérer une pièce jointe par ID
+  getPieceJointeParId(id: number): Observable<{ id: number; nomFichier: string; url: string; typeFichier: string }> {
+    return this.http.get<{ id: number; nomFichier: string; url: string; typeFichier: string }>(
+      `${this.apiUrl}/piece-jointe/${id}`,
+      this.getHttpOptions()
+    ).pipe(catchError(this.handleError));
   }
 
   getAllRequetes(): Observable<Requete[]> {
@@ -47,14 +56,14 @@ export class RequeteService {
     formData.append('requete', new Blob([JSON.stringify(requete)], { type: 'application/json' }));
     
     if (files && files.length > 0) {
-        files.forEach(file => {
-            formData.append('files', file, file.name); // Assurez-vous d'inclure le nom du fichier
-        });
+      files.forEach(file => {
+        formData.append('files', file, file.name);
+      });
     }
     
     return this.http.post<Requete>(`${this.apiUrl}/addrequete`, formData, this.getHttpOptions())
-        .pipe(catchError(this.handleError));
-}
+      .pipe(catchError(this.handleError));
+  }
 
   updateRequete(id: number, requete: Requete): Observable<Requete> {
     return this.http.put<Requete>(`${this.apiUrl}/updaterequete/${id}`, requete, this.getHttpOptions())

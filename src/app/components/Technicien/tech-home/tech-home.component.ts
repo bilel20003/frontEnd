@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { HttpErrorResponse } from '@angular/common/http';
+import { HttpErrorResponse, HttpClient } from '@angular/common/http';
 import { RequeteService } from 'src/app/services/requete.service';
 import { ObjetService } from 'src/app/services/objet.service';
 import { ServiceService } from 'src/app/services/service.service';
@@ -11,6 +11,24 @@ import { Servicee } from 'src/app/models/service.model';
 import { Ministere } from 'src/app/models/ministere.model';
 import { jwtDecode } from 'jwt-decode';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { forkJoin, of } from 'rxjs';
+import { catchError } from 'rxjs/operators';
+
+// Interface for Attachment
+interface Attachment {
+  id: number;
+  url: string;
+  nom_fichier: string;
+  typeFichier?: string;
+}
+
+// Interface for Attachment Preview
+interface AttachmentPreview {
+  nom_fichier: string;
+  url: string;
+  previewUrl?: string;
+  type: string;
+}
 
 @Component({
   selector: 'app-tech-home',
@@ -35,6 +53,7 @@ export class TechHomeComponent implements OnInit {
   noteRetour: string = '';
   isNightMode: boolean = false;
   isObjetsLoaded: boolean = false;
+  attachmentPreviews: AttachmentPreview[] = [];
 
   constructor(
     private router: Router,
@@ -42,7 +61,8 @@ export class TechHomeComponent implements OnInit {
     private objetService: ObjetService,
     private serviceService: ServiceService,
     private ministereService: MinistereService,
-    private snackBar: MatSnackBar
+    private snackBar: MatSnackBar,
+    private http: HttpClient
   ) {}
 
   ngOnInit(): void {
@@ -127,14 +147,16 @@ export class TechHomeComponent implements OnInit {
     this.requeteService.getRequetesByTechnicienId(technicienId).subscribe({
       next: (data) => {
         console.log('Reclamations received:', data);
-        this.reclamations = data;
+        this.reclamations = data.map(req => ({
+          ...req,
+          piecesJointes: req.piecesJointes?.map(pj => ({
+            ...pj,
+            url: pj.url || `http://localhost:8082/api/requetes/download/${pj.id}`,
+            nom_fichier: pj.nom_fichier || this.getFileNameFromUrl(pj.url || `http://localhost:8082/api/requetes/download/${pj.id}`)
+          })) || []
+        }));
         this.filteredReclamations = [...this.reclamations];
-        // Log IDs before sorting
-        console.log('IDs before sorting:', this.filteredReclamations.map(r => r.id));
-        // Sort by id in descending order (highest IDs at the top)
         this.filteredReclamations.sort((a, b) => b.id - a.id);
-        // Log IDs after sorting
-        console.log('IDs after sorting:', this.filteredReclamations.map(r => r.id));
         this.updatePagination();
       },
       error: (error: HttpErrorResponse) => {
@@ -160,23 +182,18 @@ export class TechHomeComponent implements OnInit {
         (reclamation.objet?.produit?.nom?.toLowerCase()?.includes(term) ?? false)
       );
     });
-    // Log IDs before sorting (after filtering)
-    console.log('IDs before sorting (after filtering):', this.filteredReclamations.map(r => r.id));
-    // Sort by id in descending order (highest IDs at the top)
     this.filteredReclamations.sort((a, b) => b.id - a.id);
-    // Log IDs after sorting (after filtering)
-    console.log('IDs after sorting (after filtering):', this.filteredReclamations.map(r => r.id));
     this.currentPage = 1;
     this.updatePagination();
   }
 
   sort(column: string): void {
     if (!this.sortDirection[column]) {
-      this.sortDirection = { [column]: true }; // Reset and set only the clicked column to descending
+      this.sortDirection = { [column]: true };
     } else {
       this.sortDirection[column] = !this.sortDirection[column];
     }
-    const direction = this.sortDirection[column] ? -1 : 1; // Default to descending (-1) for id, toggle for others
+    const direction = this.sortDirection[column] ? -1 : 1;
 
     this.filteredReclamations.sort((a, b) => {
       let valA: any = a[column as keyof Requete];
@@ -186,8 +203,8 @@ export class TechHomeComponent implements OnInit {
         valA = a.client?.name ?? 'N/A';
         valB = b.client?.name ?? 'N/A';
       } else if (column === 'objet') {
-        valA = this.objetMap[a.objet.id]?.name ?? 'N/A';
-        valB = this.objetMap[b.objet.id]?.name ?? 'N/A';
+        valA = a.objet?.name ?? 'N/A';
+        valB = b.objet?.name ?? 'N/A';
       } else if (column === 'date') {
         valA = a.date ? new Date(a.date).getTime() : 0;
         valB = b.date ? new Date(b.date).getTime() : 0;
@@ -319,15 +336,179 @@ export class TechHomeComponent implements OnInit {
   }
 
   openPopup(reclamation: Requete): void {
-    this.selectedReclamation = reclamation;
+    this.selectedReclamation = { ...reclamation };
     this.noteRetour = reclamation.noteRetour || '';
     this.popupOpen = true;
+    this.loadPieceJointesForRequete();
+    this.generateAttachmentPreviews();
+  }
+
+  private loadPieceJointesForRequete(): void {
+    if (!this.selectedReclamation || !this.selectedReclamation.piecesJointes || this.selectedReclamation.piecesJointes.length === 0) {
+      if (this.selectedReclamation) {
+        this.selectedReclamation = { ...this.selectedReclamation, piecesJointes: [] };
+      }
+      this.attachmentPreviews = [];
+      return;
+    }
+
+    const pieceJointeCalls = this.selectedReclamation.piecesJointes.map(pj =>
+      this.requeteService.getPieceJointeParId(pj.id!).pipe(
+        catchError(err => {
+          console.error(`Erreur lors du chargement de la pièce jointe ${pj.id}:`, err.message);
+          return of({ id: pj.id, nomFichier: `fichier_${pj.id}`, url: `http://localhost:8082/api/requetes/download/${pj.id}`, typeFichier: 'application/octet-stream' });
+        })
+      )
+    );
+
+    forkJoin(pieceJointeCalls).subscribe({
+      next: (results) => {
+        if (this.selectedReclamation) {
+          this.selectedReclamation = {
+            ...this.selectedReclamation,
+            piecesJointes: results.map((pj: any) => ({
+              id: pj.id,
+              nom_fichier: pj.nomFichier,
+              url: pj.url || `http://localhost:8082/api/requetes/download/${pj.id}`,
+              typeFichier: pj.typeFichier
+            }))
+          };
+          this.generateAttachmentPreviews();
+        }
+      },
+      error: (err) => {
+        console.error('Erreur globale lors du chargement des pièces jointes:', err.message);
+        if (this.selectedReclamation) {
+          this.selectedReclamation = { ...this.selectedReclamation, piecesJointes: [] };
+        }
+        this.attachmentPreviews = [];
+      }
+    });
+  }
+
+  private generateAttachmentPreviews(): void {
+    this.attachmentPreviews = [];
+    if (!this.selectedReclamation?.piecesJointes || this.selectedReclamation.piecesJointes.length === 0) {
+      console.warn('No pieces jointes found for requete ID:', this.selectedReclamation?.id);
+      return;
+    }
+
+    const imageTypes = ['image/jpeg', 'image/png'];
+    this.selectedReclamation.piecesJointes.forEach(attachment => {
+      const type = this.getFileType(attachment.nom_fichier || '');
+      const previewObj: AttachmentPreview = {
+        nom_fichier: attachment.nom_fichier || `fichier_${attachment.id}`,
+        url: attachment.url || `http://localhost:8082/api/requetes/download/${attachment.id}`,
+        previewUrl: '',
+        type
+      };
+
+      if (imageTypes.includes(type)) {
+        this.http.get(attachment.url || `http://localhost:8082/api/requetes/download/${attachment.id}`, { responseType: 'blob' }).subscribe({
+          next: (blob: Blob) => {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+              previewObj.previewUrl = e.target?.result as string;
+              this.attachmentPreviews = [...this.attachmentPreviews, previewObj];
+            };
+            reader.readAsDataURL(blob);
+          },
+          error: (err: HttpErrorResponse) => {
+            console.error('Erreur lors de la récupération de la pièce jointe pour prévisualisation:', err.message);
+            this.attachmentPreviews = [...this.attachmentPreviews, previewObj];
+          }
+        });
+      } else {
+        this.attachmentPreviews = [...this.attachmentPreviews, previewObj];
+      }
+    });
+  }
+
+  getFileIcon(nom_fichier: string): string {
+    const extension = nom_fichier.split('.').pop()?.toLowerCase() || '';
+    const iconMap: { [key: string]: string } = {
+      'jpg': 'far fa-image',
+      'jpeg': 'far fa-image',
+      'png': 'far fa-image',
+      'pdf': 'far fa-file-pdf',
+      'doc': 'far fa-file-word',
+      'docx': 'far fa-file-word'
+    };
+    return iconMap[extension] || 'far fa-file';
+  }
+
+  private getFileType(nom_fichier: string): string {
+    const extension = nom_fichier.split('.').pop()?.toLowerCase() || '';
+    const typeMap: { [key: string]: string } = {
+      'jpg': 'image/jpeg',
+      'jpeg': 'image/jpeg',
+      'png': 'image/png',
+      'pdf': 'application/pdf',
+      'doc': 'application/msword',
+      'docx': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+    };
+    return typeMap[extension] || 'application/octet-stream';
+  }
+
+  previewAttachment(attachment: { url: string; nom_fichier: string }): void {
+    if (!attachment.url) {
+      this.showError('URL de la pièce jointe non disponible.');
+      return;
+    }
+
+    this.http.get(attachment.url, { responseType: 'blob' }).subscribe({
+      next: (blob: Blob) => {
+        const objectUrl = window.URL.createObjectURL(blob);
+        const previewWindow = window.open(objectUrl, '_blank');
+        if (previewWindow) {
+          previewWindow.document.title = attachment.nom_fichier || this.getFileNameFromUrl(attachment.url);
+        } else {
+          this.showError('Impossible d’ouvrir la prévisualisation. Vérifiez les paramètres de votre navigateur.');
+        }
+        setTimeout(() => window.URL.revokeObjectURL(objectUrl), 1000);
+      },
+      error: (err: HttpErrorResponse) => {
+        console.error('Erreur lors de la prévisualisation de la pièce jointe:', err.message);
+        this.showError('Impossible de prévisualiser la pièce jointe.');
+      }
+    });
+  }
+
+  downloadAttachment(attachment: { url: string; nom_fichier: string }): void {
+    if (!attachment.url) {
+      this.showError('URL de la pièce jointe non disponible.');
+      return;
+    }
+
+    this.http.get(attachment.url, { responseType: 'blob' }).subscribe({
+      next: (blob: Blob) => {
+        const objectUrl = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = objectUrl;
+        link.download = attachment.nom_fichier || this.getFileNameFromUrl(attachment.url);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(objectUrl);
+      },
+      error: (err: HttpErrorResponse) => {
+        console.error('Erreur lors du téléchargement de la pièce jointe:', err.message);
+        this.showError('Impossible de télécharger la pièce jointe.');
+      }
+    });
+  }
+
+  private getFileNameFromUrl(url: string): string {
+    const urlParts = url.split('/');
+    const filePart = urlParts[urlParts.length - 1];
+    return filePart.includes('?') ? filePart.split('?')[0] : filePart || 'document';
   }
 
   closePopup(): void {
     this.popupOpen = false;
     this.selectedReclamation = null;
     this.noteRetour = '';
+    this.attachmentPreviews = [];
   }
 
   onOverlayClick(event: MouseEvent): void {
@@ -343,7 +524,6 @@ export class TechHomeComponent implements OnInit {
     }
 
     if (this.selectedReclamation) {
-      // Prevent state change if already TRAITEE or REFUSEE
       if (this.isReclamationProcessedOrRefused(this.selectedReclamation)) {
         this.showWarning('Cette requête est déjà traitée ou refusée.');
         return;
@@ -370,7 +550,6 @@ export class TechHomeComponent implements OnInit {
   refuserReclamation(id: number): void {
     const reclamation = this.reclamations.find(r => r.id === id);
     if (reclamation) {
-      // Prevent state change if already TRAITEE or REFUSEE
       if (this.isReclamationProcessedOrRefused(reclamation)) {
         this.showWarning('Cette requête est déjà traitée ou refusée.');
         return;

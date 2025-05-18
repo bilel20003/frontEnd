@@ -48,7 +48,7 @@
           <td>{{ reclamation.client.service?.ministere?.nomMinistere || 'N/A' }}</td>
           <td>{{ reclamation.client.service?.nomService || 'N/A' }}</td>
           <td>{{ reclamation.objet.produit?.nom || 'N/A' }}</td>
-          <td>{{ objetMap[reclamation.objet.id].name || 'N/A' }}</td>
+          <td>{{ reclamation.objet.name || 'N/A' }}</td>
           <td>
             <span class="badge" [ngClass]="getBadgeClass(reclamation.etat)">
               {{ formatDisplayText(reclamation.etat) }}
@@ -114,7 +114,7 @@
           </div>
           <div class="info-item">
             <span class="label">📌 Objet:</span>
-            <span class="value">{{ objetMap[selectedReclamation.objet.id].name || 'Non spécifié' }}</span>
+            <span class="value">{{ selectedReclamation.objet.name || 'Non spécifié' }}</span>
           </div>
           <div class="info-item">
             <span class="label">🛠 Produit:</span>
@@ -145,6 +145,25 @@
           <div class="info-item full-width">
             <span class="label">📝 Description:</span>
             <p class="value description">{{ selectedReclamation.description || 'Aucune description' }}</p>
+          </div>
+          <div class="info-item full-width">
+            <span class="label">📎 Pièces Jointes:</span>
+            <div class="attachments-container">
+              <div *ngIf="attachmentPreviews.length === 0" class="no-attachments">
+                Aucune pièce jointe.
+              </div>
+              <div class="attachment-preview-list" *ngIf="attachmentPreviews.length > 0">
+                <div *ngFor="let attachment of attachmentPreviews" class="attachment-preview-item">
+                  <div class="attachment-preview-bubble">
+                    <i [class]="getFileIcon(attachment.nom_fichier)"></i>
+                    <span>{{ attachment.nom_fichier }}</span>
+                    <img *ngIf="attachment.previewUrl" [src]="attachment.previewUrl" alt="{{ attachment.nom_fichier }}" class="attachment-preview-image">
+                  </div>
+                  <i class="fas fa-external-link-alt attachment-action" (click)="previewAttachment(attachment)" title="Ouvrir dans une nouvelle fenêtre"></i>
+                  <i class="fas fa-download attachment-action" (click)="downloadAttachment(attachment)" title="Télécharger"></i>
+                </div>
+              </div>
+            </div>
           </div>
           <div class="info-item full-width">
             <label for="noteRetour" class="label">📋 Note de Retour:</label>

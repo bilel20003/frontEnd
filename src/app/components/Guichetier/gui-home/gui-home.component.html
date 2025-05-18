@@ -168,21 +168,24 @@
             <label for="noteRetour" class="label">📋 Note de Retour:</label>
             <textarea id="noteRetour" [(ngModel)]="noteRetour"></textarea>
           </div>
-          <!-- Section des pièces jointes -->
+          <!-- Section des pièces jointes alignée avec l'interface client -->
           <div class="info-item full-width">
+            <span class="label">📎 Pièces Jointes:</span>
             <div class="attachments-container">
-              <h4>📎 Pièces Jointes:</h4>
-              <div *ngIf="selectedRequete.piecesJointes && selectedRequete.piecesJointes.length > 0">
-                <div class="attachment-item" *ngFor="let piece of selectedRequete.piecesJointes">
-                  <i class="fas fa-paperclip"></i>
-                  <a [href]="piece.url" target="_blank">{{ piece.nom_fichier }}</a>
-                  <i class="fas fa-external-link-alt attachment-action" (click)="openInNewTab(piece.url)" title="Ouvrir dans une nouvelle fenêtre"></i>
-                  <i class="fas fa-download attachment-action" (click)="downloadFile(piece.url, piece.nom_fichier)" title="Télécharger"></i>
+              <div *ngIf="attachmentPreviews.length === 0" class="no-attachments">
+                Aucune pièce jointe.
+              </div>
+              <div class="attachment-preview-list" *ngIf="attachmentPreviews.length > 0">
+                <div *ngFor="let attachment of attachmentPreviews" class="attachment-preview-item">
+                  <div class="attachment-preview-bubble">
+                    <i [class]="getFileIcon(attachment.nom_fichier)"></i>
+                    <span>{{ attachment.nom_fichier }}</span>
+                    <img *ngIf="attachment.previewUrl" [src]="attachment.previewUrl" alt="{{ attachment.nom_fichier }}" class="attachment-preview-image">
+                  </div>
+                  <i class="fas fa-external-link-alt attachment-action" (click)="previewAttachment(attachment)" title="Ouvrir dans une nouvelle fenêtre"></i>
+                  <i class="fas fa-download attachment-action" (click)="downloadAttachment(attachment)" title="Télécharger"></i>
                 </div>
               </div>
-              <p *ngIf="!selectedRequete.piecesJointes || selectedRequete.piecesJointes.length === 0">
-                Aucune pièce jointe disponible.
-              </p>
             </div>
           </div>
         </div>
