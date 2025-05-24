@@ -1,0 +1,187 @@
+<app-navbar-admin></app-navbar-admin>
+
+<div class="container">
+  <!-- Header with Title and Actions -->
+  <header class="d-flex justify-content-between align-items-center">
+    <h2>Gestion des Requêtes</h2>
+    <div class="header-actions">
+      <button class="mode-toggle" (click)="toggleMode()">
+        <i class="fas" [ngClass]="isNightMode ? 'fa-sun' : 'fa-moon'"></i>
+      </button>
+    </div>
+  </header>
+
+  <!-- Barre de recherche -->
+  <div class="search-bar-container">
+    <div class="search-bar">
+      <input type="text" placeholder="Rechercher une requête..." [(ngModel)]="searchTerm" (input)="filterRequetes()">
+      <button><i class="fas fa-search"></i></button>
+    </div>
+  </div>
+
+  <!-- Tableau -->
+  <div class="table-responsive">
+    <table class="table table-hover shadow-sm rounded">
+      <thead class="table-header">
+        <tr>
+          <th (click)="sort('id')" class="sortable" [ngClass]="{'sorted': sortDirection['id'] !== undefined}">ID</th>
+          <th (click)="sort('type')" class="sortable" [ngClass]="{'sorted': sortDirection['type'] !== undefined}">Type</th>
+          <th (click)="sort('objet')" class="sortable" [ngClass]="{'sorted': sortDirection['objet'] !== undefined}">Objet</th>
+          <th (click)="sort('description')" class="sortable" [ngClass]="{'sorted': sortDirection['description'] !== undefined}">Description</th>
+          <th (click)="sort('etat')" class="sortable" [ngClass]="{'sorted': sortDirection['etat'] !== undefined}">État</th>
+          <th (click)="sort('date')" class="sortable" [ngClass]="{'sorted': sortDirection['date'] !== undefined}">Date</th>
+          <th (click)="sort('client')" class="sortable" [ngClass]="{'sorted': sortDirection['client'] !== undefined}">Client</th>
+          <th (click)="sort('guichetier')" class="sortable" [ngClass]="{'sorted': sortDirection['guichetier'] !== undefined}">Guichetier</th>
+          <th (click)="sort('technicien')" class="sortable" [ngClass]="{'sorted': sortDirection['technicien'] !== undefined}">Technicien</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let requete of paginatedRequetes">
+          <td>{{ requete.id }}</td>
+          <td>
+            <span class="badge" [ngClass]="getTypeBadgeClass(requete.type)">
+              {{ formatDisplayText(requete.type) }}
+            </span>
+          </td>
+          <td>{{ requete.objet.name || 'N/A' }}</td>
+          <td class="description-cell">{{ requete.description }}</td>
+          <td>
+            <span class="badge" [ngClass]="getEtatBadgeClass(requete.etat)">
+              {{ formatDisplayText(requete.etat) }}
+            </span>
+          </td>
+          <td>{{ requete.date | date:'dd/MM/yyyy' }}</td>
+          <td>{{ requete.client.name }}</td>
+          <td>{{ requete.guichetier.name || 'N/A' }}</td> <!-- Correction : .name au lieu de ?.name -->
+          <td>{{ requete.technicien?.name || 'N/A' }}</td>
+          <td>
+            <button class="action-icon detail-icon" (click)="openDetailModal(requete)" data-tooltip="Consulter">
+              <i class="fas fa-eye"></i>
+            </button>
+            <button class="action-icon archive-icon" (click)="archiveRequete(requete.id)" data-tooltip="Archiver"
+                    [disabled]="requete.isArchived">
+              <i class="fas fa-archive"></i>
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- Pagination -->
+    <div class="pagination-container d-flex justify-content-between align-items-center">
+      <div class="page-options">
+        <select [(ngModel)]="itemsPerPage" (change)="onItemsPerPageChange($event)">
+          <option *ngFor="let option of [5, 10, 20]" [value]="option">{{ option }} lignes par page</option>
+        </select>
+      </div>
+      <div class="pagination">
+        <button class="btn btn-primary" (click)="goToPreviousPage()" [disabled]="currentPage === 1">
+          <i class="fas fa-chevron-left"></i>
+        </button>
+        <button *ngFor="let page of getPageNumbers()" class="btn btn-primary" [ngClass]="{'active': page === currentPage}" (click)="goToPage(page)">
+          {{ page }}
+        </button>
+        <button class="btn btn-primary" (click)="goToNextPage()" [disabled]="currentPage === totalPages">
+          <i class="fas fa-chevron-right"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modale pour les détails de la requête -->
+  <div *ngIf="isDetailModalOpen" class="modal-overlay" (click)="closeDetailModal()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3>📋 Détails de la Requête</h3>
+        <button class="close-btn" (click)="closeDetailModal()">✖</button>
+      </div>
+      <div class="modal-body">
+        <div class="info-grid" *ngIf="selectedRequete">
+          <div class="info-item">
+            <span class="label">📌 ID:</span>
+            <span class="value">{{ selectedRequete.id }}</span>
+          </div>
+          <div class="info-item">
+            <span class="label">📋 Type:</span>
+            <span class="value">
+              <span class="badge" [ngClass]="getTypeBadgeClass(selectedRequete.type)">
+                {{ formatDisplayText(selectedRequete.type) }}
+              </span>
+            </span>
+          </div>
+          <div class="info-item">
+            <span class="label">📦 Objet:</span>
+            <span class="value">{{ selectedRequete.objet.name || 'N/A' }}</span>
+          </div>
+          <div class="info-item">
+            <span class="label">📝 Description:</span>
+            <span class="value">{{ selectedRequete.description }}</span>
+          </div>
+          <div class="info-item">
+            <span class="label">⚡ État:</span>
+            <span class="value">
+              <span class="badge" [ngClass]="getEtatBadgeClass(selectedRequete.etat)">
+                {{ formatDisplayText(selectedRequete.etat) }}
+              </span>
+            </span>
+          </div>
+          <div class="info-item">
+            <span class="label">📅 Date:</span>
+            <span class="value">{{ selectedRequete.date | date:'dd/MM/yyyy' }}</span>
+          </div>
+          <div class="info-item">
+            <span class="label">📅 Date de Traitement:</span>
+            <span class="value">{{ selectedRequete.dateTraitement ? (selectedRequete.dateTraitement | date:'dd/MM/yyyy') : 'N/A' }}</span>
+          </div>
+          <div class="info-item">
+            <span class="label">📝 Note de Retour:</span>
+            <span class="value">{{ selectedRequete.noteRetour || 'N/A' }}</span>
+          </div>
+          <div class="info-item">
+            <span class="label">👤 Client:</span>
+            <span class="value">{{ selectedRequete.client.name }}</span>
+          </div>
+          <div class="info-item">
+            <span class="label">🏛️ Ministère du Client:</span>
+            <span class="value">{{ selectedRequete.client.service?.ministere?.nomMinistere || 'N/A' }}</span>
+          </div>
+          <div class="info-item">
+            <span class="label">🛠️ Service du Client:</span>
+            <span class="value">{{ selectedRequete.client.service?.nomService || 'N/A' }}</span>
+          </div>
+          <div class="info-item">
+            <span class="label">👤 Guichetier:</span>
+            <span class="value">{{ selectedRequete.guichetier.name || 'N/A' }}</span> <!-- Correction : .name au lieu de ?.name -->
+          </div>
+          <div class="info-item">
+            <span class="label">👤 Technicien:</span>
+            <span class="value">{{ selectedRequete.technicien?.name || 'N/A' }}</span>
+          </div>
+          <div class="info-item full-width">
+            <span class="label">📎 Pièces Jointes:</span>
+            <div class="attachments-container">
+              <div *ngIf="attachmentPreviews.length === 0" class="no-attachments">
+                Aucune pièce jointe.
+              </div>
+              <div class="attachment-preview-list" *ngIf="attachmentPreviews.length > 0">
+                <div *ngFor="let attachment of attachmentPreviews" class="attachment-preview-item">
+                  <div class="attachment-preview-bubble">
+                    <i [class]="getFileIcon(attachment.nom_fichier)"></i>
+                    <span>{{ attachment.nom_fichier }}</span>
+                    <img *ngIf="attachment.previewUrl" [src]="attachment.previewUrl" alt="{{ attachment.nom_fichier }}" class="attachment-preview-image">
+                  </div>
+                  <i class="fas fa-external-link-alt attachment-action" (click)="previewAttachment(attachment)" title="Ouvrir dans une nouvelle fenêtre"></i>
+                  <i class="fas fa-download attachment-action" (click)="downloadAttachment(attachment)" title="Télécharger"></i>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="form-actions">
+        <button type="button" class="btn btn-secondary" (click)="closeDetailModal()">Fermer</button>
+      </div>
+    </div>
+  </div>
+</div>

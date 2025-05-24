@@ -22,8 +22,8 @@ export class AiService {
       'Content-Type': 'application/json'
     });
 
-    // Prompt système pour des réponses concises en français
-    const systemPrompt = 'Fournis uniquement une description concise en français basée sur l’entrée suivante, sans répéter ni reformuler la demande :';
+    // Prompt système élargi pour gérer plusieurs types de tâches
+    const systemPrompt = 'Tu es une IA proactive et professionnelle. Ton rôle est d’aider l’utilisateur dans diverses tâches. Si l’utilisateur demande de générer un email, une réclamation, une demande de rendez-vous ou tout autre contenu, rédige-le directement de manière professionnelle et concise en français, en respectant les instructions spécifiques (ex. : inclure objet, salutation, corps, politesse pour un email). Si aucune génération n’est demandée, réponds de manière naturelle, chaleureuse et engageante, comme à un ami, en utilisant le contexte. Ne donne pas d’instructions ou d’explications inutiles, sauf si demandé.';
     const body = {
       model: 'mistral',
       prompt: `${systemPrompt}\n${prompt}`,
@@ -31,17 +31,17 @@ export class AiService {
       options: {
         temperature: 0.7,
         top_p: 0.9,
-        max_tokens: 200
+        max_tokens: 300
       }
     };
 
     console.log('Sending POST request to:', this.apiUrl, 'with body:', body);
 
     return this.http.post<OllamaResponse>(this.apiUrl, body, { headers }).pipe(
-      retry({ count: 2, delay: 1000 }), // Retry pour erreurs transitoires
+      retry({ count: 2, delay: 1000 }),
       map((response: OllamaResponse) => {
         console.log('Raw AI response:', response);
-        let text = response.response?.trim() || 'Erreur: aucune description générée.';
+        let text = response.response?.trim() || 'Erreur: aucune réponse générée.';
         text = this.cleanResponse(text, prompt);
         console.log('Cleaned AI response:', text);
         return text;
@@ -52,7 +52,6 @@ export class AiService {
 
   // Fonction pour nettoyer les réponses indésirables
   private cleanResponse(text: string, prompt: string): string {
-    // Expressions régulières pour supprimer les reformulations du prompt
     const unwantedPatterns = [
       /^Vous souhaitez[^.]*\./i,
       /^L'utilisateur a demandé[^.]*\./i,
@@ -65,7 +64,6 @@ export class AiService {
       cleanedText = cleanedText.replace(pattern, '').trim();
     }
 
-    // Supprimer les espaces multiples et retours à la ligne
     cleanedText = cleanedText.replace(/\s+/g, ' ').trim();
     return cleanedText;
   }

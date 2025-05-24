@@ -1,0 +1,44 @@
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+<!-- Bande en haut -->
+<div class="top-bar">
+    <span class="welcome-message">
+        Bienvenue <span class="name-highlight">{{ userInfo?.name || 'DACA' }}</span>, voici l'interface de gestion DACA
+    </span>
+    <span class="daca-badge">Directeure DACA</span>
+    <button class="icon-btn" (click)="toggleDropdown($event)" aria-label="Ouvrir le menu utilisateur">
+        <i class="fas fa-user-shield"></i>
+    </button>
+    <div class="dropdown-menu" [ngClass]="{ 'show': dropdownVisible }">
+        <ul>
+            <li>
+                <a routerLink="/profiledaca" aria-label="Voir le profil DACA">
+                    <i class="fas fa-user"></i> <span>Profil</span>
+                </a>
+            </li>
+            <li class="logout">
+                <a href="#" (click)="logout()" aria-label="Se déconnecter">
+                    <i class="fas fa-sign-out-alt"></i> <span>Déconnexion</span>
+                </a>
+            </li>
+        </ul>
+    </div>
+</div>
+
+<!-- Sidebar DACA -->
+<nav class="sidebar" [ngClass]="{ 'collapsed': sidebarCollapsed }">
+    <button class="sidebar-toggle" (click)="toggleSidebar()" aria-label="Basculer la barre latérale">
+        <i class="fas fa-bars"></i>
+    </button>
+    <div class="logo-container">
+        <img src="assets/img/logo.png" alt="Logo CNI" />
+    </div>
+    <ul class="nav-links">
+        <li>
+            <a routerLink="/dashboard" routerLinkActive="active" aria-label="Tableau de bord">
+                <i class="fas fa-chart-line"></i> <span>Dashboard</span>
+            </a>
+        </li>
+        
+    </ul>
+</nav>

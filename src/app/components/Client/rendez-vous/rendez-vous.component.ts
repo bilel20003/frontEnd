@@ -22,6 +22,7 @@ import '@fullcalendar/list';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Schedule } from 'src/app/models/schedule.model';
 import { FullCalendarComponent } from '@fullcalendar/angular';
+import { AiService } from 'src/app/services/ai.service';
 
 @Component({
   selector: 'app-rendez-vous',
@@ -34,6 +35,7 @@ export class RendezVousComponent implements OnInit {
   isNightMode: boolean = false;
   isModalOpen: boolean = false;
   isDetailsModalOpen: boolean = false;
+  isChatModalOpen: boolean = false;
   selectedRdv: Rdv | null = null;
   availableSlots: string[] = [];
   selectedSlot: string | null = null;
@@ -44,9 +46,10 @@ export class RendezVousComponent implements OnInit {
   schedules: { [key: string]: Schedule[] } = {};
   currentWeekStart: Date = new Date();
   daysInWeek: { date: Date; isAvailable: boolean }[] = [];
+  chatHistory: { text: string; isUser: boolean }[] = [];
+  chatInput: string = '';
 
   @ViewChild('calendar') calendarComponent!: FullCalendarComponent;
-  // Remove modalCalendarComponent since we're replacing it with custom week view
 
   calendarOptions: CalendarOptions = {
     plugins: [dayGridPlugin, timeGridPlugin, listPlugin, interactionPlugin],
@@ -82,7 +85,8 @@ export class RendezVousComponent implements OnInit {
     private scheduleService: ScheduleService,
     private objetService: ObjetService,
     private userInfoService: UserInfoService,
-    private snackBar: MatSnackBar
+    private snackBar: MatSnackBar,
+    private aiService: AiService
   ) {
     const tomorrow = new Date();
     tomorrow.setDate(tomorrow.getDate() + 1);
@@ -268,6 +272,7 @@ export class RendezVousComponent implements OnInit {
     this.availableSlots = [];
     this.selectedSlot = null;
     this.loadDaysInWeek();
+    this.chatHistory = [];
   }
 
   closeModal(): void {
@@ -275,6 +280,7 @@ export class RendezVousComponent implements OnInit {
     this.rendezvousForm.reset();
     this.availableSlots = [];
     this.selectedSlot = null;
+    this.chatHistory = [];
   }
 
   addRendezvous() {
@@ -477,5 +483,117 @@ export class RendezVousComponent implements OnInit {
   selectDay(date: Date) {
     this.rendezvousForm.patchValue({ dateSouhaitee: date.toISOString().split('T')[0] });
     this.loadAvailableSlots();
+  }
+
+  openChatModal(): void {
+    this.isChatModalOpen = true;
+    if (this.chatHistory.length === 0) {
+      this.chatHistory.push({ text: 'Bonjour ! Je suis votre assistant IA. Comment puis-je vous aider aujourd’hui ? 😊', isUser: false });
+    }
+  }
+
+  closeChatModal(): void {
+    this.isChatModalOpen = false;
+    this.chatInput = '';
+  }
+
+  sendChatMessage(): void {
+    if (!this.chatInput.trim()) return;
+
+    const userMessage = this.chatInput.trim().toLowerCase();
+    this.chatHistory.push({ text: userMessage, isUser: true });
+    this.chatInput = '';
+
+    // Détection des salutations ou présentations
+    if (userMessage.includes('bonjour') || userMessage.includes('salut')) {
+      this.chatHistory.push({ text: 'Bonjour ! Comment vas-tu ? 😊', isUser: false });
+      return;
+    }
+
+    if (userMessage.includes('je m\'appelle') || userMessage.includes('j\'ai')) {
+      const nameMatch = userMessage.match(/je m'appelle (\w+)/i);
+      const ageMatch = userMessage.match(/j'ai (\d+)/i);
+      let aiResponse = '';
+      if (nameMatch && ageMatch) {
+        const name = nameMatch[1];
+        const age = ageMatch[1];
+        aiResponse = `Enchanté ${name} ! Tu as ${age} ans, c’est super ! Comment puis-je t’aider aujourd’hui ?`;
+      } else if (nameMatch) {
+        const name = nameMatch[1];
+        aiResponse = `Ravi de te rencontrer ${name} ! Quel âge as-tu ?`;
+      } else if (ageMatch) {
+        const age = ageMatch[1];
+        aiResponse = `Super, tu as ${age} ans ! Comment je peux t’aider ?`;
+      }
+      if (aiResponse) {
+        this.chatHistory.push({ text: aiResponse, isUser: false });
+        return;
+      }
+    }
+
+    if (userMessage.includes('quel est mon nom') || userMessage.includes('mon âge')) {
+      const previousMessages = this.chatHistory.map(msg => msg.text).join(' ');
+      const nameMatch = previousMessages.match(/je m'appelle (\w+)/i);
+      const ageMatch = previousMessages.match(/j'ai (\d+)/i);
+      let aiResponse = '';
+      if (nameMatch && ageMatch) {
+        const name = nameMatch[1];
+        const age = ageMatch[1];
+        aiResponse = `Tu t’appelles ${name} et tu as ${age} ans !`;
+      } else if (nameMatch) {
+        const name = nameMatch[1];
+        aiResponse = `Tu t’appelles ${name}, mais je ne connais pas ton âge. Quel âge as-tu ?`;
+      } else if (ageMatch) {
+        const age = ageMatch[1];
+        aiResponse = `Tu as ${age} ans, mais je ne connais pas ton nom. Comment tu t’appelles ?`;
+      } else {
+        aiResponse = `Désolé, je ne me souviens pas de ton nom ni de ton âge. Peux-tu me le redire ?`;
+      }
+      this.chatHistory.push({ text: aiResponse, isUser: false });
+      return;
+    }
+
+    // Détection des demandes de génération
+    const context = this.chatHistory.map(msg => msg.text).join('\n');
+    let prompt = '';
+
+    // Génération d'un email
+    if (userMessage.includes('generer un mail') || userMessage.includes('generer une email')) {
+      prompt = `Construis un email professionnel en français basé sur le contexte suivant :\n${context}\nL'email doit inclure une ligne d'objet, une salutation, un corps de message clair et une formule de politesse. Retourne uniquement le contenu de l'email au format texte, sans explications ni instructions supplémentaires.`;
+    }
+    // Génération d'une réclamation
+    else if (userMessage.includes('generer une reclamation')) {
+      prompt = `Rédige une réclamation professionnelle en français basée sur le contexte suivant :\n${context}\nLa réclamation doit inclure une introduction expliquant le problème, les détails de la situation, et une demande de solution. Retourne uniquement le contenu de la réclamation au format texte, sans explications ni instructions supplémentaires.`;
+    }
+    // Génération d'une demande de rendez-vous
+    else if (userMessage.includes('generer une demande de rendez-vous') || userMessage.includes('generer une demande de rdv')) {
+      prompt = `Rédige une demande de rendez-vous professionnelle en français basée sur le contexte suivant :\n${context}\nLa demande doit inclure une introduction, une proposition de date ou une demande de disponibilités, et une formule de politesse. Retourne uniquement le contenu de la demande au format texte, sans explications ni instructions supplémentaires.`;
+    }
+    // Réponse conversationnelle par défaut
+    else {
+      prompt = `Conversation en cours :\n${context}\nIA: `;
+    }
+
+    this.aiService.generateDescription(prompt).subscribe({
+      next: (response) => {
+        this.chatHistory.push({ text: response, isUser: false });
+      },
+      error: (err) => {
+        this.showError('Erreur lors de la génération de la réponse IA.');
+        console.error('AI Error:', err);
+      }
+    });
+  }
+
+  sendFinalDescription(): void {
+    if (this.chatHistory.length > 0) {
+      const lastAIMessage = this.chatHistory[this.chatHistory.length - 1];
+      if (!lastAIMessage.isUser) {
+        this.rendezvousForm.patchValue({ description: lastAIMessage.text });
+        this.closeChatModal();
+      } else {
+        this.showError('Veuillez attendre une réponse de l\'IA avant d\'envoyer la description finale.');
+      }
+    }
   }
 }

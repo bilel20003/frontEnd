@@ -96,34 +96,43 @@ header h2 {
 
 /* Badges pour les rôles */
 .role-badge {
-  display: inline-block;
-  padding: 5px 10px;
-  border-radius: 12px;
-  font-size: 12px;
-  font-weight: 600;
-  text-transform: uppercase;
+    display: inline-block;
+    padding: 5px 10px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
 }
 
-.role-client {
-  background-color: #e6f3ff;
-  color: #007bff;
-}
-
-.role-guichetier {
-  background-color: #e6ffed;
-  color: #28a745;
-}
-
-.role-technicien {
-  background-color: #fff3e6;
-  color: #ff9900;
-}
-
+/* ADMIN - Violet */
 .role-admin {
-  background-color: #ffe6e6;
-  color: #dc3545;
+    background-color: #f3e6ff; /* Fond violet clair */
+    color: #6f42c1; /* Texte violet foncé */
 }
 
+/* CLIENT - Vert */
+.role-client {
+    background-color: #e6ffed; /* Fond vert clair */
+    color: #28a745; /* Texte vert foncé */
+}
+
+/* GUICHETIER - Bleu */
+.role-guichetier {
+    background-color: #e6f3ff; /* Fond bleu clair */
+    color: #007bff; /* Texte bleu foncé */
+}
+
+/* TECHNICIEN - Orange */
+.role-technicien {
+    background-color: #fff3e6; /* Fond orange clair */
+    color: #ff9900; /* Texte orange foncé */
+}
+
+/* DACA - Rose Magenta */
+.role-daca {
+    background-color: #ffe6f3; /* Fond rose clair */
+    color: #e83e8c; /* Texte rose magenta foncé */
+}
 /* Boutons */
 .btn {
   padding: 8px 16px;
@@ -498,7 +507,7 @@ body.night-mode {
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.6);
+  background: rgba(0, 0, 0, 0.8);
   display: flex;
   justify-content: center;
   align-items: center;

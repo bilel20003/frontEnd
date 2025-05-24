@@ -1,6 +1,12 @@
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 <div class="dashboard-layout">
-  <app-navbar-admin class="sidebar"></app-navbar-admin>
+  <!-- Conditionally render navbar based on user role -->
+  <ng-container *ngIf="userRole === 'ADMIN'; else dacaNavbar">
+    <app-navbar-admin class="sidebar"></app-navbar-admin>
+  </ng-container>
+  <ng-template #dacaNavbar>
+    <app-navbar-daca class="sidebar" *ngIf="userRole === 'DACA'"></app-navbar-daca>
+  </ng-template>
+
   <div class="main-content">
     <div class="container">
       <!-- Section: Aperçu Général -->
@@ -115,7 +121,7 @@
           </div>
         </div>
         <div class="chart-container" *ngIf="statistics">
-          <h3 class="text-lg font-semibold mb-4">Indicateurs de Qualité des Requêtes</h3>
+          <h3 class="text-lg font-semibold mb-4">Indicateurs de Qualité des Requêtes (KPI)</h3>
           <canvas #qualityChart baseChart [data]="pieChartData" [options]="qualityPieChartOptions" [type]="qualityPieChartType" *ngIf="hasNonZeroData(pieChartData); else noData"></canvas>
           <ng-template #noData>
             <p class="text-center text-gray-500">Aucune donnée disponible.</p>
@@ -126,22 +132,22 @@
           <div class="kpi-card" style="background: linear-gradient(135deg, #d1fae5, #ecfdf5); border-left: 4px solid #10b981;">
             <i class="fas fa-check-circle kpi-icon" style="background: linear-gradient(135deg, #10b981, #059669);"></i>
             <div class="kpi-content">
-              <p class="kpi-value" style="color: #059669;">{{ statistics.qualityMetrics.kpis.sameDay }}</p>
-              <p class="kpi-label">Même Jour ({{ statistics.qualityMetrics.percentages.sameDay }}%)</p>
+              <p class="kpi-value" style="color: #059669;">{{ statistics.qualityMetrics.percentages.sameDay }}%</p>
+              <p class="kpi-label">Même Jour ({{ statistics.qualityMetrics.kpis.sameDay }})</p>
             </div>
           </div>
           <div class="kpi-card" style="background: linear-gradient(135deg, #ffedd5, #fff7ed); border-left: 4px solid #f59e0b;">
             <i class="fas fa-clock kpi-icon" style="background: linear-gradient(135deg, #f59e0b, #d97706);"></i>
             <div class="kpi-content">
-              <p class="kpi-value" style="color: #d97706;">{{ statistics.qualityMetrics.kpis.withinTwoDays }}</p>
-              <p class="kpi-label">≤ 2 Jours ({{ statistics.qualityMetrics.percentages.withinTwoDays }}%)</p>
+              <p class="kpi-value" style="color: #d97706;">{{ statistics.qualityMetrics.percentages.withinTwoDays }}%</p>
+              <p class="kpi-label">≤ 2 Jours ({{ statistics.qualityMetrics.kpis.withinTwoDays }})</p>
             </div>
           </div>
           <div class="kpi-card" style="background: linear-gradient(135deg, #fee2e2, #fef2f2); border-left: 4px solid #ef4444;">
             <i class="fas fa-exclamation-triangle kpi-icon" style="background: linear-gradient(135deg, #ef4444, #dc2626);"></i>
             <div class="kpi-content">
-              <p class="kpi-value" style="color: #dc2626;">{{ statistics.qualityMetrics.kpis.moreThanTwoDays }}</p>
-              <p class="kpi-label">> 2 Jours ({{ statistics.qualityMetrics.percentages.moreThanTwoDays }}%)</p>
+              <p class="kpi-value" style="color: #dc2626;">{{ statistics.qualityMetrics.percentages.moreThanTwoDays }}%</p>
+              <p class="kpi-label">> 2 Jours ({{ statistics.qualityMetrics.kpis.moreThanTwoDays }})</p>
             </div>
           </div>
         </div>
@@ -164,50 +170,51 @@
         </div>
         <div class="chart-grid requests-charts" *ngIf="!loading; else loadingTemplate">
           <div class="chart-container">
-            <h3 class="text-lg font-semibold mb-4">Statut des Requêtes (Barres)</h3>
+            <h3 class="text-lg font-semibold mb-4">Statut des Requêtes</h3>
             <canvas #requestStatusBarChart baseChart [data]="barChartDataRequestStatus" [options]="barChartOptions" [type]="barChartType" *ngIf="hasNonZeroData(barChartDataRequestStatus); else noData"></canvas>
             <ng-template #noData>
               <p class="text-center text-gray-500">Aucune donnée disponible.</p>
             </ng-template>
           </div>
           <div class="chart-container">
-            <h3 class="text-lg font-semibold mb-4">Statut des Requêtes (Pie)</h3>
+            <h3 class="text-lg font-semibold mb-4">Statut des Requêtes %</h3>
             <canvas #requestStatusPieChart baseChart [data]="pieChartDataRequestStatus" [options]="pieChartOptions" [type]="pieChartType" *ngIf="hasNonZeroData(pieChartDataRequestStatus); else noData"></canvas>
             <ng-template #noData>
               <p class="text-center text-gray-500">Aucune donnée disponible.</p>
             </ng-template>
           </div>
           <div class="chart-container">
-            <h3 class="text-lg font-semibold mb-4">Requêtes par Ministère (Pie)</h3>
-            <canvas #ministereChart baseChart [data]="ministereChartData" [options]="pieChartOptions" [type]="pieChartType" *ngIf="hasNonZeroData(ministereChartData); else noData"></canvas>
+            <h3 class="text-lg font-semibold mb-4">Temps Moyen de Traitement par Statut</h3>
+            <canvas #avgProcessingTimeChart baseChart [data]="avgProcessingTimeChartData" [options]="avgProcessingTimeChartOptions" [type]="avgProcessingTimeChartType" *ngIf="hasNonZeroData(avgProcessingTimeChartData); else noData"></canvas>
             <ng-template #noData>
               <p class="text-center text-gray-500">Aucune donnée disponible.</p>
             </ng-template>
           </div>
+          
           <div class="chart-container">
-            <h3 class="text-lg font-semibold mb-4">Requêtes par Services (Pie)</h3>
+            <h3 class="text-lg font-semibold mb-4">Requêtes par Services</h3>
             <canvas #serviceChart baseChart [data]="serviceChartData" [options]="pieChartOptions" [type]="pieChartType" *ngIf="hasNonZeroData(serviceChartData); else noData"></canvas>
             <ng-template #noData>
               <p class="text-center text-gray-500">Aucune donnée disponible.</p>
             </ng-template>
           </div>
-          <div class="chart-container" style="grid-column: 1 / -1;">
-            <h3 class="text-lg font-semibold mb-4">Tendances des Requêtes (Ligne)</h3>
-            <canvas #lineChart baseChart [data]="lineChartData" [options]="lineChartOptions" [type]="lineChartType" *ngIf="hasNonZeroData(lineChartData); else noData"></canvas>
-            <ng-template #noData>
-              <p class="text-center text-gray-500">Aucune donnée disponible.</p>
-            </ng-template>
-          </div>
           <div class="chart-container">
-            <h3 class="text-lg font-semibold mb-4">Requêtes par Jour de la Semaine (Pie)</h3>
+            <h3 class="text-lg font-semibold mb-4">Requêtes par Jour de la Semaine</h3>
             <canvas #dayOfWeekChart baseChart [data]="dayOfWeekChartData" [options]="pieChartOptions" [type]="pieChartType" *ngIf="hasNonZeroData(dayOfWeekChartData); else noData"></canvas>
             <ng-template #noData>
               <p class="text-center text-gray-500">Aucune donnée disponible.</p>
             </ng-template>
           </div>
           <div class="chart-container">
-            <h3 class="text-lg font-semibold mb-4">Temps Moyen de Traitement par Statut (Ligne)</h3>
-            <canvas #avgProcessingTimeChart baseChart [data]="avgProcessingTimeChartData" [options]="avgProcessingTimeChartOptions" [type]="avgProcessingTimeChartType" *ngIf="hasNonZeroData(avgProcessingTimeChartData); else noData"></canvas>
+            <h3 class="text-lg font-semibold mb-4">Requêtes par Ministère</h3>
+            <canvas #ministereChart baseChart [data]="ministereChartData" [options]="pieChartOptions" [type]="pieChartType" *ngIf="hasNonZeroData(ministereChartData); else noData"></canvas>
+            <ng-template #noData>
+              <p class="text-center text-gray-500">Aucune donnée disponible.</p>
+            </ng-template>
+          </div>
+          <div class="chart-container" style="grid-column: 1 / -1;">
+            <h3 class="text-lg font-semibold mb-4">Tendances des Requêtes</h3>
+            <canvas #lineChart baseChart [data]="lineChartData" [options]="lineChartOptions" [type]="lineChartType" *ngIf="hasNonZeroData(lineChartData); else noData"></canvas>
             <ng-template #noData>
               <p class="text-center text-gray-500">Aucune donnée disponible.</p>
             </ng-template>
@@ -218,7 +225,7 @@
           <h3 class="table-subtitle">Comparaison Historique (par Mois)</h3>
           <div class="chart-filter">
             <label>Plage de Mois :</label>
-            <select [(ngModel)]="compareMonthRange" (change)="loadCompareData()">
+            <select [(ngModel)]="compareMonthRange" (ngModelChange)="loadCompareData()">
               <option value="3">Derniers 3 mois</option>
               <option value="6">Derniers 6 mois</option>
               <option value="12">Derniers 12 mois</option>
@@ -226,7 +233,7 @@
           </div>
           <div class="chart-grid">
             <div class="chart-container" style="grid-column: 1 / -1;">
-              <h3 class="text-lg font-semibold mb-4">Tendances Mensuelles des Métriques (Ligne)</h3>
+              <h3 class="text-lg font-semibold mb-4">Tendances Mensuelles des Métriques</h3>
               <canvas #monthlyTrendChart baseChart [data]="monthlyTrendChartData" [options]="monthlyTrendChartOptions" [type]="monthlyTrendChartType" *ngIf="hasNonZeroData(monthlyTrendChartData); else noData"></canvas>
               <ng-template #noData>
                 <p class="text-center text-gray-500">Aucune donnée disponible.</p>
@@ -290,16 +297,16 @@
             <input type="date" [(ngModel)]="userEndDate" (change)="loadUserData()">
           </div>
         </div>
-        <div class="chart-grid" *ngIf="!loading; else loadingTemplate">
+        <div class="chart-grid user-charts" *ngIf="!loading; else loadingTemplate">
           <div class="chart-container">
-            <h3 class="text-lg font-semibold mb-4">Répartition des Rôles (Pie)</h3>
+            <h3 class="text-lg font-semibold mb-4">Répartition des Rôles</h3>
             <canvas #userRoleChart baseChart [data]="userRoleChartData" [options]="pieChartOptions" [type]="pieChartType" *ngIf="hasNonZeroData(userRoleChartData); else noData"></canvas>
             <ng-template #noData>
               <p class="text-center text-gray-500">Aucune donnée disponible.</p>
             </ng-template>
           </div>
           <div class="chart-container">
-            <h3 class="text-lg font-semibold mb-4">Clients par Ministère (Pie)</h3>
+            <h3 class="text-lg font-semibold mb-4">Clients par Ministère</h3>
             <canvas #clientByMinistereChart baseChart [data]="clientByMinistereChartData" [options]="pieChartOptions" [type]="pieChartType" *ngIf="hasNonZeroData(clientByMinistereChartData); else noData"></canvas>
             <ng-template #noData>
               <p class="text-center text-gray-500">Aucune donnée disponible.</p>
@@ -360,16 +367,16 @@
             <input type="date" [(ngModel)]="rdvEndDate" (change)="loadRdvData()">
           </div>
         </div>
-        <div class="chart-grid" *ngIf="!loading; else loadingTemplate">
+        <div class="chart-grid rdv-charts" *ngIf="!loading; else loadingTemplate">
           <div class="chart-container">
-            <h3 class="text-lg font-semibold mb-4">Statut des RDVs (Barres)</h3>
+            <h3 class="text-lg font-semibold mb-4">Statut des RDVs</h3>
             <canvas #rdvStatusChart baseChart [data]="rdvStatusChartData" [options]="barChartOptions" [type]="barChartType" *ngIf="hasNonZeroData(rdvStatusChartData); else noData"></canvas>
             <ng-template #noData>
               <p class="text-center text-gray-500">Aucune donnée disponible.</p>
             </ng-template>
           </div>
           <div class="chart-container">
-            <h3 class="text-lg font-semibold mb-4">Charge de Travail des Techniciens (Barres)</h3>
+            <h3 class="text-lg font-semibold mb-4">Charge de Travail des Techniciens</h3>
             <canvas #technicianWorkloadChart baseChart [data]="technicianWorkloadChartData" [options]="barChartOptions" [type]="barChartType" *ngIf="hasNonZeroData(technicianWorkloadChartData); else noData"></canvas>
             <ng-template #noData>
               <p class="text-center text-gray-500">Aucune donnée disponible.</p>
@@ -434,14 +441,14 @@
         </div>
         <div class="chart-grid" *ngIf="!loading; else loadingTemplate">
           <div class="chart-container">
-            <h3 class="text-lg font-semibold mb-4">Top Produits (Pie)</h3>
+            <h3 class="text-lg font-semibold mb-4">Top Produits</h3>
             <canvas #productChart baseChart [data]="productChartData" [options]="pieChartOptions" [type]="pieChartType" *ngIf="hasNonZeroData(productChartData); else noData"></canvas>
             <ng-template #noData>
               <p class="text-center text-gray-500">Aucune donnée disponible.</p>
             </ng-template>
           </div>
           <div class="chart-container">
-            <h3 class="text-lg font-semibold mb-4">Tendances des Produits (Barres)</h3>
+            <h3 class="text-lg font-semibold mb-4">Tendances des Produits</h3>
             <canvas #productTrendChart baseChart [data]="productTrendChartData" [options]="barChartOptions" [type]="barChartType" *ngIf="hasNonZeroData(productTrendChartData); else noData"></canvas>
             <ng-template #noData>
               <p class="text-center text-gray-500">Aucune donnée disponible.</p>
@@ -461,7 +468,7 @@
             <thead class="table-header">
               <tr>
                 <th>ID</th>
-                <th>Nom</th>
+                <th>Nom du Produit</th>
                 <th>Nombre de Requêtes</th>
               </tr>
             </thead>

@@ -49,6 +49,9 @@ import { AuthInterceptor } from 'src/auth.interceptor';
 import { DashboardComponent } from './components/Admin/dashboard/dashboard.component';
 import { registerLocaleData } from '@angular/common';
 import localeFr from '@angular/common/locales/fr';
+import { RequetesAdminComponent } from './components/Admin/requetes-admin/requetes-admin.component';
+import { NavbarDacaComponent } from './components/Daca/nav-daca/nav-daca.component';
+import { ProfileDacaComponent } from './components/Daca/profile-daca/profile-daca.component';
 
 registerLocaleData(localeFr);
 
@@ -79,7 +82,10 @@ registerLocaleData(localeFr);
     TechRendezVousComponent,
     ArchiveComponent,
     ResetPasswordComponent,
-    DashboardComponent
+    DashboardComponent,
+    RequetesAdminComponent,
+    NavbarDacaComponent,
+    ProfileDacaComponent
   ],
   imports: [
     BrowserModule,

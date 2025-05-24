@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { FormGroup, FormControl, Validators } from '@angular/forms';
 import { AuthService } from 'src/app/services/auth.service';
 import { Router } from '@angular/router';
-import { MatSnackBar } from '@angular/material/snack-bar'; // Importer MatSnackBar
+import { MatSnackBar } from '@angular/material/snack-bar';
 
 @Component({
   selector: 'app-login',
@@ -21,7 +21,7 @@ export class LoginComponent implements OnInit {
   constructor(
     private authService: AuthService,
     private router: Router,
-    private snackBar: MatSnackBar // Injecter MatSnackBar
+    private snackBar: MatSnackBar
   ) {
     this.loginForm = new FormGroup({
       email: new FormControl('', [Validators.required, Validators.email]),
@@ -35,9 +35,12 @@ export class LoginComponent implements OnInit {
 
   ngOnInit(): void {
     const token = localStorage.getItem('token');
-    localStorage.clear();
+    // Éviter de vider tout le localStorage
     if (token) {
-      localStorage.setItem('token', token);
+      const role = this.authService.getRole();
+      if (role) {
+        this.redirectUser(role);
+      }
     }
   }
 
@@ -49,34 +52,53 @@ export class LoginComponent implements OnInit {
     }
 
     this.loading = true;
-    this.authService.login(this.loginForm.get('email')?.value, this.loginForm.get('password')?.value)
-      .subscribe({
-        next: (response: any) => {
-          if (response.token) {
-            const role = this.authService.getRole();
-            if (role === 'ADMIN') {
-              this.router.navigate(['/dashboard']);
-            } else if (role === 'CLIENT') {
-              this.router.navigate(['/home']);
-            } else if (role === 'GUICHETIER') {
-              this.router.navigate(['/gui-home']);
-            } else if (role === 'TECHNICIEN') {
-              this.router.navigate(['/tech-home']);
-            } else {
-              this.showError('Rôle non reconnu');
-            }
-          } else {
-            this.showError('Email ou mot de passe incorrect');
+    const email = this.loginForm.get('email')?.value;
+    const password = this.loginForm.get('password')?.value;
+
+    this.authService.login(email, password).subscribe({
+      next: (response: any) => {
+        if (response.token) {
+          const role = this.authService.getRole();
+          if (!role) {
+            this.showError('Rôle non défini dans le token. Veuillez contacter l\'administrateur.');
+            this.loading = false;
+            return;
           }
-          this.loading = false;
-        },
-        error: (error: any) => {
-          const message = error.error?.message || 'Erreur lors de la connexion';
-          this.showError(message);
-          this.loading = false;
+          this.redirectUser(role);
+        } else {
+          this.showError('Email ou mot de passe incorrect');
         }
-      });
+        this.loading = false;
+      },
+      error: (error: any) => {
+        const message = error.error?.message || 'Erreur lors de la connexion';
+        this.showError(message);
+        this.loading = false;
+      }
+    });
   }
+
+  private redirectUser(role: string): void {
+  const roleUpper = role.toUpperCase();
+  switch (roleUpper) {
+    case 'ADMIN':
+    case 'DACA':
+      this.router.navigate(['/dashboard']);
+      break;
+    case 'CLIENT':
+      this.router.navigate(['/home']);
+      break;
+    case 'GUICHETIER':
+      this.router.navigate(['/gui-home']);
+      break;
+    case 'TECHNICIEN':
+      this.router.navigate(['/tech-home']);
+      break;
+    default:
+      this.showError(`Rôle non reconnu : ${role}. Veuillez contacter l'administrateur.`);
+      break;
+  }
+}
 
   openForgotPasswordModal(): void {
     this.forgotPasswordForm.reset();
@@ -99,25 +121,23 @@ export class LoginComponent implements OnInit {
 
     this.forgotLoading = true;
     const email = this.forgotPasswordForm.get('email')?.value;
-    this.authService.forgotPassword(email)
-      .subscribe({
-        next: (response: any) => {
-          this.showSuccess('Un email de réinitialisation a été envoyé à votre adresse.');
-          this.closeForgotPasswordModal();
-          this.forgotLoading = false;
-        },
-        error: (error: any) => {
-          const message = error.error?.message || 'Erreur lors de l\'envoi de l\'email de réinitialisation';
-          this.showError(message);
-          this.forgotLoading = false;
-        }
-      });
+    this.authService.forgotPassword(email).subscribe({
+      next: (response: any) => {
+        this.showSuccess('Un email de réinitialisation a été envoyé à votre adresse.');
+        this.closeForgotPasswordModal();
+        this.forgotLoading = false;
+      },
+      error: (error: any) => {
+        const message = error.error?.message || 'Erreur lors de l\'envoi de l\'email de réinitialisation';
+        this.showError(message);
+        this.forgotLoading = false;
+      }
+    });
   }
 
-  // Méthodes pour afficher les notifications
   private showSuccess(message: string): void {
     this.snackBar.open(message, '', {
-      duration: 10000, // 10 secondes
+      duration: 10000,
       panelClass: ['custom-success-snackbar'],
       verticalPosition: 'top',
       horizontalPosition: 'center'
@@ -126,7 +146,7 @@ export class LoginComponent implements OnInit {
 
   private showError(message: string): void {
     this.snackBar.open(message, '', {
-      duration: 60000, // 10 secondes
+      duration: 10000, // Réduit à 10 secondes pour une meilleure UX
       panelClass: ['custom-error-snackbar'],
       verticalPosition: 'top',
       horizontalPosition: 'center'

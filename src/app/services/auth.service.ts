@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Observable, BehaviorSubject } from 'rxjs';
-import { tap } from 'rxjs/operators';
+import { HttpClient, HttpErrorResponse, HttpHeaders } from '@angular/common/http';
+import { Observable, BehaviorSubject, throwError } from 'rxjs';
+import { catchError, tap } from 'rxjs/operators';
 import { jwtDecode } from 'jwt-decode';
 import { Router } from '@angular/router';
 
@@ -16,13 +16,22 @@ export class AuthService {
   login(email: string, password: string): Observable<any> {
     const headers = new HttpHeaders({ 'Content-Type': 'application/json' });
     return this.http.post(`${this.apiUrl}/login`, { email: email.toLowerCase(), password }, { headers })
-      .pipe(tap((response: any) => {
-        if (response.token) {
-          localStorage.setItem('token', response.token);
-          const decodedUser = jwtDecode(response.token);
-        }
-      }));
-  }
+      .pipe(
+        tap((response: any) => {
+          if (response.token) {
+            localStorage.setItem('token', response.token);
+            const decoded: any = jwtDecode(response.token);
+            if (!decoded.role) {
+              console.warn('Rôle non trouvé dans le token', decoded);
+            }
+          }
+        }),
+        catchError((error: HttpErrorResponse) => {
+          console.error('Erreur lors de la connexion', error);
+          return throwError(() => new Error(error.error?.message || 'Erreur inconnue'));
+        })
+      );
+}
 
   forgotPassword(email: string): Observable<any> {
     const headers = new HttpHeaders({

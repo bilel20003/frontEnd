@@ -23,4 +23,5 @@ export interface Requete {
   guichetier: { id: number; name?: string };
   technicien: { id: number; name?: string } | null;
   piecesJointes?: { id?: number; url: string; nom_fichier: string; typeFichier?: string }[];
+  isArchived?: boolean;
 }

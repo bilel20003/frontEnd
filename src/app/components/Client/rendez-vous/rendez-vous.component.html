@@ -85,6 +85,9 @@
                 La description est requise (minimum 10 caractères)
               </div>
             </div>
+            <div class="info-item full-width">
+              <button class="btn btn-secondary" (click)="openChatModal()">Ouvrir la conversation IA</button>
+            </div>
           </div>
         </div>
         <div class="form-actions">
@@ -147,6 +150,32 @@
       </div>
       <div class="form-actions">
         <button class="btn btn-secondary" (click)="closeDetailsModal()">Fermer</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal for AI Chat -->
+  <div *ngIf="isChatModalOpen" class="modal-overlay" (click)="closeChatModal()">
+    <div class="modal-content chat-modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3>💬 Conversation avec l'IA</h3>
+        <button class="close-btn" (click)="closeChatModal()">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="chat-messages">
+          <div *ngFor="let message of chatHistory" class="chat-message" [ngClass]="{'user': message.isUser, 'ai': !message.isUser}">
+            <i *ngIf="message.isUser" class="fas fa-user" aria-hidden="true"></i>
+            <i *ngIf="!message.isUser" class="fas fa-robot" aria-hidden="true"></i>
+            {{ message.text }}
+          </div>
+        </div>
+        <div class="chat-input">
+          <textarea [(ngModel)]="chatInput" (keyup.enter)="sendChatMessage()" class="custom-textarea chat-textarea" placeholder="Tapez votre message..."></textarea>
+          <button class="btn btn-primary chat-btn" (click)="sendChatMessage()">Envoyer</button>
+          <button class="btn btn-secondary chat-btn" (click)="sendFinalDescription()">Envoyer description finale</button>
+        </div>
       </div>
     </div>
   </div>

@@ -163,86 +163,75 @@
 
     <!-- Popup for Creating New Request -->
     <div *ngIf="isCreatePopupOpen" class="modal-overlay" (click)="closeCreatePopup()">
-      <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-content chat-modal-content" (click)="$event.stopPropagation()">
         <div class="modal-header">
-          <h3>Nouvelle Requête</h3>
+          <h3>💬 Nouvelle Requête avec l'IA</h3>
           <button class="close-btn" (click)="closeCreatePopup()">
             <i class="fas fa-times"></i>
           </button>
         </div>
         <form #newRequeteForm="ngForm" (ngSubmit)="submitNewRequete()">
           <div class="modal-body">
-            <div class="form-group">
-              <label for="type">Type de requête</label>
-              <select id="type" name="type" [(ngModel)]="newRequete.type" (change)="loadPopupObjets()" required #type="ngModel">
-                <option value="" disabled selected>Sélectionnez un type</option>
-                <option value="DEMANDE_DE_TRAVAUX">Demande de travaux</option>
-                <option value="RECLAMATION">Réclamation</option>
-              </select>
-              <div *ngIf="type.invalid && (type.dirty || type.touched)" class="error-message">
-                <div *ngIf="type.errors?.['required']">Le type de requête est requis.</div>
-              </div>
-            </div>
-            <div class="form-group">
-              <label for="objet">Objet</label>
-              <select id="objet" name="objet" [ngModel]="newRequete.objet.id" (ngModelChange)="newRequete.objet.id = +$event" required #objet="ngModel" [disabled]="!newRequete.type || isLoadingPopupObjets || popupObjets.length === 0">
-                <option value="0" disabled selected>Sélectionnez un objet</option>
-                <option *ngFor="let obj of popupObjets" [value]="obj.id">
-                  {{ obj.name }}
-                </option>
-              </select>
-              <div *ngIf="isLoadingPopupObjets" class="loading-message">
-                Chargement des objets...
-              </div>
-              <div *ngIf="newRequete.type && !isLoadingPopupObjets && popupObjets.length === 0" class="error-message">
-                Aucun objet disponible pour ce type de requête.
-              </div>
-              <div *ngIf="objet.invalid && (objet.dirty || objet.touched)" class="error-message">
-                <div *ngIf="objet.errors?.['required']">L'objet est requis.</div>
-              </div>
-            </div>
-            <div class="form-group">
-              <label for="description">Description</label>
-              <textarea id="description" name="description" [(ngModel)]="newRequete.description" required #description="ngModel" minlength="10"></textarea>
-              <div *ngIf="description.invalid && (description.dirty || description.touched)" class="error-message">
-                <div *ngIf="description.errors?.['required']">La description est requise.</div>
-                <div *ngIf="description.errors?.['minlength']">La description doit contenir au moins 10 caractères.</div>
-              </div>
-            </div>
-            <div class="form-group">
-              <label for="files">Pièces jointes (max 10 Mo par fichier)</label>
-              <input type="file" id="files" name="files" multiple (change)="onFileChange($event)" #fileInput accept=".pdf,.jpg,.jpeg,.png,.doc,.docx" />
-              <div *ngIf="fileError" class="error-message">{{ fileError }}</div>
-              <div class="attachment-preview-list" *ngIf="filePreviews.length > 0">
-                <div *ngFor="let preview of filePreviews; let i = index" class="attachment-preview-item">
-                  <div class="attachment-preview-bubble">
-                    <i [class]="getFileIcon(preview.nom_fichier)"></i>
-                    <span>{{ preview.nom_fichier }}</span>
-                    <img *ngIf="preview.previewUrl" [src]="preview.previewUrl" alt="{{ preview.nom_fichier }}" class="attachment-preview-image">
-                  </div>
-                  <button type="button" class="remove-attachment-btn" (click)="removeFile(i)">
-                    <i class="fas fa-times"></i>
-                  </button>
+            <div class="info-grid">
+              <div class="info-item">
+                <span class="label">📄 Type de requête</span>
+                <select id="type" name="type" [(ngModel)]="newRequete.type" (change)="loadPopupObjets()" required #type="ngModel">
+                  <option value="" disabled selected>Sélectionnez un type</option>
+                  <option value="DEMANDE_DE_TRAVAUX">Demande de travaux</option>
+                  <option value="RECLAMATION">Réclamation</option>
+                </select>
+                <div *ngIf="type.invalid && (type.dirty || type.touched)" class="error-message">
+                  <div *ngIf="type.errors?.['required']">Le type de requête est requis.</div>
                 </div>
               </div>
-              <div *ngIf="filePreviews.length === 0" class="no-attachments">
-                Aucune pièce jointe sélectionnée.
+              <div class="info-item">
+                <span class="label">⚙️ Objet</span>
+                <select id="objet" name="objet" [ngModel]="newRequete.objet.id" (ngModelChange)="newRequete.objet.id = +$event" required #objet="ngModel" [disabled]="!newRequete.type || isLoadingPopupObjets || popupObjets.length === 0">
+                  <option value="0" disabled selected>Sélectionnez un objet</option>
+                  <option *ngFor="let obj of popupObjets" [value]="obj.id">
+                    {{ obj.name }}
+                  </option>
+                </select>
+                <div *ngIf="isLoadingPopupObjets" class="loading-message">
+                  Chargement des objets...
+                </div>
+                <div *ngIf="newRequete.type && !isLoadingPopupObjets && popupObjets.length === 0" class="error-message">
+                  Aucun objet disponible pour ce type de requête.
+                </div>
+                <div *ngIf="objet.invalid && (objet.dirty || objet.touched)" class="error-message">
+                  <div *ngIf="objet.errors?.['required']">L'objet est requis.</div>
+                </div>
               </div>
-            </div>
-            <div class="form-group">
-              <button type="button" class="btn btn-primary" (click)="toggleAIPrompt()">
-                Générer une description avec l’IA
-              </button>
-            </div>
-            <div *ngIf="isAIPromptVisible" class="form-group ai-prompt-group">
-              <label for="aiPrompt">Décrivez ce que vous voulez générer</label>
-              <textarea id="aiPrompt" name="aiPrompt" [(ngModel)]="aiPrompt" placeholder="Ex: Décrivez un problème avec un ordinateur portable qui ne s'allume pas"></textarea>
-              <div class="ai-actions">
-                <button type="button" class="btn btn-primary" (click)="generateAIDescription()" [disabled]="isAILoading">
-                  <i *ngIf="isAILoading" class="fas fa-spinner fa-spin"></i>
-                  Générer
-                </button>
-                <button type="button" class="btn btn-secondary" (click)="toggleAIPrompt()">Annuler</button>
+              <div class="info-item full-width">
+                <span class="label">📝 Description</span>
+                <textarea id="description" name="description" [(ngModel)]="newRequete.description" required #description="ngModel" minlength="10" class="custom-textarea"></textarea>
+                <div *ngIf="description.invalid && (description.dirty || description.touched)" class="error-message">
+                  <div *ngIf="description.errors?.['required']">La description est requise.</div>
+                  <div *ngIf="description.errors?.['minlength']">La description doit contenir au moins 10 caractères.</div>
+                </div>
+              </div>
+              <div class="info-item full-width">
+                <button class="btn btn-secondary" (click)="openChatModal()">Ouvrir la conversation IA</button>
+              </div>
+              <div class="info-item full-width">
+                <span class="label">📎 Pièces jointes (max 10 Mo par fichier)</span>
+                <input type="file" id="files" name="files" multiple (change)="onFileChange($event)" #fileInput accept=".pdf,.jpg,.jpeg,.png,.doc,.docx" />
+                <div *ngIf="fileError" class="error-message">{{ fileError }}</div>
+                <div class="attachment-preview-list" *ngIf="filePreviews.length > 0">
+                  <div *ngFor="let preview of filePreviews; let i = index" class="attachment-preview-item">
+                    <div class="attachment-preview-bubble">
+                      <i [class]="getFileIcon(preview.nom_fichier)"></i>
+                      <span>{{ preview.nom_fichier }}</span>
+                      <img *ngIf="preview.previewUrl" [src]="preview.previewUrl" alt="{{ preview.nom_fichier }}" class="attachment-preview-image">
+                    </div>
+                    <button type="button" class="remove-attachment-btn" (click)="removeFile(i)">
+                      <i class="fas fa-times"></i>
+                    </button>
+                  </div>
+                </div>
+                <div *ngIf="filePreviews.length === 0" class="no-attachments">
+                  Aucune pièce jointe sélectionnée.
+                </div>
               </div>
             </div>
           </div>
@@ -251,6 +240,32 @@
             <button type="button" class="btn btn-secondary" (click)="closeCreatePopup()">Annuler</button>
           </div>
         </form>
+      </div>
+    </div>
+
+    <!-- Modal for AI Chat -->
+    <div *ngIf="isChatModalOpen" class="modal-overlay" (click)="closeChatModal()">
+      <div class="modal-content chat-modal-content" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h3>💬 Conversation avec l'IA</h3>
+          <button class="close-btn" (click)="closeChatModal()">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="chat-messages">
+            <div *ngFor="let message of chatHistory" class="chat-message" [ngClass]="{'user': message.isUser, 'ai': !message.isUser}">
+              <i *ngIf="message.isUser" class="fas fa-user" aria-hidden="true"></i>
+              <i *ngIf="!message.isUser" class="fas fa-robot" aria-hidden="true"></i>
+              {{ message.text }}
+            </div>
+          </div>
+          <div class="chat-input">
+            <textarea [(ngModel)]="chatInput" (keyup.enter)="sendChatMessage()" class="custom-textarea chat-textarea" placeholder="Tapez votre message..."></textarea>
+            <button class="btn btn-primary chat-btn" (click)="sendChatMessage()">Envoyer</button>
+            <button class="btn btn-secondary chat-btn" (click)="sendFinalDescription()">Envoyer description finale</button>
+          </div>
+        </div>
       </div>
     </div>
   </div>

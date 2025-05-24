@@ -326,3 +326,49 @@
   .night-mode .btn-success:hover {
     background-color: #27ae60;
   }
+  .action-icon {
+  background: transparent;
+  border: 1px solid;
+  border-radius: 6px;
+  font-size: 1.1rem;
+  cursor: pointer;
+  padding: 6px;
+  margin: 0 6px;
+  position: relative;
+  transition: background 0.3s, border-color 0.3s, transform 0.2s;
+  width: 30px;
+  height: 30px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.unarchive-icon {
+  color: #28a745; /* Vert pour le désarchivage */
+  border-color: #28a745;
+}
+
+.unarchive-icon:hover {
+  background: linear-gradient(135deg, #28a745, #218838); /* Dégradé vert au survol */
+  color: white;
+  border-color: transparent;
+  transform: scale(1.1);
+}
+
+.action-icon:hover::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #333;
+  color: white;
+  padding: 5px 10px;
+  border-radius: 4px;
+  font-size: 12px;
+  white-space: nowrap;
+  z-index: 10;
+  opacity: 0;
+  pointer-events: none;
+  animation: fadeInTooltip 0.2s ease forwards;
+  margin-bottom: 8px;
+}

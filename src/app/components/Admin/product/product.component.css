@@ -6,6 +6,7 @@
   padding-top: 80px;
   min-height: calc(100vh - 70px);
   box-sizing: border-box;
+  transition: background-color 0.3s ease, color 0.3s ease; /* Add transition */
 }
 
 /* Header */
@@ -16,6 +17,7 @@ header h2 {
   text-transform: uppercase;
   margin-left: 250px;
   padding: 20px 0;
+  transition: color 0.3s ease; /* Add transition */
 }
 
 /* Barre de recherche */
@@ -25,6 +27,7 @@ header h2 {
   margin-bottom: 15px;
   background-color: white;
   padding: 10px 0;
+  transition: background-color 0.3s ease; /* Add transition */
 }
 
 .search-bar {
@@ -35,6 +38,7 @@ header h2 {
   padding: 8px 15px;
   box-shadow: 0 2px 4px rgba(24, 23, 23, 0.15);
   width: 350px;
+  transition: background-color 0.3s ease, box-shadow 0.3s ease; /* Add transition */
 }
 
 .search-bar input {
@@ -43,6 +47,8 @@ header h2 {
   outline: none;
   padding: 8px 12px;
   font-size: 14px;
+  background-color: transparent; /* Ensure input inherits parent background */
+  transition: color 0.3s ease; /* Add transition */
 }
 
 .search-bar button {
@@ -51,7 +57,7 @@ header h2 {
   border-radius: 50%;
   padding: 8px;
   cursor: pointer;
-  transition: 0.3s;
+  transition: background-color 0.3s ease; /* Already present */
 }
 
 .search-bar button:hover {
@@ -66,6 +72,7 @@ header h2 {
   overflow: hidden;
   background-color: white;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  transition: background-color 0.3s ease, box-shadow 0.3s ease; /* Add transition */
 }
 
 .table {
@@ -78,12 +85,14 @@ header h2 {
 .table td {
   padding: 12px 15px;
   text-align: left;
+  transition: color 0.3s ease; /* Add transition for text */
 }
 
 .table-header th {
   background: linear-gradient(135deg, #1e3c72, #2a5298);
   color: white;
   cursor: pointer;
+  transition: background 0.3s ease; /* Add transition */
 }
 
 .table-header th.sortable:hover {
@@ -92,6 +101,7 @@ header h2 {
 
 .table-hover tbody tr:hover {
   background-color: #f9f9f9;
+  transition: background-color 0.3s ease; /* Add transition */
 }
 
 /* Badges pour les rôles */
@@ -102,6 +112,7 @@ header h2 {
   font-size: 12px;
   font-weight: 600;
   text-transform: uppercase;
+  transition: background-color 0.3s ease, color 0.3s ease; /* Add transition */
 }
 
 .role-client {
@@ -129,7 +140,7 @@ header h2 {
   padding: 8px 16px;
   border-radius: 6px;
   font-size: 14px;
-  transition: all 0.3s ease;
+  transition: all 0.3s ease; /* Already present */
   margin-right: 10px;
 }
 
@@ -137,6 +148,7 @@ header h2 {
   background: linear-gradient(135deg, #1e3c72, #2a5298);
   color: white;
   border: none;
+  transition: background 0.3s ease, transform 0.3s ease; /* Add transition */
 }
 
 .btn-primary:hover {
@@ -160,6 +172,7 @@ header h2 {
   background-color: #6c757d;
   color: white;
   border: none;
+  transition: background-color 0.3s ease, transform 0.3s ease; /* Add transition */
 }
 
 .btn-secondary:hover {
@@ -167,7 +180,7 @@ header h2 {
   transform: translateY(-2px);
 }
 
-/* Action Icons (Rounded Square with Gradient Fill) */
+/* Action Icons */
 .action-icon {
   background: transparent;
   border: 1px solid;
@@ -177,7 +190,7 @@ header h2 {
   padding: 6px;
   margin: 0 6px;
   position: relative;
-  transition: background 0.3s, border-color 0.3s, transform 0.2s;
+  transition: background 0.3s ease, border-color 0.3s ease, transform 0.2s ease, color 0.3s ease; /* Add color transition */
   width: 30px;
   height: 30px;
   display: inline-flex;
@@ -248,7 +261,7 @@ header h2 {
   background-color: #007bff;
   color: white;
   cursor: pointer;
-  transition: 0.3s;
+  transition: background-color 0.3s ease; /* Add transition */
   border: none;
   min-width: 36px;
   text-align: center;
@@ -270,6 +283,7 @@ header h2 {
   font-size: 14px;
   border-radius: 5px;
   border: 1px solid #aa2727;
+  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease; /* Add transition */
 }
 
 /* Icône de mode nuit/jour */
@@ -285,7 +299,7 @@ header h2 {
   color: #1e3c72;
   font-size: 1.5rem;
   cursor: pointer;
-  transition: color 0.3s;
+  transition: color 0.3s ease; /* Already present */
 }
 
 .mode-toggle:hover {
@@ -314,7 +328,7 @@ header h2 {
   right: 0;
   bottom: 0;
   background-color: #ccc;
-  transition: .3s ease;
+  transition: background-color 0.3s ease; /* Update transition */
   border-radius: 20px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
 }
@@ -327,7 +341,7 @@ header h2 {
   left: 2px;
   bottom: 2px;
   background-color: white;
-  transition: .3s ease;
+  transition: transform 0.3s ease; /* Update transition */
   border-radius: 50%;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
 }
@@ -344,6 +358,7 @@ input:checked + .slider:before {
 body.night-mode {
   background-color: #121212;
   color: white;
+  transition: background-color 0.3s ease, color 0.3s ease; /* Add transition */
 }
 
 .night-mode .container {
@@ -352,6 +367,7 @@ body.night-mode {
 
 .night-mode .table-responsive {
   background-color: #1e1f1f;
+  box-shadow: 0 4px 10px rgba(255, 255, 255, 0.1); /* Adjust shadow for dark mode */
 }
 
 .night-mode .table-header th {
@@ -373,11 +389,11 @@ body.night-mode {
 }
 
 .night-mode .search-bar button {
-  background: linear-gradient(135deg, #333, #555);
+  background: linear-gradient(135deg, #ffca2c, #ff9900); /* Update for better contrast */
 }
 
 .night-mode .search-bar button:hover {
-  background: linear-gradient(135deg, #555, #333);
+  background: linear-gradient(135deg, #ff9900, #ffca2c);
 }
 
 .night-mode .pagination button {
@@ -395,7 +411,7 @@ body.night-mode {
 
 .night-mode .page-options select {
   background-color: #333;
-  color: #2ecc71;
+  color: white; /* Update for better visibility */
   border-color: #555;
 }
 
@@ -475,7 +491,7 @@ body.night-mode {
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.6);
+  background: rgba(0, 0, 0, 0.8);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -493,6 +509,7 @@ body.night-mode {
   max-height: 90vh;
   overflow-y: auto;
   box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+  transition: background-color 0.3s ease; /* Add transition */
   animation: slideIn 0.3s ease-out;
 }
 
@@ -504,12 +521,14 @@ body.night-mode {
   justify-content: space-between;
   align-items: center;
   border-radius: 12px 12px 0 0;
+  transition: background 0.3s ease; /* Add transition */
 }
 
 .modal-header h3 {
   margin: 0;
   font-size: 1.5rem;
   font-weight: 600;
+  transition: color 0.3s ease; /* Add transition */
 }
 
 .close-btn {
@@ -518,7 +537,7 @@ body.night-mode {
   color: white;
   font-size: 1.2rem;
   cursor: pointer;
-  transition: color 0.3s;
+  transition: color 0.3s ease; /* Already present */
 }
 
 .close-btn:hover {
@@ -527,6 +546,7 @@ body.night-mode {
 
 .modal-body {
   padding: 20px;
+  transition: color 0.3s ease; /* Add transition */
 }
 
 .info-grid {
@@ -546,6 +566,7 @@ body.night-mode {
   margin-bottom: 6px;
   font-size: 14px;
   color: #1e3c72;
+  transition: color 0.3s ease; /* Add transition */
 }
 
 .form-actions {
@@ -555,6 +576,7 @@ body.night-mode {
   background-color: #f9f9f9;
   border-radius: 0 0 12px 12px;
   gap: 10px;
+  transition: background-color 0.3s ease; /* Add transition */
 }
 
 /* Styles pour les formulaires dans les modals */
@@ -567,6 +589,7 @@ body.night-mode {
   margin-bottom: 6px;
   font-weight: 600;
   font-size: 15px;
+  transition: color 0.3s ease; /* Add transition */
 }
 
 .form-control {
@@ -576,7 +599,7 @@ body.night-mode {
   border-radius: 5px;
   box-sizing: border-box;
   font-size: 14px;
-  transition: border-color 0.2s ease;
+  transition: border-color 0.2s ease, background-color 0.3s ease, color 0.3s ease; /* Add transitions */
 }
 
 .form-control:focus {
@@ -594,6 +617,7 @@ body.night-mode {
   color: #dc3545;
   font-size: 12px;
   margin-top: 5px;
+  transition: color 0.3s ease; /* Add transition */
 }
 
 /* Night mode for popup */
@@ -622,6 +646,7 @@ body.night-mode {
 
 .night-mode .form-control:focus {
   border-color: #2ecc71;
+  box-shadow: 0 0 5px rgba(46, 204, 113, 0.3); /* Update for dark mode */
 }
 
 .night-mode .form-control.ng-invalid.ng-touched {
@@ -656,6 +681,7 @@ body.night-mode {
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
   font-size: 14px;
   padding: 10px 20px;
+  transition: background-color 0.3s ease; /* Add transition */
 }
 
 .custom-error-snackbar {
@@ -665,6 +691,7 @@ body.night-mode {
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
   font-size: 14px;
   padding: 10px 20px;
+  transition: background-color 0.3s ease; /* Add transition */
 }
 
 .custom-success-snackbar .mat-snack-bar-action {

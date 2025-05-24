@@ -44,8 +44,8 @@
             {{ getFieldValue(item, field) }}
           </td>
           <td>
-            <button class="btn btn-success btn-sm" (click)="unarchive(item.id)">
-              <i class="fas fa-undo"></i> Désarchiver
+            <button class="action-icon unarchive-icon" (click)="unarchive(item.id)" data-tooltip="Désarchiver">
+              <i class="fas fa-undo"></i>
             </button>
           </td>
         </tr>

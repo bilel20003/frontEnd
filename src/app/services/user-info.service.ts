@@ -96,7 +96,7 @@ export class UserInfoService {
         }, {} as { [key: number]: string });
 
         return users.map(user => {
-          console.log(`Mapping user ID ${user.id}: Raw produit data:`, user.produit); // Enhanced logging
+          console.log(`Mapping user ID ${user.id}: Raw produit data:`, user.produit);
 
           const roleName = user.role && user.role.id ? roleMap[user.role.id] || 'N/A' : 'N/A';
           const service = user.service && user.service.id && serviceMap[user.service.id] ? serviceMap[user.service.id] : null;
@@ -113,12 +113,11 @@ export class UserInfoService {
             produitNom = user.produit.nom ?? (produitId && produitMap[produitId] ? produitMap[produitId] : 'N/A');
           } else {
             console.warn(`Produit is missing or invalid for user ID ${user.id}:`, user.produit);
-            // Default to 'Any' (id: 1) as a temporary workaround
-            produitId = 1; // Assuming 'Any' is the default product with id: 1
+            produitId = 1; // Default to 'Any'
             produitNom = produitMap[1] || 'N/A';
           }
 
-          console.log(`User ID ${user.id} - produitId: ${produitId}, produitNom: ${produitNom}`); // Debug log for mapping result
+          console.log(`User ID ${user.id} - produitId: ${produitId}, produitNom: ${produitNom}`);
 
           return {
             id: user.id || 0,
@@ -252,13 +251,15 @@ export class UserInfoService {
       'CLIENT': 4,
       'GUICHETIER': 2,
       'TECHNICIEN': 3,
-      'ADMIN': 1
+      'ADMIN': 1,
+      'DACA': 5
     };
     const roleId = roleMap[roleName.toUpperCase()];
     if (!roleId) {
-      console.error(`No role ID found for roleName: ${roleName}`);
+      console.error(`Invalid role '${roleName}'. Valid roles are: ${Object.keys(roleMap).join(', ')}`);
+      throw new Error(`Invalid role '${roleName}'`);
     }
-    return roleId || 0;
+    return roleId;
   }
 
   private handleError(error: HttpErrorResponse): Observable<never> {
@@ -289,7 +290,6 @@ export class UserInfoService {
     );
   }
 
-  // New function to get users by role
   getUsersByRole(roleName: string): Observable<UserDisplay[]> {
     console.log(`getUsersByRole called with role: ${roleName}`);
     return this.getAllUsers().pipe(

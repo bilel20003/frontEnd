@@ -221,12 +221,11 @@ export class UtilisateursComponent implements OnInit {
       this.editingUtilisateur = utilisateur;
       const service = this.services.find(s => s.nomService === utilisateur.service);
 
-      // If produitId is undefined, fetch the user details from the backend
       if (!utilisateur.produitId) {
         console.warn(`ProduitId is undefined for user ID ${utilisateur.id}, fetching user details from backend...`);
         this.userInfoService.getUserById(utilisateur.id).subscribe({
           next: (userInfo) => {
-            const fetchedProduitId = userInfo.produit && typeof userInfo.produit === 'object' && 'id' in userInfo.produit && userInfo.produit.id != null ? userInfo.produit.id : 1; // Default to 1 ('Any')
+            const fetchedProduitId = userInfo.produit && typeof userInfo.produit === 'object' && 'id' in userInfo.produit && userInfo.produit.id != null ? userInfo.produit.id : 1;
             console.log(`Fetched produitId for user ID ${utilisateur.id}:`, fetchedProduitId);
 
             this.utilisateurForm.patchValue({
@@ -247,7 +246,6 @@ export class UtilisateursComponent implements OnInit {
           error: (error: HttpErrorResponse) => {
             console.error(`Failed to fetch user ID ${utilisateur.id}:`, error);
             this.showError(`Erreur lors de la récupération des détails de l'utilisateur: ${error.message}`);
-            // Fallback to default 'Any' product (id: 1)
             this.utilisateurForm.patchValue({
               id: utilisateur.id,
               nom: utilisateur.nom,
@@ -256,7 +254,7 @@ export class UtilisateursComponent implements OnInit {
               ministere: utilisateur.ministere,
               service: utilisateur.service,
               serviceId: service ? service.id : (this.services.length > 0 ? this.services[0].id : undefined),
-              produitId: 1, // Default to 'Any'
+              produitId: 1,
               password: '',
               status: utilisateur.status
             });
@@ -316,7 +314,8 @@ export class UtilisateursComponent implements OnInit {
       { value: 'CLIENT', label: 'Client' },
       { value: 'GUICHETIER', label: 'Guichetier' },
       { value: 'TECHNICIEN', label: 'Technicien' },
-      { value: 'ADMIN', label: 'Admin' }
+      { value: 'ADMIN', label: 'Admin' },
+      { value: 'DACA', label: 'Directeur DACA' }
     ];
   }
 
@@ -373,7 +372,7 @@ export class UtilisateursComponent implements OnInit {
       console.error('Produit not found, produitId:', produitId, 'produits:', this.produits);
       return;
     }
-    const validRoles = ['CLIENT', 'GUICHETIER', 'TECHNICIEN', 'ADMIN'];
+    const validRoles = ['CLIENT', 'GUICHETIER', 'TECHNICIEN', 'ADMIN', 'DACA'];
     if (!validRoles.includes(this.utilisateurForm.get('role')?.value)) {
       this.showError('Rôle sélectionné non valide.');
       console.error('Invalid role:', this.utilisateurForm.get('role')?.value);
@@ -400,7 +399,7 @@ export class UtilisateursComponent implements OnInit {
           },
           error: (error: HttpErrorResponse) => {
             console.error('Erreur lors de l\'envoi de l\'email de bienvenue:', error);
-            this.showError(`Utilisateur ajouté, mais erreur lors de l'envoi de l\'email de bienvenue: ${error.message || 'Erreur inconnue.'}`);
+            this.showError(`Utilisateur ajouté, mais erreur lors de l'envoi de l'email de bienvenue: ${error.message || 'Erreur inconnue.'}`);
           }
         });
         this.loadInitialData();
@@ -438,7 +437,7 @@ export class UtilisateursComponent implements OnInit {
       console.error('Produit not found, produitId:', produitId, 'produits:', this.produits);
       return;
     }
-    const validRoles = ['CLIENT', 'GUICHETIER', 'TECHNICIEN', 'ADMIN'];
+    const validRoles = ['CLIENT', 'GUICHETIER', 'TECHNICIEN', 'ADMIN', 'DACA'];
     if (!validRoles.includes(this.utilisateurForm.get('role')?.value)) {
       this.showError('Rôle sélectionné non valide.');
       console.error('Invalid role:', this.utilisateurForm.get('role')?.value);

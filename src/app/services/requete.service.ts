@@ -13,7 +13,6 @@ export class RequeteService {
 
   constructor(private http: HttpClient) {}
 
-  // Rendre la méthode publique
   public getHttpOptions(): { headers: HttpHeaders } {
     const token = localStorage.getItem('token');
     return {
@@ -23,7 +22,6 @@ export class RequeteService {
     };
   }
 
-  // Nouvelle méthode pour récupérer une pièce jointe par ID
   getPieceJointeParId(id: number): Observable<{ id: number; nomFichier: string; url: string; typeFichier: string }> {
     return this.http.get<{ id: number; nomFichier: string; url: string; typeFichier: string }>(
       `${this.apiUrl}/piece-jointe/${id}`,
@@ -68,6 +66,20 @@ export class RequeteService {
   updateRequete(id: number, requete: Requete): Observable<Requete> {
     return this.http.put<Requete>(`${this.apiUrl}/updaterequete/${id}`, requete, this.getHttpOptions())
       .pipe(catchError(this.handleError));
+  }
+
+  // Nouvelle méthode pour archiver une requête
+  archiveRequete(id: number): Observable<Requete> {
+    return this.http.put<Requete>(`${this.apiUrl}/archiverequete/${id}`, {}, this.getHttpOptions())
+      .pipe(catchError(this.handleError));
+  }
+
+  // Nouvelle méthode pour télécharger une pièce jointe
+  downloadPieceJointe(pieceJointeId: number): Observable<Blob> {
+    return this.http.get(`${this.apiUrl}/download/${pieceJointeId}`, {
+      ...this.getHttpOptions(),
+      responseType: 'blob'
+    }).pipe(catchError(this.handleError));
   }
 
   getGuichetierWithLeastRequests(): Observable<{ id: number }> {

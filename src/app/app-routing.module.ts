@@ -31,6 +31,8 @@ import { ScheduleComponent } from './components/Admin/schedule/schedule.componen
 import { TechRendezVousComponent } from './components/Technicien/tech-rendez-vous/tech-rendez-vous.component';
 import { ArchiveComponent } from './components/Admin/archive/archive.component';
 import { ResetPasswordComponent } from './components/reset-password/reset-password.component';
+import { RequetesAdminComponent } from './components/Admin/requetes-admin/requetes-admin.component';
+import { ProfileDacaComponent } from './components/Daca/profile-daca/profile-daca.component';
 
 
 const routes: Routes = [
@@ -41,8 +43,8 @@ const routes: Routes = [
 
   // Admin routes (protected by AuthGuard and role-based authorization)
   { path: 'utilisateurs', component: UtilisateursComponent, canActivate: [AuthGuard], data: { role: 'ADMIN' } },
-  { path: 'navbar-admin', component: NavbarAdminComponent, canActivate: [AuthGuard], data: { role: 'ADMIN' } },
-  { path: 'dashboard', component: DashboardComponent, canActivate: [AuthGuard], data: { role: 'ADMIN' } },
+  { path: 'navbar-admin', component: NavbarAdminComponent, canActivate: [AuthGuard], data: { role: 'ADMIN' } }, 
+  { path: 'dashboard', component: DashboardComponent, canActivate: [AuthGuard], data: { roles: ['ADMIN', 'DACA'] } },
   { path: 'product', component: ProductsComponent, canActivate: [AuthGuard], data: { role: 'ADMIN' } },
   { path: 'objet-reclamation', component: ObjetReclamationComponent, canActivate: [AuthGuard], data: { role: 'ADMIN' } },
   { path: 'role', component: GererRoleComponent, canActivate: [AuthGuard], data: { role: 'ADMIN' } },
@@ -51,6 +53,10 @@ const routes: Routes = [
   { path: 'profile-admin', component: ProfileAdminComponent, canActivate: [AuthGuard], data: { role: 'ADMIN' } },
   { path: 'schedule', component: ScheduleComponent, canActivate: [AuthGuard], data: { role: 'ADMIN' } },
   { path: 'archive', component: ArchiveComponent, canActivate: [AuthGuard], data: { role: 'ADMIN' } },
+  { path: 'requetes', component: RequetesAdminComponent, canActivate: [AuthGuard], data: { role: 'ADMIN' } },
+
+  //Daca
+  {path:'profiledaca',component:ProfileDacaComponent, canActivate: [AuthGuard], data: { role: 'DACA' } },
 
   // Client routes (protected by AuthGuard)
   { path: 'home', component: HomeComponent, canActivate: [AuthGuard], data: { role: 'CLIENT' }  },

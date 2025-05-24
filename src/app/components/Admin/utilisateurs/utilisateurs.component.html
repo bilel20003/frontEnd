@@ -47,7 +47,8 @@
               'role-client': utilisateur.role === 'CLIENT',
               'role-guichetier': utilisateur.role === 'GUICHETIER',
               'role-technicien': utilisateur.role === 'TECHNICIEN',
-              'role-admin': utilisateur.role === 'ADMIN'
+              'role-admin': utilisateur.role === 'ADMIN',
+              'role-daca': utilisateur.role === 'DACA'
             }">
               {{ utilisateur.role }}
             </span>
@@ -70,7 +71,6 @@
             <button class="action-icon archive-icon" (click)="archiverUtilisateur(utilisateur)" data-tooltip="Archiver">
               <i class="fas fa-archive"></i>
             </button>
-            
           </td>
         </tr>
       </tbody>
@@ -195,7 +195,8 @@
                 'role-client': selectedUtilisateur.role === 'CLIENT',
                 'role-guichetier': selectedUtilisateur.role === 'GUICHETIER',
                 'role-technicien': selectedUtilisateur.role === 'TECHNICIEN',
-                'role-admin': selectedUtilisateur.role === 'ADMIN'
+                'role-admin': selectedUtilisateur.role === 'ADMIN',
+                'role-daca': selectedUtilisateur.role === 'DACA'
               }">
                 {{ selectedUtilisateur.role }}
               </span>

@@ -154,7 +154,8 @@ export class GererRoleComponent implements OnInit {
       1: 'role-admin',    // Assuming ID 1 is for ADMIN
       2: 'role-client',   // Assuming ID 2 is for CLIENT
       3: 'role-guichetier', // Assuming ID 3 is for GUICHETIER
-      4: 'role-technicien'  // Assuming ID 4 is for TECHNICIEN
+      4: 'role-technicien',  // Assuming ID 4 is for TECHNICIEN
+      5: 'role-daca'
     };
     return badgeMap[roleId] || 'role-client'; // Default to 'role-client' if ID not found
   }

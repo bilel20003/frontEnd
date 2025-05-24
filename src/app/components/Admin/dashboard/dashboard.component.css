@@ -193,6 +193,17 @@ body {
   grid-template-columns: repeat(auto-fit, minmax(30rem, 1fr));
 }
 
+/* Specific Chart Grid for Users and RDVs Sections */
+.section .chart-grid.user-charts,
+.section .chart-grid.rdv-charts {
+  grid-template-columns: repeat(auto-fit, minmax(30rem, 1fr));
+}
+
+/* Specific Chart Grid for Products Section */
+.section .chart-grid.product-charts {
+  grid-template-columns: repeat(auto-fit, minmax(30rem, 1fr));
+}
+
 .chart-container {
   background: #FFFFFF;
   border-radius: 0.75rem;
@@ -203,7 +214,7 @@ body {
   height: auto;
   min-height: 22rem;
   position: relative;
-  cursor: pointer; /* Added for interactivity */
+  cursor: pointer;
 }
 
 .chart-container:hover {
@@ -470,6 +481,13 @@ body {
     min-height: 20rem;
   }
   .section .chart-grid.requests-charts {
+    grid-template-columns: 1fr;
+  }
+  .section .chart-grid.user-charts,
+  .section .chart-grid.rdv-charts {
+    grid-template-columns: 1fr;
+  }
+  .section .chart-grid.product-charts {
     grid-template-columns: 1fr;
   }
 }
