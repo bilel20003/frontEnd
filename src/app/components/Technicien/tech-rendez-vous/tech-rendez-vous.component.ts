@@ -6,7 +6,7 @@ import { CalendarOptions, EventInput, EventContentArg } from '@fullcalendar/core
 import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
 import listPlugin from '@fullcalendar/list';
-import interactionPlugin from '@fullcalendar/interaction'; // Add interaction for modern features
+import interactionPlugin from '@fullcalendar/interaction';
 import { HttpErrorResponse } from '@angular/common/http';
 import { MatSnackBar } from '@angular/material/snack-bar';
 
@@ -46,16 +46,16 @@ export class TechRendezVousComponent implements OnInit {
     height: 'auto',
     locale: 'fr',
     eventContent: this.renderEventContent.bind(this),
-    dayMaxEvents: true, // Limits events per day for a cleaner look
-    moreLinkClick: 'popover', // Modern popover for additional events
-    eventDisplay: 'block', // Ensures events are displayed as blocks
-    eventTimeFormat: { hour: '2-digit', minute: '2-digit', meridiem: false }, // Clean time format
-    slotDuration: '00:30:00', // 30-minute slots for time views
-    slotLabelInterval: '01:00', // Hourly labels
-    editable: false, // Disable drag unless needed
-    selectable: true, // Enable selection for modern interaction
-    dayCellClassNames: 'modern-day-cell', // Custom class for styling
-    eventClassNames: 'modern-event' // Custom class for event styling
+    dayMaxEvents: true,
+    moreLinkClick: 'popover',
+    eventDisplay: 'block',
+    eventTimeFormat: { hour: '2-digit', minute: '2-digit', meridiem: false },
+    slotDuration: '00:30:00',
+    slotLabelInterval: '01:00',
+    editable: false,
+    selectable: true,
+    dayCellClassNames: 'modern-day-cell',
+    eventClassNames: 'modern-event'
   };
 
   constructor(
@@ -197,7 +197,7 @@ export class TechRendezVousComponent implements OnInit {
       },
       backgroundColor: this.getEventColor(rdv.status),
       borderColor: this.getEventColor(rdv.status),
-      textColor: this.getTextColor(rdv.status) // Dynamic text color
+      textColor: this.getTextColor(rdv.status)
     }));
     this.calendarOptions = {
       ...this.calendarOptions,
@@ -208,18 +208,18 @@ export class TechRendezVousComponent implements OnInit {
   getEventColor(status: string): string {
     switch (status) {
       case 'EN_ATTENTE':
-        return '#e1c809'; 
+        return '#e1c809';
       case 'TERMINE':
-        return '#01622a'; 
+        return '#01622a';
       case 'REFUSE':
-        return '#991304'; 
+        return '#991304';
       default:
         return '#6c757d';
     }
   }
 
   getTextColor(status: string): string {
-    return status === 'EN_ATTENTE' ? '#212529' : 'white'; // Dark text for yellow, white for others
+    return status === 'EN_ATTENTE' ? '#212529' : 'white';
   }
 
   renderEventContent(eventInfo: EventContentArg): any {
@@ -315,14 +315,21 @@ export class TechRendezVousComponent implements OnInit {
     }
 
     console.log('Generating Meet link for RDV:', this.selectedRdv.id);
+    const startDateTime = new Date(this.selectedRdv.dateSouhaitee);
+    const endDateTime = new Date(startDateTime.getTime() + 3600000); // 1-hour duration
     const event = {
-      summary: `Rendez-vous ID: ${this.selectedRdv.id}`,
+      summary: `RDV: ${this.selectedRdv.typeProbleme} pour ${this.selectedRdv.client.name || 'Client non spécifié'}`,
+      description: `ID du rendez-vous: ${this.selectedRdv.id}\n` +
+                   `Client: ${this.selectedRdv.client.name || 'Non spécifié'}\n` +
+                   `Type de problème: ${this.selectedRdv.typeProbleme}\n` +
+                   `Description: ${this.selectedRdv.description || 'Aucune description'}\n` +
+                   `Date et heure: ${startDateTime.toLocaleString('fr-FR', { timeZone: 'Europe/Paris' })}`,
       start: {
-        dateTime: new Date(this.selectedRdv.dateSouhaitee).toISOString(),
+        dateTime: startDateTime.toISOString(),
         timeZone: 'Europe/Paris'
       },
       end: {
-        dateTime: new Date(new Date(this.selectedRdv.dateSouhaitee).getTime() + 3600000).toISOString(),
+        dateTime: endDateTime.toISOString(),
         timeZone: 'Europe/Paris'
       },
       conferenceData: {
@@ -389,22 +396,56 @@ export class TechRendezVousComponent implements OnInit {
 
   updateRdvWithMeetLink(rdvId: number, meetLink: string): void {
     console.log('Updating RDV with Meet link:', { rdvId, meetLink });
+
+    // Optimistic update: Set meetLink in selectedRdv immediately
+    if (this.selectedRdv && this.selectedRdv.id === rdvId) {
+      this.selectedRdv = { ...this.selectedRdv, meetLink };
+      console.log('Optimistic update applied to selectedRdv:', this.selectedRdv);
+    }
+
+    // Trigger change detection to reflect optimistic update
+    this.cdr.markForCheck();
+    this.cdr.detectChanges();
+
+    // Update backend
     this.rendezvousService.updateRdv(rdvId, { meetLink }).subscribe({
       next: (updatedRdv) => {
         console.log('RDV updated successfully:', updatedRdv);
-        this.selectedRdv = updatedRdv;
+        // Update selectedRdv with full backend response
+        if (this.selectedRdv && this.selectedRdv.id === rdvId) {
+          this.selectedRdv = updatedRdv;
+        }
+        // Update arrays
         const index = this.rendezvous.findIndex(r => r.id === updatedRdv.id);
         if (index !== -1) {
           this.rendezvous[index] = updatedRdv;
           this.filteredRendezvous[index] = updatedRdv;
         }
         this.loadCalendarEvents();
+        this.cdr.markForCheck();
         this.cdr.detectChanges();
+        this.showSuccess('Lien Meet généré avec succès !');
         this.errorMessage = null;
       },
       error: (err: HttpErrorResponse) => {
         console.error('Erreur lors de l’enregistrement du lien Meet:', err);
         this.errorMessage = err.message;
+        this.showError('Erreur lors de l’enregistrement du lien Meet.');
+        // Fallback: Fetch RDV to ensure modal has latest data
+        if (this.selectedRdv && this.selectedRdv.id === rdvId) {
+          this.rendezvousService.getRdvById(rdvId).subscribe({
+            next: (fetchedRdv: Rdv) => {
+              this.selectedRdv = fetchedRdv;
+              console.log('RDV fetched after error:', fetchedRdv);
+              this.cdr.markForCheck();
+              this.cdr.detectChanges();
+            },
+            error: (fetchErr: HttpErrorResponse) => {
+              console.error('Erreur lors de la récupération du RDV:', fetchErr);
+              this.errorMessage = 'Erreur lors de la récupération des données du RDV.';
+            }
+          });
+        }
       }
     });
   }

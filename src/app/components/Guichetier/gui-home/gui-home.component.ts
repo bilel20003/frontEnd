@@ -11,6 +11,7 @@ import { jwtDecode } from 'jwt-decode';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Observable, forkJoin, of } from 'rxjs';
 import { map, catchError } from 'rxjs/operators';
+import { ChangeDetectorRef } from '@angular/core'; // Added for change detection
 
 interface AttachmentPreview {
   nom_fichier: string;
@@ -51,7 +52,8 @@ export class GuiHomeComponent implements OnInit {
     private objetService: ObjetService,
     private userInfoService: UserInfoService,
     private snackBar: MatSnackBar,
-    private http: HttpClient
+    private http: HttpClient,
+    private cdr: ChangeDetectorRef // Added for change detection
   ) {}
 
   ngOnInit(): void {
@@ -319,17 +321,22 @@ export class GuiHomeComponent implements OnInit {
       this.isPopupOpen = true;
 
       if (reclamation.etat === 'NOUVEAU') {
-        const updatedRequete = { ...reclamation, etat: 'EN_COURS_DE_TRAITEMENT', dateTraitement: new Date() };
+        const updatedRequete = { ...reclamation, etat: 'EN_COURS_DE_TRAITEMENT' };
         this.requeteService.updateRequete(id, updatedRequete).subscribe({
-          next: () => {
-            console.log('Requête mise à jour avec succès');
+          next: (response) => {
+            console.log('Requête mise à jour avec succès:', response);
+            // Update selectedRequete to reflect the new status
+            if (this.selectedRequete && this.selectedRequete.id === id) {
+              this.selectedRequete = { ...this.selectedRequete, etat: 'EN_COURS_DE_TRAITEMENT' };
+            }
             this.loadReclamations(this.getGuichetierIdFromToken()!);
             this.showSuccess('Requête mise à jour avec succès !');
             this.loadPieceJointesForRequete();
             this.generateAttachmentPreviews();
+            this.cdr.detectChanges(); // Trigger change detection to update modal
           },
           error: (error: HttpErrorResponse) => {
-            console.error('Erreur lors de la mise à jour de la requête', error);
+            console.error('Erreur lors de la mise à jour de la requête:', error);
             this.showError('Erreur lors de la mise à jour de la requête.');
           }
         });
@@ -489,7 +496,7 @@ export class GuiHomeComponent implements OnInit {
     return filePart.includes('?') ? filePart.split('?')[0] : filePart || 'document';
   }
 
-   getFileIcon(nom_fichier: string): string {
+  getFileIcon(nom_fichier: string): string {
     const extension = nom_fichier.split('.').pop()?.toLowerCase() || '';
     const iconMap: { [key: string]: string } = {
       'jpg': 'far fa-image',

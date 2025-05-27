@@ -322,72 +322,6 @@ header h2 {
   gap: 15px;
 }
 
-.night-mode {
-  background-color: #121212;
-  color: #ddd;
-}
-
-.night-mode .container {
-  background-color: #121212;
-}
-
-.night-mode header h2 {
-  color: #2ecc71;
-}
-
-.night-mode .search-bar {
-  background: rgba(30, 31, 31, 0.9);
-  box-shadow: 0 4px 12px rgba(255, 255, 255, 0.1);
-}
-
-.night-mode .search-bar input {
-  color: #ddd;
-}
-
-.night-mode .search-bar button {
-  background: #2ecc71;
-}
-
-.night-mode .search-bar button:hover {
-  background: #27ae60;
-}
-
-.night-mode .modal-content {
-  background: rgba(31, 31, 31, 0.95);
-  color: #ddd;
-}
-
-.night-mode .modal-header {
-  background: linear-gradient(135deg, #333, #555);
-}
-
-.night-mode .modal-body .label {
-  color: #2ecc71;
-}
-
-.night-mode .modal-body .value {
-  color: #ddd;
-  background: #222;
-}
-
-.night-mode .value.description {
-  background: #222;
-}
-
-.night-mode .modal-content textarea {
-  background: #333;
-  color: #ddd;
-  border-color: #555;
-}
-
-.night-mode .modal-content textarea:focus {
-  border-color: #2ecc71;
-  box-shadow: 0 0 5px rgba(46, 204, 113, 0.5);
-}
-
-.night-mode .form-actions {
-  background: rgba(34, 34, 34, 0.9);
-}
 
 /* Modern Calendar Styling */
 .calendar-container {
@@ -462,10 +396,7 @@ header h2 {
   font-weight: 500;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
   transition: transform 0.2s ease, box-shadow 0.2s ease;
-  /* Original colors replaced with nude/matte tones */
-  /* - EN_ATTENTE: #ffca2c (bright yellow) -> #d9b8a0 (soft beige) */
-  /* - TERMINE: #2ecc71 (bright green) -> #c9c0bb (muted taupe) */
-  /* - REFUSE: #ff6b6b (bright red) -> #a68d7a (warm grayish-brown) */
+ 
 }
 
 .modern-event:hover {
@@ -474,38 +405,7 @@ header h2 {
 }
 /* END: Changing appointment colors to nude/matte tones */
 
-.night-mode .calendar-container {
-  background: rgba(30, 31, 31, 0.5);
-}
 
-.night-mode .fc .fc-toolbar {
-  background: linear-gradient(135deg, #333, #555);
-}
-
-.night-mode .fc .fc-button {
-  background: #333;
-}
-
-.night-mode .fc .fc-button:hover {
-  background: #555;
-}
-
-.night-mode .fc .fc-daygrid-day-number,
-.night-mode .fc .fc-col-header-cell-cushion {
-  color: #ddd;
-}
-
-.night-mode .modern-day-cell {
-  border-color: rgba(255, 255, 255, 0.1);
-}
-
-.night-mode .modern-event {
-  box-shadow: 0 2px 5px rgba(255, 255, 255, 0.1);
-}
-
-.night-mode .modern-event:hover {
-  box-shadow: 0 4px 10px rgba(255, 255, 255, 0.2);
-}
 
 /* Animations */
 @keyframes fadeIn {
@@ -622,4 +522,27 @@ header h2 {
   .modal-header h3 {
     font-size: 1.6rem;
   }
+}
+/* Badges pour les statuts */
+.badge {
+  display: inline-block;
+  padding: 5px 10px;
+  border-radius: 5px;
+  font-size: 13px;
+  font-weight: bold;
+}
+
+.badge-warning {
+  background-color: #ffdd00;
+  color: #212529;
+}
+
+.badge-success {
+  background-color: #00d21c;
+  color: white;
+}
+
+.badge-danger {
+  background-color: #ef4444;
+  color: white;
 }

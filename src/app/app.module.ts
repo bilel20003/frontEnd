@@ -22,7 +22,6 @@ import { GuiHomeComponent } from './components/Guichetier/gui-home/gui-home.comp
 import { NgxPaginationModule } from 'ngx-pagination';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { HomeComponent } from './components/Client/home/home.component';
-import { ReclamationComponent } from './components/Client/reclamation/reclamation.component';
 import { RendezVousComponent } from './components/Client/rendez-vous/rendez-vous.component';
 import { NavbarComponent } from './components/Client/navbar/navbar.component';
 import { UtilisateursComponent } from './components/Admin/utilisateurs/utilisateurs.component';
@@ -64,7 +63,6 @@ registerLocaleData(localeFr);
     TechHomeComponent,
     GuiHomeComponent,
     HomeComponent,
-    ReclamationComponent,
     RendezVousComponent,
     NavbarComponent,
     UtilisateursComponent,

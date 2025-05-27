@@ -7,7 +7,6 @@ import { AuthGuard } from './guards/auth.guard';  // Adjust the path according t
 //client
 import { NavbarComponent } from './components/Client/navbar/navbar.component';
 import { HomeComponent } from './components/Client/home/home.component';
-import { ReclamationComponent } from './components/Client/reclamation/reclamation.component';
 import { RendezVousComponent } from './components/Client/rendez-vous/rendez-vous.component';
 import { ProfileClientComponent } from './components/Client/profile-client/profile-client.component';
 
@@ -62,7 +61,6 @@ const routes: Routes = [
   { path: 'home', component: HomeComponent, canActivate: [AuthGuard], data: { role: 'CLIENT' }  },
   { path: 'rendez-vous', component: RendezVousComponent, canActivate: [AuthGuard] , data: { role: 'CLIENT' } },
   { path: 'navbar', component: NavbarComponent, canActivate: [AuthGuard], data: { role: 'CLIENT' }  },
-  { path: 'reclamation', component: ReclamationComponent, canActivate: [AuthGuard] , data: { role: 'CLIENT' } },
   { path: 'profile-client', component:  ProfileClientComponent, canActivate: [AuthGuard] , data: { role: 'CLIENT' } },
   // Technicien routes
   { path: 'tech-home', component: TechHomeComponent, canActivate: [AuthGuard] , data: { role: 'TECHNICIEN' }},

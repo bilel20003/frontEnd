@@ -26,10 +26,10 @@ export class DashboardComponent implements OnInit, AfterViewInit {
   private allRdvs: DashboardRdv[] = [];
   private allProducts: { id: number; nom: string; requestCount: number }[] = [];
 
-  requestPeriod: '7days' | '30days' | 'custom' = '7days';
+  requestPeriod: '7days' | '30days' | 'custom' = '30days';
   requestStartDate: string = '';
   requestEndDate: string = '';
-  userPeriod: '7days' | '30days' | 'custom' = '7days';
+  userPeriod: '7days' | '30days' | 'custom' = '30days';
   userStartDate: string = '';
   userEndDate: string = '';
   rdvPeriod: '7days' | '30days' | 'custom' = '7days';

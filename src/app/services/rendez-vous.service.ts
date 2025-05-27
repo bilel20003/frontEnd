@@ -72,6 +72,14 @@ export class RendezvousService {
     );
   }
 
+  getRdvById(id: number): Observable<Rdv> {
+    const url = `${this.apiUrl}/${id}`;
+    console.log('Sending GET request to:', url);
+    return this.http.get<Rdv>(url, this.getHttpOptions()).pipe(
+      catchError(this.handleError)
+    );
+  }
+
   private handleError(error: HttpErrorResponse): Observable<never> {
     let errorMessage = 'Une erreur est survenue, veuillez réessayer.';
     if (error.status === 500) {
